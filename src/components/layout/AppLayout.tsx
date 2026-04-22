@@ -4,17 +4,13 @@ import { SettingsPanel } from '@/components/sidebar/settings/SettingsPanel';
 import { MainContent } from './MainContent';
 
 export function AppLayout() {
-  const { isSettingsOpen } = useSidebar();
+  const { isSettingsOpen, theme } = useSidebar();
+  const dk = theme === 'dark';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8f8f8]">
-      {/* Navigation sidebar */}
+    <div className={`flex h-screen overflow-hidden ${dk ? 'bg-[#161616]' : 'bg-[#F8F8F8]'}`}>
       <Sidebar />
-
-      {/* Settings sidebar */}
       {isSettingsOpen && <SettingsPanel />}
-
-      {/* Main content */}
       <main className="flex-1 overflow-auto">
         <MainContent />
       </main>

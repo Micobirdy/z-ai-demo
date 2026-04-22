@@ -1,21 +1,10 @@
 import { type ComponentType } from 'react';
-import {
-  Settings,
-  User,
-  Gauge,
-  Route,
-  Database,
-  Home,
-} from 'lucide-react';
+import { Settings, User, Gauge, Route, Database, Home } from 'lucide-react';
 import clsx from 'clsx';
 import { useSidebar } from '@/hooks/useSidebar';
 import type { SettingsSection } from '@/types/sidebar';
 
-const categories: {
-  id: SettingsSection;
-  label: string;
-  icon: ComponentType<{ className?: string }>;
-}[] = [
+const categories: { id: SettingsSection; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'account', label: 'Account', icon: User },
   { id: 'dashboard', label: 'Dashboard', icon: Gauge },
@@ -25,7 +14,8 @@ const categories: {
 ];
 
 export function SettingsSidebar() {
-  const { activeSettingsSection, setActiveSettingsSection } = useSidebar();
+  const { activeSettingsSection, setActiveSettingsSection, theme } = useSidebar();
+  const dk = theme === 'dark';
 
   return (
     <div className="flex flex-col gap-[4px] p-[6px]">
@@ -33,22 +23,15 @@ export function SettingsSidebar() {
         const Icon = cat.icon;
         const isActive = activeSettingsSection === cat.id;
         return (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() => setActiveSettingsSection(cat.id)}
+          <button key={cat.id} type="button" onClick={() => setActiveSettingsSection(cat.id)}
             className={clsx(
-              'flex items-center gap-[8px] h-[36px] px-[8px] text-left transition-colors cursor-pointer',
+              'flex items-center gap-[8px] h-[36px] px-[8px] text-left transition-colors cursor-pointer rounded-[6px]',
               isActive
-                ? 'bg-[#0d0d0d]/[0.06] rounded-[6px]'
-                : 'rounded-[6px] hover:bg-[#0d0d0d]/[0.03] active:bg-[#0d0d0d]/[0.06]'
-            )}
-          >
-            <Icon className={clsx('size-[16px] shrink-0', isActive ? 'text-[#0d0d0d]' : 'text-[#0d0d0d]/60')} />
-            <span className={clsx(
-              'text-[14px] leading-[20px] tracking-[-0.18px] min-w-0',
-              isActive ? 'text-[#0d0d0d]' : 'text-[#0d0d0d]/70'
+                ? dk ? 'bg-white/[0.08]' : 'bg-[#0d0d0d]/[0.06]'
+                : dk ? 'hover:bg-white/[0.04]' : 'hover:bg-[#0d0d0d]/[0.03]'
             )}>
+            <Icon className={clsx('size-[16px] shrink-0', isActive ? dk ? 'text-white' : 'text-[#0d0d0d]' : dk ? 'text-white/50' : 'text-[#0d0d0d]/60')} />
+            <span className={clsx('text-[14px] leading-[20px] tracking-[-0.18px] min-w-0', isActive ? dk ? 'text-white' : 'text-[#0d0d0d]' : dk ? 'text-white/60' : 'text-[#0d0d0d]/70')}>
               {cat.label}
             </span>
           </button>

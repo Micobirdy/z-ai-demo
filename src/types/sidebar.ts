@@ -8,6 +8,8 @@ export type SettingsSection =
   | 'data'
   | 'about';
 
+export type Theme = 'light' | 'dark';
+
 export interface SidebarContextValue {
   // Sidebar collapse state
   isCollapsed: boolean;
@@ -30,6 +32,10 @@ export interface SidebarContextValue {
   closeSettings: () => void;
   activeSettingsSection: SettingsSection;
   setActiveSettingsSection: (section: SettingsSection) => void;
+
+  // Theme
+  theme: Theme;
+  toggleTheme: () => void;
 
   // Responsive
   isMobile: boolean;

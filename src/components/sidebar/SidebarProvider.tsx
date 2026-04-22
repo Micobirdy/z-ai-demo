@@ -7,7 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import type { NavItemId, SettingsSection, SidebarContextValue } from '@/types/sidebar';
+import type { NavItemId, SettingsSection, SidebarContextValue, Theme } from '@/types/sidebar';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export const SidebarContext = createContext<SidebarContextValue | null>(null);
@@ -19,7 +19,12 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeSettingsSection, setActiveSettingsSection] =
     useState<SettingsSection>('general');
+  const [theme, setTheme] = useState<Theme>('light');
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  }, []);
 
   // Debounce hover to prevent flicker
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -84,6 +89,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       closeSettings,
       activeSettingsSection,
       setActiveSettingsSection,
+      theme,
+      toggleTheme,
       isMobile,
     }),
     [
@@ -97,6 +104,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       openSettings,
       closeSettings,
       activeSettingsSection,
+      theme,
+      toggleTheme,
       isMobile,
     ]
   );
