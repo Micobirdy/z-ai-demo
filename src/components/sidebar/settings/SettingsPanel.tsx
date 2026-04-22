@@ -16,7 +16,7 @@ export function SettingsPanel() {
     <div
       className={clsx(
         'flex h-full w-[180px] shrink-0 flex-col overflow-hidden',
-        dk ? 'border-r border-white/[0.06] bg-[#1a1a1a]' : 'border-r border-[#dbdbdb] bg-[#f8f8f8]',
+        dk ? 'border-r border-white/[0.06] bg-[#161616]' : 'border-r border-[#dbdbdb] bg-[#f8f8f8]',
         'transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
         mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
       )}

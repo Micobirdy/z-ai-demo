@@ -1,4 +1,4 @@
-import { useRef, type ComponentType } from 'react';
+import { useRef, useState, type ComponentType } from 'react';
 import {
   SquarePen, ScanFace, Plus, GraduationCap, Folder,
   PanelLeftClose, PanelLeftOpen, ArrowUpCircle, ChevronDown, Settings,
@@ -34,9 +34,10 @@ export function Sidebar() {
   const {
     isCollapsed, toggleCollapse, isHoverExpanded, setHoverExpanded,
     isExpanded, activeNav, setActiveNav, theme,
-    openSettings, isSettingsOpen,
+    openSettings, closeSettings, isSettingsOpen,
   } = useSidebar();
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const [logoHovered, setLogoHovered] = useState(false);
   const dk = theme === 'dark';
 
   const fg = dk ? 'text-white' : 'text-[#0d0d0d]';
@@ -45,7 +46,7 @@ export function Sidebar() {
   const activeBg = dk ? 'bg-white/[0.08]' : 'bg-[#0d0d0d]/[0.04]';
   const activeBgPress = dk ? 'active:bg-white/[0.1]' : 'active:bg-[#0d0d0d]/[0.08]';
   const toggleFg = dk ? 'text-white/40 hover:text-white/80' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/80';
-  const sidebarBg = dk ? 'bg-[#1a1a1a]' : 'bg-[#f8f8f8]';
+  const sidebarBg = dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]';
   const borderColor = dk ? 'border-white/[0.06]' : 'border-[#dbdbdb]';
 
   // Show expanded UI when not collapsed OR when hover-expanded
@@ -72,24 +73,34 @@ export function Sidebar() {
           'flex items-center shrink-0',
           showExpanded ? 'justify-between pl-[16px] pr-[10px] py-[10px]' : 'flex-col items-center gap-[4px] py-[10px]'
         )}>
-          <div className="w-[28px] h-[28px] rounded-[6px] bg-[#2d2d2d] border-[0.8px] border-white/10 overflow-hidden flex items-center justify-center cursor-pointer hover:bg-[#444] transition-colors">
-            <img src="/icons/zai-logo.png" alt="Z" className="w-[22px] h-[22px] object-cover" />
+          {/* Logo area — when collapsed, hover shows expand button overlay */}
+          <div
+            className="relative"
+            onMouseEnter={() => isCollapsed && setLogoHovered(true)}
+            onMouseLeave={() => setLogoHovered(false)}
+          >
+            <div className={clsx(
+              'w-[28px] h-[28px] rounded-[6px] bg-[#2d2d2d] border-[0.8px] border-white/10 overflow-hidden flex items-center justify-center cursor-pointer hover:bg-[#444] transition-all',
+              isCollapsed && logoHovered && 'opacity-0'
+            )}>
+              <img src="/icons/zai-logo.png" alt="Z" className="w-[22px] h-[22px] object-cover" />
+            </div>
+            {isCollapsed && logoHovered && (
+              <button
+                type="button"
+                onClick={toggleCollapse}
+                aria-label="Expand sidebar"
+                className={`absolute inset-0 flex items-center justify-center rounded-[6px] ${toggleFg} ${hoverBg} ${activeBgPress} transition-all cursor-pointer`}
+              >
+                <PanelLeftOpen className="size-[18px]" />
+              </button>
+            )}
           </div>
-          {/*
-            Claude-style toggle logic:
-            - Sidebar expanded → show PanelLeftClose → click to collapse
-            - Sidebar collapsed (hovering or not) → show PanelLeftOpen → click to expand permanently
-          */}
+          {/* Expanded: show collapse button */}
           {!isCollapsed && (
             <button type="button" onClick={toggleCollapse} aria-label="Collapse sidebar"
               className={`w-9 h-9 flex items-center justify-center rounded-[8px] ${toggleFg} ${hoverBg} ${activeBgPress} transition-all cursor-pointer`}>
               <PanelLeftClose className="size-[18px]" />
-            </button>
-          )}
-          {isCollapsed && (
-            <button type="button" onClick={toggleCollapse} aria-label="Expand sidebar"
-              className={`w-9 h-9 flex items-center justify-center rounded-[8px] ${toggleFg} ${hoverBg} ${activeBgPress} transition-all cursor-pointer`}>
-              <PanelLeftOpen className="size-[18px]" />
             </button>
           )}
         </div>
@@ -106,7 +117,7 @@ export function Sidebar() {
                 {cardItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.id} type="button" onClick={() => setActiveNav(item.id)}
+                    <button key={item.id} type="button" onClick={() => { setActiveNav(item.id); closeSettings(); }}
                       className={clsx(
                         'flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] w-full text-left transition-colors cursor-pointer',
                         activeNav === item.id ? activeBg : `${hoverBg} ${activeBgPress}`
@@ -122,7 +133,7 @@ export function Sidebar() {
                 {cardItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.id} type="button" title={item.label} onClick={() => setActiveNav(item.id)}
+                    <button key={item.id} type="button" title={item.label} onClick={() => { setActiveNav(item.id); closeSettings(); }}
                       className={clsx('flex items-center justify-center size-[36px] rounded-[6px] transition-colors cursor-pointer', activeNav === item.id ? activeBg : `${hoverBg} ${activeBgPress}`)}>
                       <Icon className={`size-[18px] ${fg}`} />
                     </button>
@@ -136,7 +147,7 @@ export function Sidebar() {
               {listItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button key={item.id} type="button" title={!showExpanded ? item.label : undefined} onClick={() => setActiveNav(item.id)}
+                  <button key={item.id} type="button" title={!showExpanded ? item.label : undefined} onClick={() => { setActiveNav(item.id); closeSettings(); }}
                     className={clsx(
                       'flex items-center transition-colors cursor-pointer',
                       showExpanded ? `gap-[8px] px-[12px] py-[7px] w-full text-left rounded-[6px] ${hoverBg} ${activeBgPress}` : `justify-center size-[36px] rounded-[6px] ${hoverBg} ${activeBgPress}`,

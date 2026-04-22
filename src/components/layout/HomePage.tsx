@@ -11,8 +11,6 @@ import {
   FileText,
   PenLine,
   Sparkles,
-  Sun,
-  Moon,
 } from 'lucide-react';
 import { BorderBeam } from 'border-beam';
 import { useSidebar } from '@/hooks/useSidebar';
@@ -34,36 +32,30 @@ const imCards = [
 ];
 
 export function HomePage() {
-  const { theme, toggleTheme } = useSidebar();
+  const { theme } = useSidebar();
   const dk = theme === 'dark';
   const [chatText, setChatText] = useState('');
 
   return (
-    <div className={`flex-1 h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-white'}`}>
+    <div className={`flex-1 h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#F8F8F8]'}`}>
       {/* Top bar */}
-      <div className={`flex items-center justify-between px-[24px] py-[12px] sticky top-0 z-10 backdrop-blur-sm ${dk ? 'bg-[#161616]/80' : 'bg-white/80'}`}>
-        <button className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[8px] transition-colors cursor-pointer ${dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.04]'}`}>
-          <span className={`text-[14px] font-medium tracking-[-0.18px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>GLM-5.1</span>
-          <ChevronDown className={`size-[14px] ${dk ? 'text-white/50' : 'text-[#0d0d0d]/50'}`} />
+      <div className={`flex items-center justify-between px-3 py-2 sticky top-0 z-10 backdrop-blur-sm ${dk ? 'bg-[#161616]/80' : 'bg-[#F8F8F8]/80'}`}>
+        <button className={`flex items-center gap-1 pl-4 pr-3 py-1 rounded-md shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] overflow-hidden transition-colors cursor-pointer ${
+          dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.02]'
+        }`}>
+          <span className={`text-lg font-normal leading-7 ${dk ? 'text-white' : 'text-stone-950'}`}>GLM-5.1</span>
+          <ChevronDown className={`size-4 ${dk ? 'text-white/50' : 'text-stone-950'}`} />
         </button>
-        <div className="flex items-center gap-[8px]">
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`size-[32px] flex items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
-              dk ? 'text-white/50 hover:text-white hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d] hover:bg-[#0d0d0d]/[0.04]'
-            }`}
-            title={dk ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {dk ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
-          </button>
-          <button className={`px-[16px] py-[6px] rounded-[8px] text-[13px] font-medium transition-colors cursor-pointer ${
-            dk ? 'bg-white text-[#161616] hover:bg-white/90' : 'bg-[#0d0d0d] text-white hover:bg-[#333]'
+        <div className="flex items-center gap-3">
+          <button className={`px-3 py-1.5 rounded-md shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] overflow-hidden flex items-center gap-1 transition-colors cursor-pointer ${
+            dk ? 'bg-white text-[#161616] hover:bg-white/90' : 'bg-stone-950 text-white hover:bg-stone-800'
           }`}>
-            Log in
+            <span className="text-sm font-normal leading-5 line-clamp-1">Log in</span>
           </button>
-          <button className={`text-[13px] transition-colors cursor-pointer ${dk ? 'text-white/50 hover:text-white/80' : 'text-[#0d0d0d]/60 hover:text-[#0d0d0d]'}`}>
-            Sign up for free
+          <button className={`px-3 py-1.5 rounded-md shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] overflow-hidden flex items-center gap-1 transition-colors cursor-pointer ${
+            dk ? 'bg-white/[0.08] hover:bg-white/[0.12]' : 'bg-white hover:bg-gray-50'
+          }`}>
+            <span className={`text-sm font-normal leading-5 line-clamp-1 ${dk ? 'text-white/80' : 'text-stone-950 opacity-80'}`}>Sign up for free</span>
           </button>
         </div>
       </div>
@@ -71,7 +63,7 @@ export function HomePage() {
       {/* Main */}
       <div className="max-w-[680px] mx-auto px-[24px] pt-[48px] pb-[60px] flex flex-col items-center">
         {/* Hero */}
-        <h1 className={`text-[36px] font-medium leading-[44px] tracking-[-0.5px] text-center mb-[12px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>
+        <h1 className={`text-[36px] font-bold leading-[44px] tracking-[-0.5px] text-center mb-[12px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: "'Iowan Old Style BT', 'Georgia', serif" }}>
           Create anything you can imagine
         </h1>
         <p className={`text-[15px] leading-[22px] tracking-[-0.18px] text-center mb-[32px] ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>

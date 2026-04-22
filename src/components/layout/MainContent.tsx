@@ -1,21 +1,31 @@
 import { useSidebar } from '@/hooks/useSidebar';
 import { DashboardContent } from './DashboardContent';
 import { HomePage } from './HomePage';
+import { GeneralSettings } from '@/components/sidebar/settings/sections/GeneralSettings';
+import { AccountSettings } from '@/components/sidebar/settings/sections/AccountSettings';
+import { ConnectorsSettings } from '@/components/sidebar/settings/sections/ConnectorsSettings';
+import { DataSettings } from '@/components/sidebar/settings/sections/DataSettings';
+import { AboutSettings } from '@/components/sidebar/settings/sections/AboutSettings';
 
 export function MainContent() {
-  const { activeSettingsSection, isSettingsOpen } = useSidebar();
+  const { activeSettingsSection, isSettingsOpen, theme } = useSidebar();
+  const dk = theme === 'dark';
 
-  if (isSettingsOpen && activeSettingsSection === 'dashboard') {
-    return <DashboardContent />;
-  }
+  if (!isSettingsOpen) return <HomePage />;
 
-  if (isSettingsOpen) {
-    return (
-      <div className="flex h-full items-center justify-center bg-[#f8f8f8]">
-        <p className="text-[14px] text-[#0d0d0d]/40">Select Dashboard to view content</p>
+  if (activeSettingsSection === 'dashboard') return <DashboardContent />;
+
+  const bg = dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]';
+
+  return (
+    <div className={`flex-1 h-full overflow-y-auto ${bg}`}>
+      <div className="max-w-[680px] mx-auto pt-[60px] pb-[80px] px-[40px]">
+        {activeSettingsSection === 'general' && <GeneralSettings />}
+        {activeSettingsSection === 'account' && <AccountSettings />}
+        {activeSettingsSection === 'connectors' && <ConnectorsSettings />}
+        {activeSettingsSection === 'data' && <DataSettings />}
+        {activeSettingsSection === 'about' && <AboutSettings />}
       </div>
-    );
-  }
-
-  return <HomePage />;
+    </div>
+  );
 }
