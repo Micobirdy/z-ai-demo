@@ -8,11 +8,14 @@ import { cn } from '@/lib/utils'
 
 const easeOut = [0.4, 0, 0.2, 1] as const
 
+type AgentKey = 'im' | 'ai-ppt' | 'full-stack' | 'data-analysis' | 'file-processing' | 'ai-writing'
+
 export function HomePage() {
   const { theme, toggleTheme } = useSidebar()
   const dk = theme === 'dark'
   const reduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState('')
+  const [selectedAgent, setSelectedAgent] = useState<AgentKey>('im')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const maxChars = 3000
 
@@ -59,8 +62,10 @@ export function HomePage() {
     },
   }
 
-  const triShadow = '0px_0px_0px_1px_rgba(0,0,0,0.08),0px_1px_2px_0px_rgba(0,0,0,0.08),inset_0px_0px_0px_1px_rgba(255,255,255,1)'
-  const triShadowDk = '0px_0px_0px_1px_rgba(255,255,255,0.1),0px_1px_2px_0px_rgba(0,0,0,0.3),inset_0px_0px_0px_1px_rgba(255,255,255,0.06)'
+  const triShadow = '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px 0px rgba(0,0,0,0.08), inset 0px 0px 0px 1px rgba(255,255,255,1)'
+  const triShadowDk = '0px 0px 0px 1px rgba(255,255,255,0.1), 0px 1px 2px 0px rgba(0,0,0,0.3), inset 0px 0px 0px 1px rgba(255,255,255,0.06)'
+
+  const hasInput = inputValue.length > 0
 
   return (
     <div className={`relative w-full h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]'}`}>
@@ -180,31 +185,27 @@ export function HomePage() {
               transition={scaleTrans}
             >
               <BorderBeam
-                size="line"
-                colorVariant="mono"
+                size="md"
+                colorVariant="sunset"
                 theme={dk ? 'dark' : 'light'}
                 borderRadius={12}
                 strength={dk ? 0.7 : 0.5}
-                duration={2.4}
+                duration={1.96}
+                active={hasInput}
               >
               <div className={cn(
-                "rounded-xl overflow-hidden inline-flex flex-col justify-start items-start w-full",
-                dk
-                  ? "bg-[#1e1e1e] outline outline-1 outline-offset-[-1px] outline-white/[0.1] shadow-[0px_4px_16px_0px_rgba(0,0,0,0.3)]"
-                  : "bg-white outline outline-1 outline-offset-[-1px] outline-zinc-300 shadow-[0px_4px_16px_0px_rgba(0,0,0,0.05)]"
-              )}>
+                "rounded-xl inline-flex flex-col justify-start items-start w-full",
+                dk ? "bg-[#1e1e1e]" : "bg-white"
+              )} style={{
+                boxShadow: dk
+                  ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
+                  : '0px 4px 16px 0px rgba(0,0,0,0.05)'
+              }}>
                 {/* Textarea area */}
                 <div className={cn(
-                  "self-stretch h-24 p-3 relative rounded-t-xl outline outline-1 flex flex-col justify-start items-start gap-2",
-                  dk
-                    ? "bg-[#1e1e1e] outline-white/[0.06]"
-                    : "bg-white outline-zinc-300/0"
+                  "self-stretch h-24 p-3 relative rounded-t-xl flex flex-col justify-start items-start gap-2",
+                  dk ? "bg-[#1e1e1e]" : "bg-white"
                 )}>
-                  {/* Cursor line */}
-                  <div className={cn(
-                    "w-0 h-4 absolute left-[12px] top-[16px] outline outline-1 outline-offset-[-0.5px]",
-                    dk ? "outline-white" : "outline-black"
-                  )} />
                   {/* Placeholder */}
                   {!inputValue && (
                     <div className={cn(
@@ -283,26 +284,18 @@ export function HomePage() {
             animate="show"
             className="self-stretch inline-flex justify-center items-center gap-3"
           >
-            {/* IM — pill shape, active */}
-            <motion.button
+            {/* IM — pill shape */}
+            <FeaturePill
               variants={featureItem}
-              className={cn(
-                "px-3 py-2 rounded-[99px] flex justify-start items-center gap-1.5 overflow-hidden transition-colors",
-                dk
-                  ? `bg-white/[0.08] shadow-[${triShadowDk}]`
-                  : `bg-stone-950/5 shadow-[${triShadow}]`
-              )}
-              style={{
-                boxShadow: dk ? triShadowDk.split(',').map(s => s.trim()).join(', ') : triShadow.split(',').map(s => s.trim()).join(', ')
-              }}
-            >
-              <div className="w-4 h-4 relative opacity-80 overflow-hidden flex items-center justify-center">
-                <MessageSquare className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />
-              </div>
-              <span className={cn("opacity-80 text-xs font-medium leading-4", dk ? "text-white" : "text-stone-950")} style={{ fontFamily: "'Geist', sans-serif" }}>
-                IM
-              </span>
-            </motion.button>
+              dk={dk}
+              agentKey="im"
+              selectedAgent={selectedAgent}
+              onSelect={setSelectedAgent}
+              triShadow={triShadow}
+              triShadowDk={triShadowDk}
+              icon={<MessageSquare className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              label="IM"
+            />
 
             {/* Separator */}
             <div className="px-2 flex justify-start items-center gap-2.5">
@@ -311,6 +304,7 @@ export function HomePage() {
 
             {/* AI PPT */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              agentKey="ai-ppt" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
               icon={<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="2" y="3" width="12" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
                 <rect x="2" y="9" width="5" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
@@ -320,21 +314,25 @@ export function HomePage() {
 
             {/* Full-stack */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              agentKey="full-stack" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
               icon={<Monitor className={cn("size-3.5", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
               label="Full-stack" />
 
             {/* Data Analysis */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              agentKey="data-analysis" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
               icon={<BarChart3 className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.5} />}
               label="Data Analysis" />
 
             {/* File Processing */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              agentKey="file-processing" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
               icon={<FileText className={cn("size-3.5", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
               label="File Processing" />
 
             {/* AI Writing */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              agentKey="ai-writing" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
               icon={<PenTool className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
               label="AI Writing" />
           </motion.div>
@@ -344,31 +342,68 @@ export function HomePage() {
   )
 }
 
-function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label }: {
+function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShadow, triShadowDk, icon, label }: {
+  variants: Record<string, unknown>
+  dk: boolean
+  agentKey: AgentKey
+  selectedAgent: AgentKey
+  onSelect: (key: AgentKey) => void
+  triShadow: string
+  triShadowDk: string
+  icon: React.ReactNode
+  label: string
+}) {
+  const active = selectedAgent === agentKey
+  return (
+    <motion.button
+      variants={variants}
+      onClick={() => onSelect(agentKey)}
+      className={cn(
+        "px-3 py-2 rounded-[99px] flex justify-start items-center gap-1.5 overflow-hidden transition-all cursor-pointer",
+        active
+          ? dk ? "bg-white/[0.12]" : "bg-stone-950/5"
+          : dk ? "bg-white/[0.04]" : "bg-transparent"
+      )}
+      style={{ boxShadow: active ? (dk ? triShadowDk : triShadow) : 'none' }}
+    >
+      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-50")}>
+        {icon}
+      </div>
+      <span className={cn("text-xs font-medium leading-4 transition-opacity", dk ? "text-white" : "text-stone-950", active ? "opacity-80" : "opacity-50")} style={{ fontFamily: "'Geist', sans-serif" }}>
+        {label}
+      </span>
+    </motion.button>
+  )
+}
+
+function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label, agentKey, selectedAgent, onSelect }: {
   variants: Record<string, unknown>
   dk: boolean
   triShadow: string
   triShadowDk: string
   icon: React.ReactNode
   label: string
+  agentKey: AgentKey
+  selectedAgent: AgentKey
+  onSelect: (key: AgentKey) => void
 }) {
+  const active = selectedAgent === agentKey
   return (
     <motion.button
       variants={variants}
+      onClick={() => onSelect(agentKey)}
       className={cn(
-        "px-3 py-2 rounded-lg flex justify-center items-center gap-2 overflow-hidden transition-colors",
-        dk
-          ? "bg-white/[0.04]"
-          : "bg-neutral-50/90"
+        "px-3 py-2 rounded-lg flex justify-center items-center gap-2 overflow-hidden transition-all cursor-pointer",
+        active
+          ? dk ? "bg-white/[0.1]" : "bg-white"
+          : dk ? "bg-white/[0.04]" : "bg-neutral-50/90"
       )}
-      style={{
-        boxShadow: dk ? triShadowDk.split(',').map(s => s.trim()).join(', ') : triShadow.split(',').map(s => s.trim()).join(', ')
-      }}
+      style={{ boxShadow: dk ? triShadowDk : triShadow }}
     >
-      <div className="w-4 h-4 relative opacity-60 overflow-hidden flex items-center justify-center">
+      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-90" : "opacity-60")}>
         {icon}
       </div>
-      <span className={cn("opacity-60 text-xs font-medium leading-4", dk ? "text-white" : "text-stone-950")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-xs font-medium leading-4 transition-opacity", dk ? "text-white" : "text-stone-950", active ? "opacity-90" : "opacity-60")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
