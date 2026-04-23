@@ -1,211 +1,366 @@
-import { useState } from 'react';
-import {
-  ChevronDown,
-  Plus,
-  Image,
-  ArrowUp,
-  MessageCircle,
-  Presentation,
-  Code2,
-  BarChart3,
-  FileText,
-  PenLine,
-  Sparkles,
-} from 'lucide-react';
-import { BorderBeam } from 'border-beam';
-import { useSidebar } from '@/hooks/useSidebar';
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { ChevronDown, Sun, Moon, Paperclip, MessageSquare, BarChart3, FileText, PenTool, Monitor, Send } from 'lucide-react'
+import ZHoverEffect from '@/components/home/ZHoverEffect'
+import { useSidebar } from '@/hooks/useSidebar'
+import { cn } from '@/lib/utils'
 
-const featureTags = [
-  { icon: MessageCircle, label: 'IM', active: true },
-  { icon: Presentation, label: 'AI PPT' },
-  { icon: Code2, label: 'Full-stack' },
-  { icon: BarChart3, label: 'Data Analysis' },
-  { icon: FileText, label: 'File Processing' },
-  { icon: PenLine, label: 'AI Writing' },
-];
-
-const imCards = [
-  { name: 'Lark', desc: 'Just @ me in the chat.', color: '#3b82f6', status: 'connect' as const },
-  { name: 'WeChat', desc: 'Join the private chat, start working immediately.', color: '#22c55e', status: 'connect' as const },
-  { name: 'Discord', desc: 'Always on standby in your community.', color: '#7c3aed', status: 'connect' as const },
-  { name: 'Telegram', desc: 'Quick reply wherever you are.', color: '#0ea5e9', status: 'soon' as const },
-];
+const easeOut = [0.4, 0, 0.2, 1] as const
 
 export function HomePage() {
-  const { theme } = useSidebar();
-  const dk = theme === 'dark';
-  const [chatText, setChatText] = useState('');
+  const { theme, toggleTheme } = useSidebar()
+  const dk = theme === 'dark'
+  const reduceMotion = useReducedMotion()
+  const [inputValue, setInputValue] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const maxChars = 3000
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    if (value.length <= maxChars) {
+      setInputValue(value)
+    }
+  }
+
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 72)}px`
+    }
+  }, [inputValue])
+
+  const enterTrans = reduceMotion
+    ? { duration: 0.01 }
+    : { duration: 0.55, ease: easeOut }
+  const enterTransShort = reduceMotion
+    ? { duration: 0.01 }
+    : { duration: 0.45, ease: easeOut }
+  const scaleTrans = reduceMotion
+    ? { duration: 0.01 }
+    : { duration: 0.5, ease: easeOut, delay: 0.12 }
+
+  const featureContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: reduceMotion
+        ? { duration: 0.01 }
+        : { staggerChildren: 0.07, delayChildren: 0.52 },
+    },
+  }
+  const featureItem = {
+    hidden: { opacity: 0, y: 14 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: reduceMotion ? { duration: 0.01 } : { duration: 0.4, ease: easeOut },
+    },
+  }
+
+  const triShadow = '0px_0px_0px_1px_rgba(0,0,0,0.08),0px_1px_2px_0px_rgba(0,0,0,0.08),inset_0px_0px_0px_1px_rgba(255,255,255,1)'
+  const triShadowDk = '0px_0px_0px_1px_rgba(255,255,255,0.1),0px_1px_2px_0px_rgba(0,0,0,0.3),inset_0px_0px_0px_1px_rgba(255,255,255,0.06)'
 
   return (
-    <div className={`flex-1 h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#F8F8F8]'}`}>
+    <div className={`relative w-full h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]'}`}>
+      <ZHoverEffect />
+
       {/* Top bar */}
-      <div className={`flex items-center justify-between px-3 py-2 sticky top-0 z-10 backdrop-blur-sm ${dk ? 'bg-[#161616]/80' : 'bg-[#F8F8F8]/80'}`}>
-        <button className={`flex items-center gap-1 pl-4 pr-3 py-1 rounded-md shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] overflow-hidden transition-colors cursor-pointer ${
-          dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.02]'
+      <div className={`flex items-center justify-between px-[12px] py-[8px] sticky top-0 z-10 backdrop-blur-sm ${dk ? 'bg-[#161616]/80' : 'bg-[#f8f8f8]/80'}`}>
+        {/* Left — Model selector */}
+        <button className={`pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
+          dk
+            ? 'shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)] hover:bg-white/[0.06]'
+            : 'shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] hover:bg-[#0d0d0d]/[0.02]'
         }`}>
-          <span className={`text-lg font-normal leading-7 ${dk ? 'text-white' : 'text-stone-950'}`}>GLM-5.1</span>
-          <ChevronDown className={`size-4 ${dk ? 'text-white/50' : 'text-stone-950'}`} />
+          <span className={`text-[18px] font-normal leading-[28px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
+          <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
+            <ChevronDown className={`size-[12px] ${dk ? 'text-white/50' : 'text-[#0d0d0d]'}`} />
+          </div>
         </button>
-        <div className="flex items-center gap-3">
-          <button className={`px-3 py-1.5 rounded-md shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] overflow-hidden flex items-center gap-1 transition-colors cursor-pointer ${
-            dk ? 'bg-white text-[#161616] hover:bg-white/90' : 'bg-stone-950 text-white hover:bg-stone-800'
-          }`}>
-            <span className="text-sm font-normal leading-5 line-clamp-1">Log in</span>
+
+        {/* Right — Controls */}
+        <div className="flex items-center gap-[8px]">
+          {/* Light/Dark toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
+              dk
+                ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)] hover:bg-white/[0.06]'
+                : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] hover:bg-[#0d0d0d]/[0.02]'
+            }`}
+            title={dk ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <div className="w-[20px] h-[20px] flex items-center justify-center opacity-80">
+              {dk ? <Sun className="size-[16px] text-white" /> : <Moon className="size-[16px] text-[#0d0d0d]" />}
+            </div>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+              {dk ? 'Light' : 'Dark'}
+            </span>
           </button>
-          <button className={`px-3 py-1.5 rounded-md shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] overflow-hidden flex items-center gap-1 transition-colors cursor-pointer ${
-            dk ? 'bg-white/[0.08] hover:bg-white/[0.12]' : 'bg-white hover:bg-gray-50'
+
+          {/* Background Tasks */}
+          <div className={`pl-[6px] pr-[8px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden ${
+            dk
+              ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)]'
+              : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)]'
           }`}>
-            <span className={`text-sm font-normal leading-5 line-clamp-1 ${dk ? 'text-white/80' : 'text-stone-950 opacity-80'}`}>Sign up for free</span>
-          </button>
+            <div className={`p-[4px] rounded-full flex items-center justify-center ${
+              dk
+                ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)]'
+                : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)]'
+            }`}>
+              <div className="w-[8px] h-[8px] relative">
+                <div className="w-[6px] h-[6px] absolute left-[1px] top-[1px] bg-green-500 rounded-full outline outline-[3px] outline-green-500/20" />
+              </div>
+            </div>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+              Background Tasks
+            </span>
+            <div className="w-[16px] h-[16px] relative opacity-40 flex items-center justify-center">
+              <ChevronDown className={`size-[12px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} />
+            </div>
+          </div>
+
+          {/* Usage indicator */}
+          <div className={`pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden ${
+            dk
+              ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)]'
+              : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)]'
+          }`}>
+            <div className="w-[20px] h-[20px] relative opacity-80 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1.5" y="6.5" width="13" height="6" rx="1" stroke={dk ? '#fff' : '#0d0d0d'} strokeWidth="1.33"/>
+                <rect x="3.5" y="8.5" width="4" height="2" rx="0.5" fill={dk ? '#fff' : '#0d0d0d'}/>
+              </svg>
+            </div>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] line-clamp-1 ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+              50%
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Main */}
-      <div className="max-w-[680px] mx-auto px-[24px] pt-[48px] pb-[60px] flex flex-col items-center">
-        {/* Hero */}
-        <h1 className={`text-[36px] font-bold leading-[44px] tracking-[-0.5px] text-center mb-[12px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: "'Iowan Old Style BT', 'Georgia', serif" }}>
-          Create anything you can imagine
-        </h1>
-        <p className={`text-[15px] leading-[22px] tracking-[-0.18px] text-center mb-[32px] ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>
-          Interact with z.ai and explore the boundless creative world
-        </p>
-
-        {/* Chat input — BorderBeam sunset only when text is entered */}
-        <div className="w-full mb-[16px]">
-          <BorderBeam colorVariant="sunset" size="md" theme={dk ? 'dark' : 'light'} active={chatText.length > 0}>
-            <div className={`rounded-[16px] border p-[16px] ${
-              dk ? 'bg-[#1a1a1a] border-white/[0.08]' : 'bg-white border-[#e5e5e5] shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
-            }`}>
-              <textarea
-                placeholder="Chat with z.ai or start creating."
-                rows={3}
-                value={chatText}
-                onChange={(e) => setChatText(e.target.value)}
-                className={`w-full resize-none text-[15px] leading-[22px] tracking-[-0.18px] bg-transparent focus:outline-none ${
-                  dk ? 'text-white placeholder:text-white/25' : 'text-[#0d0d0d] placeholder:text-[#0d0d0d]/30'
-                }`}
-              />
-              <div className="flex items-center justify-between mt-[8px]">
-                <div className="flex items-center gap-[4px]">
-                  <button className={`size-[32px] flex items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
-                    dk ? 'text-white/30 hover:text-white/60 hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/70 hover:bg-[#0d0d0d]/[0.04]'
-                  }`}>
-                    <Plus className="size-[18px]" />
-                  </button>
-                  <button className={`size-[32px] flex items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
-                    dk ? 'text-white/30 hover:text-white/60 hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/70 hover:bg-[#0d0d0d]/[0.04]'
-                  }`}>
-                    <Image className="size-[18px]" />
-                  </button>
-                </div>
-                <button className={`size-[32px] flex items-center justify-center rounded-full transition-colors cursor-pointer ${
-                  dk ? 'bg-white text-[#161616] hover:bg-white/90' : 'bg-[#0d0d0d] text-white hover:bg-[#333]'
-                }`}>
-                  <ArrowUp className="size-[16px]" />
-                </button>
-              </div>
-            </div>
-          </BorderBeam>
-        </div>
-
-        {/* Feature tags */}
-        <div className="flex items-center gap-[8px] mb-[32px] flex-wrap justify-center">
-          {featureTags.map((tag) => {
-            const Icon = tag.icon;
-            return (
-              <button
-                key={tag.label}
-                className={`flex items-center gap-[6px] px-[14px] py-[7px] rounded-full border text-[13px] leading-[18px] tracking-[-0.18px] transition-colors cursor-pointer ${
-                  tag.active
-                    ? dk ? 'border-white/20 bg-white/[0.08] text-white' : 'border-[#0d0d0d]/20 bg-[#0d0d0d]/[0.04] text-[#0d0d0d]'
-                    : dk ? 'border-white/[0.08] text-white/50 hover:border-white/15 hover:bg-white/[0.04]' : 'border-[#e5e5e5] text-[#0d0d0d]/60 hover:border-[#d0d0d0] hover:bg-[#0d0d0d]/[0.02]'
-                }`}
+      {/* Main content */}
+      <div
+        className="flex flex-col items-center justify-start pt-[200px] pb-[200px] px-[24px] relative w-full"
+        style={{ zIndex: 1 }}
+      >
+        <div className="flex flex-col gap-[52px] items-center relative shrink-0">
+          {/* Chatbot area */}
+          <div className="flex flex-col gap-[52px] items-center justify-center relative shrink-0">
+            {/* Title */}
+            <div className={`flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full ${dk ? 'text-white' : 'text-[#1b1818]'}`}>
+              <motion.p
+                className="leading-none not-italic relative shrink-0 text-[52px] text-balance tracking-[-2.08px]"
+                style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif', fontWeight: 'normal' }}
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={enterTrans}
               >
-                <Icon className="size-[14px]" />
-                {tag.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* IM Cards — no BorderBeam */}
-        <div className="w-full grid grid-cols-2 gap-[12px] mb-[32px]">
-          {imCards.map((card) => (
-            <div
-              key={card.name}
-              className={`flex items-center gap-[12px] p-[16px] rounded-[12px] border transition-all cursor-pointer ${
-                dk
-                  ? 'bg-[#1a1a1a] border-white/[0.06] hover:border-white/[0.12] hover:bg-[#1e1e1e]'
-                  : 'bg-white border-[#e5e5e5] hover:border-[#d0d0d0] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
-              }`}
-            >
-              <div className="size-[40px] rounded-[10px] flex items-center justify-center shrink-0" style={{ backgroundColor: card.color + '18' }}>
-                <div className="size-[20px] rounded-full" style={{ backgroundColor: card.color }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-[14px] font-medium leading-[20px] tracking-[-0.18px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>{card.name}</p>
-                <p className={`text-[12px] leading-[18px] tracking-[-0.18px] truncate ${dk ? 'text-white/35' : 'text-[#0d0d0d]/40'}`}>{card.desc}</p>
-              </div>
-              {card.status === 'connect' ? (
-                <button className={`px-[14px] py-[5px] rounded-[8px] border text-[13px] font-medium transition-colors cursor-pointer shrink-0 ${
-                  dk ? 'border-white/[0.12] text-white hover:bg-white/[0.06]' : 'border-[#e5e5e5] text-[#0d0d0d] hover:bg-[#0d0d0d]/[0.04]'
-                }`}>
-                  Connect
-                </button>
-              ) : (
-                <span className={`text-[13px] tracking-[-0.18px] shrink-0 ${dk ? 'text-white/25' : 'text-[#0d0d0d]/30'}`}>Coming soon</span>
-              )}
+                Create anything you can imagine
+              </motion.p>
+              <motion.p
+                className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty ${dk ? 'text-white/40' : 'text-[#737373]'}`}
+                style={{ fontFamily: 'Geist, sans-serif' }}
+                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...enterTransShort, delay: reduceMotion ? 0 : 0.08 }}
+              >
+                Interact with z.ai and explore the boundless creative world
+              </motion.p>
             </div>
-          ))}
-        </div>
 
-        {/* Recommendation — no BorderBeam */}
-        <div className="w-full">
-          <div className="flex items-center gap-[6px] mb-[12px]">
-            <Sparkles className={`size-[16px] ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`} />
-            <span className={`text-[14px] font-medium tracking-[-0.18px] ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>Get started with IM</span>
-          </div>
-          <div className={`rounded-[16px] border overflow-hidden transition-all ${
-            dk ? 'bg-[#1a1a1a] border-white/[0.06] hover:border-white/[0.12]' : 'bg-white border-[#e5e5e5] hover:border-[#d0d0d0] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
-          }`}>
-            <div className="flex gap-[20px] p-[20px]">
-              <div className="flex-1 flex flex-col justify-center min-w-0">
-                <h3 className={`text-[16px] font-medium leading-[24px] tracking-[-0.18px] mb-[4px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>
-                  Best in class demos
-                </h3>
-                <p className={`text-[13px] leading-[20px] tracking-[-0.18px] mb-[12px] ${dk ? 'text-white/35' : 'text-[#0d0d0d]/40'}`}>
-                  Explore top performing examples from our customer showcase
-                </p>
-                <button className={`text-[13px] transition-colors cursor-pointer self-start underline underline-offset-2 ${
-                  dk ? 'text-white/30 hover:text-white/50' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/60'
-                }`}>
-                  Dismiss
-                </button>
-              </div>
-              <div className={`w-[200px] h-[120px] rounded-[12px] shrink-0 flex items-center justify-center overflow-hidden ${
-                dk ? 'bg-gradient-to-br from-[#1e1e2e] to-[#2a1a1a]' : 'bg-gradient-to-br from-[#f0f4ff] to-[#e8f0fe]'
-              }`}>
-                <div className={`w-[160px] h-[100px] rounded-[8px] flex items-center justify-center ${
-                  dk ? 'bg-white/5 shadow-[0_2px_12px_rgba(0,0,0,0.3)]' : 'bg-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
-                }`}>
-                  <div className={`size-[32px] rounded-full flex items-center justify-center ${dk ? 'bg-white/10' : 'bg-[#0d0d0d]/10'}`}>
-                    <ArrowUp className={`size-[16px] rotate-45 ${dk ? 'text-white/30' : 'text-[#0d0d0d]/30'}`} />
+            {/* Input area — simplified chatbot card */}
+            <motion.div
+              className="relative w-[794px] max-w-full origin-top"
+              initial={reduceMotion ? false : { opacity: 0, y: 22, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={scaleTrans}
+            >
+              <div className={cn(
+                "rounded-xl overflow-hidden inline-flex flex-col justify-start items-start w-full",
+                dk
+                  ? "bg-[#1e1e1e] outline outline-1 outline-offset-[-1px] outline-white/[0.1] shadow-[0px_4px_16px_0px_rgba(0,0,0,0.3)]"
+                  : "bg-white outline outline-1 outline-offset-[-1px] outline-zinc-300 shadow-[0px_4px_16px_0px_rgba(0,0,0,0.05)]"
+              )}>
+                {/* Textarea area */}
+                <div className={cn(
+                  "self-stretch h-24 p-3 relative rounded-t-xl outline outline-1 flex flex-col justify-start items-start gap-2",
+                  dk
+                    ? "bg-[#1e1e1e] outline-white/[0.06]"
+                    : "bg-white outline-zinc-300/0"
+                )}>
+                  {/* Cursor line */}
+                  <div className={cn(
+                    "w-0 h-4 absolute left-[12px] top-[16px] outline outline-1 outline-offset-[-0.5px]",
+                    dk ? "outline-white" : "outline-black"
+                  )} />
+                  {/* Placeholder */}
+                  {!inputValue && (
+                    <div className={cn(
+                      "self-stretch flex-1 opacity-30 text-base font-normal leading-6 pointer-events-none",
+                      dk ? "text-white" : "text-stone-950"
+                    )} style={{ fontFamily: "'Geist', sans-serif" }}>
+                      Chat with z.ai, or start creating.
+                    </div>
+                  )}
+                  <textarea
+                    ref={textareaRef}
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    maxLength={maxChars}
+                    className={cn(
+                      "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
+                      dk ? "text-white" : "text-stone-950"
+                    )}
+                    style={{ fontFamily: "'Geist', sans-serif" }}
+                  />
+                </div>
+
+                {/* Bottom toolbar */}
+                <div className="self-stretch p-3 inline-flex justify-between items-center flex-wrap content-center overflow-hidden">
+                  <div className="flex-1 flex justify-between items-center">
+                    {/* Left — upload & thinking icons */}
+                    <div className="flex justify-start items-center gap-2">
+                      <div className="flex justify-start items-center gap-1">
+                        {/* Upload / paperclip icon */}
+                        <button className={cn(
+                          "w-7 h-7 relative opacity-70 rounded-[999px] flex items-center justify-center transition-opacity hover:opacity-100"
+                        )} aria-label="Upload">
+                          <Paperclip className={cn("size-[16px]", dk ? "text-white" : "text-stone-950")} />
+                        </button>
+                        {/* Thinking icon */}
+                        <button className={cn(
+                          "w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center transition-opacity hover:opacity-100"
+                        )} aria-label="Thinking">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="8" cy="8" r="5.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33"/>
+                            <circle cx="6" cy="8.5" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
+                            <circle cx="8" cy="6.5" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
+                            <circle cx="10" cy="8.5" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Right — send button */}
+                    <div className="flex justify-start items-center gap-3">
+                      <button
+                        className={cn(
+                          "p-1.5 rounded-lg flex justify-center items-center gap-2",
+                          dk ? "bg-white/[0.15]" : "bg-neutral-200"
+                        )}
+                        aria-label="Send"
+                      >
+                        <div className={cn("w-4 h-4 relative overflow-hidden", dk ? "opacity-40" : "opacity-20")}>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
 
-        {/* Bottom login */}
-        <div className="mt-[32px]">
-          <button className={`px-[24px] py-[8px] rounded-[10px] border text-[14px] transition-colors cursor-pointer ${
-            dk ? 'border-white/[0.1] text-white/50 hover:bg-white/[0.04]' : 'border-[#e5e5e5] text-[#0d0d0d]/60 hover:bg-[#0d0d0d]/[0.04]'
-          }`}>
-            Log in
-          </button>
+          {/* Feature buttons */}
+          <motion.div
+            variants={featureContainer}
+            initial="hidden"
+            animate="show"
+            className="self-stretch inline-flex justify-center items-center gap-3"
+          >
+            {/* IM — pill shape, active */}
+            <motion.button
+              variants={featureItem}
+              className={cn(
+                "px-3 py-2 rounded-[99px] flex justify-start items-center gap-1.5 overflow-hidden transition-colors",
+                dk
+                  ? `bg-white/[0.08] shadow-[${triShadowDk}]`
+                  : `bg-stone-950/5 shadow-[${triShadow}]`
+              )}
+              style={{
+                boxShadow: dk ? triShadowDk.split(',').map(s => s.trim()).join(', ') : triShadow.split(',').map(s => s.trim()).join(', ')
+              }}
+            >
+              <div className="w-4 h-4 relative opacity-80 overflow-hidden flex items-center justify-center">
+                <MessageSquare className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />
+              </div>
+              <span className={cn("opacity-80 text-xs font-medium leading-4", dk ? "text-white" : "text-stone-950")} style={{ fontFamily: "'Geist', sans-serif" }}>
+                IM
+              </span>
+            </motion.button>
+
+            {/* Separator */}
+            <div className="px-2 flex justify-start items-center gap-2.5">
+              <div className={cn("w-0 h-4 opacity-20 outline outline-1 outline-offset-[-0.5px]", dk ? "outline-white" : "outline-stone-950")} />
+            </div>
+
+            {/* AI PPT */}
+            <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              icon={<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="3" width="12" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
+                <rect x="2" y="9" width="5" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
+                <rect x="9" y="9" width="5" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
+              </svg>}
+              label="AI PPT" />
+
+            {/* Full-stack */}
+            <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              icon={<Monitor className={cn("size-3.5", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              label="Full-stack" />
+
+            {/* Data Analysis */}
+            <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              icon={<BarChart3 className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.5} />}
+              label="Data Analysis" />
+
+            {/* File Processing */}
+            <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              icon={<FileText className={cn("size-3.5", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              label="File Processing" />
+
+            {/* AI Writing */}
+            <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
+              icon={<PenTool className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              label="AI Writing" />
+          </motion.div>
         </div>
       </div>
     </div>
-  );
+  )
+}
+
+function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label }: {
+  variants: Record<string, unknown>
+  dk: boolean
+  triShadow: string
+  triShadowDk: string
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <motion.button
+      variants={variants}
+      className={cn(
+        "px-3 py-2 rounded-lg flex justify-center items-center gap-2 overflow-hidden transition-colors",
+        dk
+          ? "bg-white/[0.04]"
+          : "bg-neutral-50/90"
+      )}
+      style={{
+        boxShadow: dk ? triShadowDk.split(',').map(s => s.trim()).join(', ') : triShadow.split(',').map(s => s.trim()).join(', ')
+      }}
+    >
+      <div className="w-4 h-4 relative opacity-60 overflow-hidden flex items-center justify-center">
+        {icon}
+      </div>
+      <span className={cn("opacity-60 text-xs font-medium leading-4", dk ? "text-white" : "text-stone-950")} style={{ fontFamily: "'Geist', sans-serif" }}>
+        {label}
+      </span>
+    </motion.button>
+  )
 }
