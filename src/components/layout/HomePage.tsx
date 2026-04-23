@@ -192,17 +192,19 @@ export function HomePage() {
                 strength={dk ? 0.7 : 0.5}
                 duration={1.96}
                 active={hasInput}
+                style={{
+                  outline: dk ? '1px solid rgba(255,255,255,0.1)' : '1px solid #a1a1aa',
+                  outlineOffset: '-1px',
+                  borderRadius: 12,
+                  boxShadow: dk
+                    ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
+                    : '0px 4px 16px 0px rgba(0,0,0,0.05)',
+                }}
               >
               <div className={cn(
                 "rounded-xl inline-flex flex-col justify-start items-start w-full overflow-hidden",
                 dk ? "bg-[#1e1e1e]" : "bg-white"
-              )} style={{
-                boxShadow: dk
-                  ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
-                  : '0px 4px 16px 0px rgba(0,0,0,0.05)',
-                outline: dk ? '1px solid rgba(255,255,255,0.1)' : '1px solid #a1a1aa',
-                outlineOffset: '-1px'
-              }}>
+              )}>
                 {/* Textarea area */}
                 <div className={cn(
                   "self-stretch h-24 p-3 relative rounded-t-xl flex flex-col justify-start items-start gap-2",
