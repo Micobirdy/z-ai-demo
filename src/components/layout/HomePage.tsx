@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
-import { ChevronDown, Sun, Moon, Paperclip, MessageSquare, BarChart3, FileText, PenTool, Monitor, Send } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
+import { ChevronDown, Sun, Moon, Paperclip, MessageSquare, BarChart3, FileText, PenTool, Monitor } from 'lucide-react'
+import { BorderBeam } from 'border-beam'
 import ZHoverEffect from '@/components/home/ZHoverEffect'
 import { useSidebar } from '@/hooks/useSidebar'
 import { cn } from '@/lib/utils'
@@ -178,6 +179,14 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={scaleTrans}
             >
+              <BorderBeam
+                size="line"
+                colorVariant="mono"
+                theme={dk ? 'dark' : 'light'}
+                borderRadius={12}
+                strength={dk ? 0.7 : 0.5}
+                duration={2.4}
+              >
               <div className={cn(
                 "rounded-xl overflow-hidden inline-flex flex-col justify-start items-start w-full",
                 dk
@@ -263,6 +272,7 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
+              </BorderBeam>
             </motion.div>
           </div>
 
