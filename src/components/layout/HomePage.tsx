@@ -202,12 +202,12 @@ export function HomePage() {
                 active={hasInput}
               >
               <div className={cn(
-                "rounded-xl inline-flex flex-col justify-start items-start w-full overflow-hidden",
+                "rounded-[12px] inline-flex flex-col justify-start items-start w-full overflow-hidden",
                 dk ? "bg-[#1e1e1e]" : "bg-white"
               )}>
                 {/* Textarea area */}
                 <div className={cn(
-                  "self-stretch h-24 p-3 relative rounded-t-xl flex flex-col justify-start items-start gap-2",
+                  "self-stretch h-24 p-3 relative rounded-t-[12px] flex flex-col justify-start items-start gap-2",
                   dk ? "bg-[#1e1e1e]" : "bg-white"
                 )}>
                   {/* Placeholder */}
@@ -264,7 +264,7 @@ export function HomePage() {
                     <div className="flex justify-start items-center gap-3">
                       <button
                         className={cn(
-                          "p-1.5 rounded-lg flex justify-center items-center gap-2",
+                          "p-1.5 rounded-[8px] flex justify-center items-center gap-2",
                           dk ? "bg-white/[0.15]" : "bg-neutral-200"
                         )}
                         aria-label="Send"
@@ -399,7 +399,7 @@ function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label, agentKe
       variants={variants}
       onClick={() => onSelect(agentKey)}
       className={cn(
-        "px-3 py-2 rounded-lg flex justify-center items-center gap-2 overflow-hidden transition-all cursor-pointer",
+        "px-3 py-2 rounded-[8px] flex justify-center items-center gap-2 overflow-hidden transition-all cursor-pointer",
         active
           ? dk ? "bg-white/[0.1]" : "bg-white"
           : dk ? "bg-white/[0.04]" : "bg-neutral-50/90"
