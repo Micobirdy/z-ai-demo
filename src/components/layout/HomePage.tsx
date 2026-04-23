@@ -183,6 +183,14 @@ export function HomePage() {
               initial={reduceMotion ? false : { opacity: 0, y: 22, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={scaleTrans}
+              style={{
+                borderRadius: 12,
+                outline: dk ? '1px solid rgba(255,255,255,0.1)' : '1px solid #d4d4d8',
+                outlineOffset: '-1px',
+                boxShadow: dk
+                  ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
+                  : '0px 4px 16px 0px rgba(0,0,0,0.05)',
+              }}
             >
               <BorderBeam
                 size="md"
@@ -192,14 +200,6 @@ export function HomePage() {
                 strength={dk ? 0.7 : 0.5}
                 duration={1.96}
                 active={hasInput}
-                style={{
-                  outline: dk ? '1px solid rgba(255,255,255,0.1)' : '1px solid #a1a1aa',
-                  outlineOffset: '-1px',
-                  borderRadius: 12,
-                  boxShadow: dk
-                    ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
-                    : '0px 4px 16px 0px rgba(0,0,0,0.05)',
-                }}
               >
               <div className={cn(
                 "rounded-xl inline-flex flex-col justify-start items-start w-full overflow-hidden",
