@@ -37,11 +37,12 @@ export function GeneralSettings() {
 
       <SettingRow label="Time zone" dk={dk}>
         <SelectBox value={timezone} onChange={setTimezone} dk={dk} selectBg={selectBg} border={border} fg={fg}>
-          <option value="gmt+8">{"(GMT+8:00) Beijing"}</option>
-          <option value="gmt+3">{"(GMT+3:00) Istanbul"}</option>
-          <option value="gmt+0">{"(GMT+0:00) London"}</option>
-          <option value="gmt-5">{"(GMT-5:00) New York"}</option>
-          <option value="gmt-8">{"(GMT-8:00) Los Angeles"}</option>
+          <option value="gmt+3">{"(GMT+3:00)  Istanbul"}</option>
+          <option value="gmt-8">{"(UTC-8)  Pacific Time"}</option>
+          <option value="gmt-5">{"(UTC-5)  Eastern Time"}</option>
+          <option value="gmt+0">{"(GMT+0:00)  London"}</option>
+          <option value="gmt+8">{"(GMT+8:00)  Beijing"}</option>
+          <option value="auto">{"Time zone - Autodetect"}</option>
         </SelectBox>
       </SettingRow>
     </div>
@@ -65,7 +66,7 @@ function SelectBox({ value, onChange, dk, selectBg, border, fg, children }: {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none w-[240px] pl-[14px] pr-[36px] py-[8px] rounded-[8px] border text-[14px] leading-[20px] tracking-[-0.18px] cursor-pointer focus:outline-none transition-colors ${selectBg} ${border} ${fg} ${dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.02]'}`}
+        className={`appearance-none w-[320px] pl-[14px] pr-[36px] py-[10px] rounded-[8px] border text-[14px] leading-[20px] tracking-[-0.18px] cursor-pointer focus:outline-none transition-colors ${selectBg} ${border} ${fg} ${dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.02]'}`}
       >
         {children}
       </select>
