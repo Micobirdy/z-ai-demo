@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { ChevronDown, Sun, Moon, Paperclip, MessageSquare, BarChart3, FileText, PenTool, Monitor } from 'lucide-react'
+import { ChevronDown, Sun, Moon, MessageSquare, BarChart3, FileText, PenTool, Monitor } from 'lucide-react'
 import { BorderBeam } from 'border-beam'
 import ZHoverEffect from '@/components/home/ZHoverEffect'
 import { useSidebar } from '@/hooks/useSidebar'
@@ -194,12 +194,14 @@ export function HomePage() {
                 active={hasInput}
               >
               <div className={cn(
-                "rounded-xl inline-flex flex-col justify-start items-start w-full",
+                "rounded-xl inline-flex flex-col justify-start items-start w-full overflow-hidden",
                 dk ? "bg-[#1e1e1e]" : "bg-white"
               )} style={{
                 boxShadow: dk
                   ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
-                  : '0px 4px 16px 0px rgba(0,0,0,0.05)'
+                  : '0px 4px 16px 0px rgba(0,0,0,0.05)',
+                outline: dk ? '1px solid rgba(255,255,255,0.1)' : '1px solid #a1a1aa',
+                outlineOffset: '-1px'
               }}>
                 {/* Textarea area */}
                 <div className={cn(
@@ -234,22 +236,24 @@ export function HomePage() {
                     {/* Left — upload & thinking icons */}
                     <div className="flex justify-start items-center gap-2">
                       <div className="flex justify-start items-center gap-1">
-                        {/* Upload / paperclip icon */}
-                        <button className={cn(
-                          "w-7 h-7 relative opacity-70 rounded-[999px] flex items-center justify-center transition-opacity hover:opacity-100"
-                        )} aria-label="Upload">
-                          <Paperclip className={cn("size-[16px]", dk ? "text-white" : "text-stone-950")} />
+                        {/* Upload / attach icon */}
+                        <button className="w-7 h-7 relative opacity-70 rounded-[999px] flex items-center justify-center transition-opacity hover:opacity-100" aria-label="Upload">
+                          <div className="w-5 h-5 overflow-hidden flex items-center justify-center">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M10.5 7.5V9.5C10.5 10.0523 10.0523 10.5 9.5 10.5H2.5C1.94772 10.5 1.5 10.0523 1.5 9.5V7.5M6 1.5V7.5M6 1.5L3.5 4M6 1.5L8.5 4" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
                         </button>
                         {/* Thinking icon */}
-                        <button className={cn(
-                          "w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center transition-opacity hover:opacity-100"
-                        )} aria-label="Thinking">
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="8" cy="8" r="5.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33"/>
-                            <circle cx="6" cy="8.5" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
-                            <circle cx="8" cy="6.5" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
-                            <circle cx="10" cy="8.5" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
-                          </svg>
+                        <button className="w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center transition-opacity hover:opacity-100" aria-label="Thinking">
+                          <div className="w-4 h-4 relative overflow-hidden">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="8" cy="8" r="5.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33"/>
+                              <circle cx="5.5" cy="8" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
+                              <circle cx="8" cy="8" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
+                              <circle cx="10.5" cy="8" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
+                            </svg>
+                          </div>
                         </button>
                       </div>
                     </div>
