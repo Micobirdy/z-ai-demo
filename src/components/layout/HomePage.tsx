@@ -185,11 +185,9 @@ export function HomePage() {
               transition={scaleTrans}
               style={{
                 borderRadius: 12,
-                outline: dk ? '1px solid rgba(255,255,255,0.1)' : '1px solid #d4d4d8',
+                outline: dk ? '1px solid rgba(64,64,64,0.8)' : '1px solid #d4d4d8',
                 outlineOffset: '-1px',
-                boxShadow: dk
-                  ? '0px 4px 16px 0px rgba(0,0,0,0.3)'
-                  : '0px 4px 16px 0px rgba(0,0,0,0.05)',
+                boxShadow: '0px 4px 16px 0px rgba(0,0,0,0.05)',
               }}
             >
               <BorderBeam
@@ -203,12 +201,12 @@ export function HomePage() {
               >
               <div className={cn(
                 "rounded-[12px] inline-flex flex-col justify-start items-start w-full overflow-hidden",
-                dk ? "bg-[#1e1e1e]" : "bg-white"
+                dk ? "bg-zinc-800" : "bg-white"
               )}>
                 {/* Textarea area */}
                 <div className={cn(
                   "self-stretch h-24 p-3 relative rounded-t-[12px] flex flex-col justify-start items-start gap-2",
-                  dk ? "bg-[#1e1e1e]" : "bg-white"
+                  dk ? "bg-zinc-800" : "bg-white"
                 )}>
                   {/* Placeholder */}
                   {!inputValue && (
@@ -264,12 +262,14 @@ export function HomePage() {
                     <div className="flex justify-start items-center gap-3">
                       <button
                         className={cn(
-                          "p-1.5 rounded-[8px] flex justify-center items-center gap-2",
-                          dk ? "bg-white/[0.15]" : "bg-neutral-200"
+                          "p-1.5 rounded-[8px] flex justify-center items-center gap-1 overflow-hidden",
+                          dk
+                            ? "opacity-25 bg-white shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] outline outline-1 outline-offset-[-1px] outline-stone-950/10"
+                            : "bg-neutral-200"
                         )}
                         aria-label="Send"
                       >
-                        <div className={cn("w-4 h-4 relative overflow-hidden", dk ? "opacity-40" : "opacity-20")}>
+                        <div className={cn("w-4 h-4 relative overflow-hidden", dk ? "" : "opacity-20")}>
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
