@@ -58,12 +58,8 @@ export function Sidebar() {
     )}>
       <div
         ref={sidebarRef}
-        onMouseEnter={() => isCollapsed && setHoverExpanded(true)}
-        onMouseLeave={() => setHoverExpanded(false)}
         className={clsx(
-          'flex h-full flex-col', sidebarBg, 'border-r', borderColor,
-          isCollapsed && isHoverExpanded && `absolute left-0 top-0 z-40 w-[260px] rounded-r-2xl ${dk ? 'shadow-[0_8px_30px_rgba(0,0,0,0.5)]' : 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]'}`,
-          !(isCollapsed && isHoverExpanded) && 'w-full',
+          'flex h-full flex-col w-full', sidebarBg, 'border-r', borderColor,
           'transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]'
         )}
       >
