@@ -7,13 +7,14 @@ export function DashboardContent() {
   const dk = theme === 'dark';
 
   return (
-    <div className={`flex-1 overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]'}`}>
-      <div className="max-w-[680px] mx-auto pt-[60px] pb-[80px] px-[40px] flex flex-col gap-[32px]">
-        {/* Title */}
-        <div>
-          <h1 className={`text-[24px] font-medium leading-[32px] tracking-[-0.18px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>Dashboard</h1>
-          <div className={`mt-[16px] h-px w-[70%] ${dk ? 'bg-white/[0.08]' : 'bg-[#e5e5e5]'}`} />
-        </div>
+    <div className="flex flex-col gap-[32px]">
+      {/* Title */}
+      <div>
+        <h1 className={`text-[24px] font-medium leading-[32px] tracking-[-0.18px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}
+          style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif' }}>
+          Dashboard
+        </h1>
+      </div>
 
         {/* Pro alert */}
         <div className={`rounded-[12px] border overflow-hidden ${dk ? 'border-white/[0.08] bg-white/[0.04]' : 'border-[#e5e5e5] bg-white'}`}>
@@ -86,7 +87,6 @@ export function DashboardContent() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
