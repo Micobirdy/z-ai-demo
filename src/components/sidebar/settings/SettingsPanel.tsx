@@ -15,18 +15,30 @@ export function SettingsPanel() {
   return (
     <div
       className={clsx(
-        'flex h-full w-[180px] shrink-0 flex-col overflow-hidden',
+        'flex h-full w-72 shrink-0 flex-col overflow-hidden',
         dk ? 'border-r border-white/[0.06] bg-[#161616]' : 'border-r border-[#dbdbdb] bg-[#f8f8f8]',
         'transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
         mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
       )}
     >
-      <div className="flex items-center gap-[8px] pl-[16px] pr-[8px] py-[16px] shrink-0">
-        <span className={`flex-1 text-[18px] font-medium leading-[20px] tracking-[-0.18px] opacity-80 capitalize ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>
-          Settings
-        </span>
+      <div className="px-8 pt-14 flex flex-col gap-4">
+        <div className="self-stretch flex flex-col">
+          {/* Title with bottom border */}
+          <div className={clsx(
+            'px-4 pb-4 border-b flex items-start',
+            dk ? 'border-white/[0.06]' : 'border-[#dbdbdb]'
+          )}>
+            <span className={clsx(
+              'flex-1 text-2xl font-bold leading-8',
+              dk ? 'text-white' : 'text-stone-950'
+            )} style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif' }}>
+              Settings
+            </span>
+          </div>
+          {/* Nav items */}
+          <SettingsSidebar />
+        </div>
       </div>
-      <SettingsSidebar />
       <div className="flex-1" />
     </div>
   );
