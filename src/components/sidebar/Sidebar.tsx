@@ -40,26 +40,7 @@ export function Sidebar() {
   const [logoHovered, setLogoHovered] = useState(false);
   const dk = theme === 'dark';
 
-  // Delayed unmount: keep expanded content rendered during collapse animation
-  const [showExpandedContent, setShowExpandedContent] = useState(isExpanded);
-  const [contentVisible, setContentVisible] = useState(isExpanded);
-
-  useEffect(() => {
-    if (isExpanded) {
-      // Expanding: mount content immediately, fade in on next frame
-      setShowExpandedContent(true);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setContentVisible(true));
-      });
-    } else {
-      // Collapsing: fade out first, then unmount after transition
-      setContentVisible(false);
-      const timer = setTimeout(() => setShowExpandedContent(false), 180);
-      return () => clearTimeout(timer);
-    }
-  }, [isExpanded]);
-
-  const showExpanded = showExpandedContent;
+  const showExpanded = isExpanded;
 
   const fg = dk ? 'text-white' : 'text-[#0d0d0d]';
   const fgMuted = dk ? 'text-white/50' : 'text-[#0d0d0d]/50';
@@ -70,15 +51,9 @@ export function Sidebar() {
   const sidebarBg = dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]';
   const borderColor = dk ? 'border-white/[0.06]' : 'border-[#dbdbdb]';
 
-  const expandedContentStyle = {
-    opacity: contentVisible ? 1 : 0,
-    transition: 'opacity 180ms cubic-bezier(0.4, 0, 0.2, 1)',
-    pointerEvents: (contentVisible ? 'auto' : 'none') as React.CSSProperties['pointerEvents'],
-  };
-
   return (
     <div className={clsx(
-      'relative shrink-0 transition-[width] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
+      'relative shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
       isCollapsed ? 'w-[56px]' : 'w-[260px]'
     )}>
       <div
@@ -86,17 +61,14 @@ export function Sidebar() {
         onMouseEnter={() => isCollapsed && setHoverExpanded(true)}
         onMouseLeave={() => setHoverExpanded(false)}
         className={clsx(
-          'flex h-full flex-col', sidebarBg, 'border-r', borderColor,
+          'flex h-full flex-col overflow-hidden', sidebarBg, 'border-r', borderColor,
           isCollapsed && isHoverExpanded && `absolute left-0 top-0 z-40 w-[260px] rounded-r-2xl ${dk ? 'shadow-[0_8px_30px_rgba(0,0,0,0.5)]' : 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]'}`,
           !(isCollapsed && isHoverExpanded) && 'w-full',
-          'transition-[width,box-shadow] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]'
+          'transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]'
         )}
       >
         {/* Header */}
-        <div className={clsx(
-          'flex items-center shrink-0 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
-          showExpanded ? 'justify-between pl-[16px] pr-[10px] py-[10px]' : 'flex-col items-center gap-[4px] py-[10px]'
-        )}>
+        <div className="flex items-center justify-between pl-[16px] pr-[10px] py-[10px] shrink-0">
           {/* Logo area */}
           <div
             className="relative"
@@ -120,145 +92,142 @@ export function Sidebar() {
               </button>
             )}
           </div>
-          {/* Collapse button - with fade */}
-          {showExpanded && (
-            <button type="button" onClick={toggleCollapse} aria-label="Collapse sidebar"
-              style={expandedContentStyle}
-              className={`w-9 h-9 flex items-center justify-center rounded-[8px] ${toggleFg} ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
-              <PanelLeftClose className="size-[18px]" />
-            </button>
-          )}
+          {/* Collapse button */}
+          <button type="button" onClick={toggleCollapse} aria-label="Collapse sidebar"
+            className={clsx(
+              'w-9 h-9 flex items-center justify-center rounded-[8px] transition-all cursor-pointer shrink-0',
+              toggleFg, hoverBg, activeBgPress,
+              showExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none w-0 overflow-hidden'
+            )}>
+            <PanelLeftClose className="size-[18px]" />
+          </button>
         </div>
 
         {/* Nav */}
         <div className="flex-1 flex flex-col pt-[4px] px-[6px] overflow-y-auto min-h-0">
           <div className="flex flex-col gap-[16px]">
             {/* Card group */}
-            {showExpanded ? (
-              <div style={expandedContentStyle} className={clsx(
-                'relative flex flex-col gap-[2px] p-[4px] rounded-[8px]',
-                dk ? 'bg-white/[0.06]' : 'bg-white shadow-[0_0_0_1px_rgba(219,219,219,0.8),0_2px_8px_rgba(0,0,0,0.06)]'
-              )}>
-                {cardItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button key={item.id} type="button" onClick={() => { setActiveNav(item.id); closeSettings(); }}
-                      className={clsx(
-                        'flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] w-full text-left transition-colors cursor-pointer',
-                        activeNav === item.id ? activeBg : `${hoverBg} ${activeBgPress}`
-                      )}>
-                      <Icon className={`size-[18px] shrink-0 ${fg}`} />
-                      <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-[2px]">
-                {cardItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button key={item.id} type="button" title={item.label} onClick={() => { setActiveNav(item.id); closeSettings(); }}
-                      className={clsx('flex items-center justify-center size-[36px] rounded-[6px] transition-colors cursor-pointer', activeNav === item.id ? activeBg : `${hoverBg} ${activeBgPress}`)}>
-                      <Icon className={`size-[18px] ${fg}`} />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <div className={clsx(
+              'relative flex flex-col gap-[2px] p-[4px] rounded-[8px] transition-all duration-300',
+              showExpanded
+                ? dk ? 'bg-white/[0.06]' : 'bg-white shadow-[0_0_0_1px_rgba(219,219,219,0.8),0_2px_8px_rgba(0,0,0,0.06)]'
+                : 'bg-transparent shadow-none'
+            )}>
+              {cardItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button key={item.id} type="button" onClick={() => { setActiveNav(item.id); closeSettings(); }}
+                    className={clsx(
+                      'flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] w-full text-left transition-colors cursor-pointer',
+                      activeNav === item.id ? activeBg : `${hoverBg} ${activeBgPress}`
+                    )}>
+                    <Icon className={`size-[18px] shrink-0 ${fg}`} />
+                    <span className={clsx(
+                      'text-[14px] leading-[20px] tracking-[-0.18px] whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300',
+                      fg,
+                      showExpanded ? 'opacity-100 max-w-[200px]' : 'opacity-0 max-w-0'
+                    )}>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
             {/* List group */}
-            <div className={clsx('flex flex-col', !showExpanded && 'items-center gap-[2px]')}>
+            <div className="flex flex-col">
               {listItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <button key={item.id} type="button" title={!showExpanded ? item.label : undefined} onClick={() => { setActiveNav(item.id); closeSettings(); }}
                     className={clsx(
-                      'flex items-center transition-colors cursor-pointer',
-                      showExpanded ? `gap-[8px] px-[12px] py-[7px] w-full text-left rounded-[6px] ${hoverBg} ${activeBgPress}` : `justify-center size-[36px] rounded-[6px] ${hoverBg} ${activeBgPress}`,
+                      'flex items-center gap-[8px] px-[12px] py-[7px] rounded-[6px] w-full text-left transition-colors cursor-pointer',
+                      hoverBg, activeBgPress,
                       activeNav === item.id && activeBg
                     )}>
                     <Icon className={`size-[18px] shrink-0 ${fg}`} />
-                    {showExpanded && (
-                      <span style={expandedContentStyle} className="flex items-center gap-[8px] flex-1 min-w-0">
-                        <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>{item.label}</span>
-                        {item.badge && (
-                          <span className={`ml-auto px-[6px] py-[1px] rounded-[4px] text-[10px] font-medium leading-[14px] ${dk ? 'bg-white text-[#111]' : 'bg-[#0d0d0d] text-white'}`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </span>
-                    )}
+                    <span className={clsx(
+                      'flex items-center gap-[8px] flex-1 min-w-0 whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300',
+                      showExpanded ? 'opacity-100 max-w-[200px]' : 'opacity-0 max-w-0'
+                    )}>
+                      <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>{item.label}</span>
+                      {item.badge && (
+                        <span className={`ml-auto px-[6px] py-[1px] rounded-[4px] text-[10px] font-medium leading-[14px] ${dk ? 'bg-white text-[#111]' : 'bg-[#0d0d0d] text-white'}`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
             {/* Recents */}
-            {showExpanded && (
-              <div className="flex flex-col" style={expandedContentStyle}>
-                <button className="flex items-center gap-[4px] px-[12px] py-[6px] group cursor-pointer">
-                  <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fgMuted} transition-colors`}>Zai Web</span>
-                  <ChevronDown className={`size-[14px] ${dk ? 'text-white/30' : 'text-[#0d0d0d]/30'} transition-colors`} />
+            <div className={clsx(
+              'flex flex-col overflow-hidden transition-[opacity,max-height] duration-300',
+              showExpanded ? 'opacity-100 max-h-[300px]' : 'opacity-0 max-h-0'
+            )}>
+              <button className="flex items-center gap-[4px] px-[12px] py-[6px] group cursor-pointer">
+                <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fgMuted} transition-colors whitespace-nowrap`}>Zai Web</span>
+                <ChevronDown className={`size-[14px] ${dk ? 'text-white/30' : 'text-[#0d0d0d]/30'} transition-colors`} />
+              </button>
+              {recentItems.map((item, i) => (
+                <button key={i} type="button" className={`px-[12px] py-[6px] text-left rounded-[6px] ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
+                  <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg} block truncate whitespace-nowrap`}>{item}</span>
                 </button>
-                {recentItems.map((item, i) => (
-                  <button key={i} type="button" className={`px-[12px] py-[6px] text-left rounded-[6px] ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
-                    <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg} block truncate`}>{item}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Upgrade */}
-        <div className="flex items-center justify-center py-[8px] shrink-0">
-          {showExpanded ? (
-            <button style={expandedContentStyle} className={`flex items-center gap-[4px] rounded-full pl-[6px] pr-[12px] py-[4px] transition-colors cursor-pointer ${dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#daeeff] hover:bg-[#c3dcf9]'}`}>
-              <ArrowUpCircle className="size-[18px] text-[#0068e0]" />
-              <span className="text-[13px] leading-[20px] text-[#0068e0]">Upgrade</span>
-            </button>
-          ) : (
-            <button title="Upgrade" className={`flex items-center justify-center size-[32px] rounded-full transition-colors cursor-pointer ${dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#daeeff] hover:bg-[#c3dcf9]'}`}>
-              <ArrowUpCircle className="size-[16px] text-[#0068e0]" />
-            </button>
-          )}
+        <div className="flex items-center py-[8px] px-[6px] shrink-0">
+          <button className={clsx(
+            'flex items-center gap-[4px] rounded-full py-[4px] transition-all cursor-pointer overflow-hidden',
+            dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#daeeff] hover:bg-[#c3dcf9]',
+            showExpanded ? 'pl-[6px] pr-[12px] mx-auto' : 'justify-center size-[32px] mx-auto p-0'
+          )}>
+            <ArrowUpCircle className={clsx('text-[#0068e0] shrink-0', showExpanded ? 'size-[18px]' : 'size-[16px]')} />
+            <span className={clsx(
+              'text-[13px] leading-[20px] text-[#0068e0] whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300',
+              showExpanded ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0'
+            )}>Upgrade</span>
+          </button>
         </div>
 
         {/* Footer */}
         <div className={`border-t p-[8px] shrink-0 ${borderColor}`}>
-          <div className={clsx('flex items-center gap-[6px] p-[6px] min-w-0 rounded-[6px]', !showExpanded && 'flex-col')}>
+          <div className="flex items-center gap-[6px] p-[6px] min-w-0 rounded-[6px]">
             <div className="size-[24px] shrink-0 rounded-full overflow-hidden bg-[#ccc]">
               <img src="/icons/avatar.png" alt="" className="size-full object-cover" />
             </div>
-            {showExpanded && (
-              <div style={expandedContentStyle} className="flex items-center gap-[6px] flex-1 min-w-0">
-                <div className="flex-1 flex flex-col min-w-0">
-                  <span className={`text-[14px] leading-[20px] tracking-[-0.18px] truncate ${fg}`}>Mico Yun</span>
-                  <span className={`text-[12px] leading-[16px] tracking-[-0.18px] truncate ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>Lite plan</span>
-                </div>
-                <button type="button" onClick={(e) => { e.stopPropagation(); openSettings(); }} aria-label="Settings"
-                  className={clsx(
-                    'size-[24px] shrink-0 rounded-[6px] flex items-center justify-center transition-colors cursor-pointer',
-                    isSettingsOpen
-                      ? dk ? 'bg-white/[0.1] text-white/80' : 'bg-[#0d0d0d]/[0.06] text-[#0d0d0d]/80'
-                      : dk ? 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/70 hover:bg-[#0d0d0d]/[0.04]'
-                  )}>
-                  <Settings className="size-[16px]" />
-                </button>
+            <div className={clsx(
+              'flex items-center gap-[6px] flex-1 min-w-0 overflow-hidden transition-[opacity,max-width] duration-300',
+              showExpanded ? 'opacity-100 max-w-[200px]' : 'opacity-0 max-w-0'
+            )}>
+              <div className="flex-1 flex flex-col min-w-0">
+                <span className={`text-[14px] leading-[20px] tracking-[-0.18px] truncate whitespace-nowrap ${fg}`}>Mico Yun</span>
+                <span className={`text-[12px] leading-[16px] tracking-[-0.18px] truncate whitespace-nowrap ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>Lite plan</span>
               </div>
-            )}
-            {!showExpanded && (
-              <button type="button" onClick={openSettings} title="Settings"
+              <button type="button" onClick={(e) => { e.stopPropagation(); openSettings(); }} aria-label="Settings"
                 className={clsx(
-                  'size-[24px] shrink-0 rounded-[6px] flex items-center justify-center transition-colors cursor-pointer mt-[4px]',
+                  'size-[24px] shrink-0 rounded-[6px] flex items-center justify-center transition-colors cursor-pointer',
                   isSettingsOpen
                     ? dk ? 'bg-white/[0.1] text-white/80' : 'bg-[#0d0d0d]/[0.06] text-[#0d0d0d]/80'
                     : dk ? 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/70 hover:bg-[#0d0d0d]/[0.04]'
                 )}>
                 <Settings className="size-[16px]" />
               </button>
-            )}
+            </div>
+            {/* Collapsed: settings gear */}
+            <button type="button" onClick={openSettings} title="Settings"
+              className={clsx(
+                'size-[24px] shrink-0 rounded-[6px] flex items-center justify-center transition-all cursor-pointer',
+                showExpanded ? 'opacity-0 w-0 overflow-hidden pointer-events-none' : 'opacity-100 mt-0',
+                isSettingsOpen
+                  ? dk ? 'bg-white/[0.1] text-white/80' : 'bg-[#0d0d0d]/[0.06] text-[#0d0d0d]/80'
+                  : dk ? 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/70 hover:bg-[#0d0d0d]/[0.04]'
+              )}>
+              <Settings className="size-[16px]" />
+            </button>
           </div>
         </div>
       </div>
