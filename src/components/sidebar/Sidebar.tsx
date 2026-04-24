@@ -1,4 +1,4 @@
-import { useRef, useState, type ComponentType } from 'react';
+import { useRef, useState, useEffect, type ComponentType } from 'react';
 import {
   SquarePen, ScanFace, Plus, GraduationCap, Folder,
   PanelLeftClose, PanelLeftOpen, ArrowUpCircle, ChevronDown, Settings,
@@ -40,6 +40,27 @@ export function Sidebar() {
   const [logoHovered, setLogoHovered] = useState(false);
   const dk = theme === 'dark';
 
+  // Delayed unmount: keep expanded content rendered during collapse animation
+  const [showExpandedContent, setShowExpandedContent] = useState(isExpanded);
+  const [contentVisible, setContentVisible] = useState(isExpanded);
+
+  useEffect(() => {
+    if (isExpanded) {
+      // Expanding: mount content immediately, fade in on next frame
+      setShowExpandedContent(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setContentVisible(true));
+      });
+    } else {
+      // Collapsing: fade out first, then unmount after transition
+      setContentVisible(false);
+      const timer = setTimeout(() => setShowExpandedContent(false), 180);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
+  const showExpanded = showExpandedContent;
+
   const fg = dk ? 'text-white' : 'text-[#0d0d0d]';
   const fgMuted = dk ? 'text-white/50' : 'text-[#0d0d0d]/50';
   const hoverBg = dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.04]';
@@ -49,12 +70,15 @@ export function Sidebar() {
   const sidebarBg = dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]';
   const borderColor = dk ? 'border-white/[0.06]' : 'border-[#dbdbdb]';
 
-  // Show expanded UI when not collapsed OR when hover-expanded
-  const showExpanded = isExpanded;
+  const expandedContentStyle = {
+    opacity: contentVisible ? 1 : 0,
+    transition: 'opacity 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+    pointerEvents: (contentVisible ? 'auto' : 'none') as React.CSSProperties['pointerEvents'],
+  };
 
   return (
     <div className={clsx(
-      'relative shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+      'relative shrink-0 transition-[width] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
       isCollapsed ? 'w-[56px]' : 'w-[260px]'
     )}>
       <div
@@ -65,15 +89,15 @@ export function Sidebar() {
           'flex h-full flex-col', sidebarBg, 'border-r', borderColor,
           isCollapsed && isHoverExpanded && `absolute left-0 top-0 z-40 w-[260px] rounded-r-2xl ${dk ? 'shadow-[0_8px_30px_rgba(0,0,0,0.5)]' : 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]'}`,
           !(isCollapsed && isHoverExpanded) && 'w-full',
-          'transition-[width,box-shadow] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]'
+          'transition-[width,box-shadow] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]'
         )}
       >
         {/* Header */}
         <div className={clsx(
-          'flex items-center shrink-0',
+          'flex items-center shrink-0 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
           showExpanded ? 'justify-between pl-[16px] pr-[10px] py-[10px]' : 'flex-col items-center gap-[4px] py-[10px]'
         )}>
-          {/* Logo area — when collapsed, hover shows expand button overlay */}
+          {/* Logo area */}
           <div
             className="relative"
             onMouseEnter={() => isCollapsed && setLogoHovered(true)}
@@ -96,10 +120,11 @@ export function Sidebar() {
               </button>
             )}
           </div>
-          {/* Expanded: show collapse button */}
-          {!isCollapsed && (
+          {/* Collapse button - with fade */}
+          {showExpanded && (
             <button type="button" onClick={toggleCollapse} aria-label="Collapse sidebar"
-              className={`w-9 h-9 flex items-center justify-center rounded-[8px] ${toggleFg} ${hoverBg} ${activeBgPress} transition-all cursor-pointer`}>
+              style={expandedContentStyle}
+              className={`w-9 h-9 flex items-center justify-center rounded-[8px] ${toggleFg} ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
               <PanelLeftClose className="size-[18px]" />
             </button>
           )}
@@ -110,7 +135,7 @@ export function Sidebar() {
           <div className="flex flex-col gap-[16px]">
             {/* Card group */}
             {showExpanded ? (
-              <div className={clsx(
+              <div style={expandedContentStyle} className={clsx(
                 'relative flex flex-col gap-[2px] p-[4px] rounded-[8px]',
                 dk ? 'bg-white/[0.06]' : 'bg-white shadow-[0_0_0_1px_rgba(219,219,219,0.8),0_2px_8px_rgba(0,0,0,0.06)]'
               )}>
@@ -155,14 +180,14 @@ export function Sidebar() {
                     )}>
                     <Icon className={`size-[18px] shrink-0 ${fg}`} />
                     {showExpanded && (
-                      <>
+                      <span style={expandedContentStyle} className="flex items-center gap-[8px] flex-1 min-w-0">
                         <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>{item.label}</span>
                         {item.badge && (
                           <span className={`ml-auto px-[6px] py-[1px] rounded-[4px] text-[10px] font-medium leading-[14px] ${dk ? 'bg-white text-[#111]' : 'bg-[#0d0d0d] text-white'}`}>
                             {item.badge}
                           </span>
                         )}
-                      </>
+                      </span>
                     )}
                   </button>
                 );
@@ -171,7 +196,7 @@ export function Sidebar() {
 
             {/* Recents */}
             {showExpanded && (
-              <div className="flex flex-col">
+              <div className="flex flex-col" style={expandedContentStyle}>
                 <button className="flex items-center gap-[4px] px-[12px] py-[6px] group cursor-pointer">
                   <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fgMuted} transition-colors`}>Zai Web</span>
                   <ChevronDown className={`size-[14px] ${dk ? 'text-white/30' : 'text-[#0d0d0d]/30'} transition-colors`} />
@@ -189,7 +214,7 @@ export function Sidebar() {
         {/* Upgrade */}
         <div className="flex items-center justify-center py-[8px] shrink-0">
           {showExpanded ? (
-            <button className={`flex items-center gap-[4px] rounded-full pl-[6px] pr-[12px] py-[4px] transition-colors cursor-pointer ${dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#daeeff] hover:bg-[#c3dcf9]'}`}>
+            <button style={expandedContentStyle} className={`flex items-center gap-[4px] rounded-full pl-[6px] pr-[12px] py-[4px] transition-colors cursor-pointer ${dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#daeeff] hover:bg-[#c3dcf9]'}`}>
               <ArrowUpCircle className="size-[18px] text-[#0068e0]" />
               <span className="text-[13px] leading-[20px] text-[#0068e0]">Upgrade</span>
             </button>
@@ -207,7 +232,7 @@ export function Sidebar() {
               <img src="/icons/avatar.png" alt="" className="size-full object-cover" />
             </div>
             {showExpanded && (
-              <>
+              <div style={expandedContentStyle} className="flex items-center gap-[6px] flex-1 min-w-0">
                 <div className="flex-1 flex flex-col min-w-0">
                   <span className={`text-[14px] leading-[20px] tracking-[-0.18px] truncate ${fg}`}>Mico Yun</span>
                   <span className={`text-[12px] leading-[16px] tracking-[-0.18px] truncate ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>Lite plan</span>
@@ -221,9 +246,8 @@ export function Sidebar() {
                   )}>
                   <Settings className="size-[16px]" />
                 </button>
-              </>
+              </div>
             )}
-            {/* Collapsed: settings gear below avatar */}
             {!showExpanded && (
               <button type="button" onClick={openSettings} title="Settings"
                 className={clsx(
