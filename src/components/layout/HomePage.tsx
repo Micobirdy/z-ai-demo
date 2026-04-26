@@ -205,14 +205,14 @@ export function HomePage() {
               )}>
                 {/* Textarea area */}
                 <div className={cn(
-                  "self-stretch h-24 p-3 relative rounded-t-[12px] flex flex-col justify-start items-start gap-2",
-                  dk ? "bg-zinc-800" : "bg-white"
+                  "self-stretch h-24 p-3 relative rounded-t-[12px] outline outline-1 flex flex-col justify-start items-start gap-2",
+                  dk ? "bg-zinc-800 outline-white/[0.06]" : "bg-white outline-transparent"
                 )}>
                   {/* Placeholder */}
                   {!inputValue && (
                     <div className={cn(
-                      "self-stretch flex-1 opacity-30 text-base font-normal leading-6 pointer-events-none",
-                      dk ? "text-white" : "text-stone-950"
+                      "self-stretch flex-1 text-base font-normal leading-5 pointer-events-none",
+                      dk ? "text-white/40" : "text-stone-950 opacity-30"
                     )} style={{ fontFamily: "'Geist', sans-serif" }}>
                       Chat with z.ai, or start creating.
                     </div>
@@ -233,29 +233,18 @@ export function HomePage() {
                 {/* Bottom toolbar */}
                 <div className="self-stretch p-3 inline-flex justify-between items-center flex-wrap content-center overflow-hidden">
                   <div className="flex-1 flex justify-between items-center">
-                    {/* Left — upload & thinking icons */}
+                    {/* Left — attach icon */}
                     <div className="flex justify-start items-center gap-2">
-                      <div className="flex justify-start items-center gap-1">
-                        {/* Upload / attach icon */}
-                        <button className="w-7 h-7 relative opacity-70 rounded-[999px] flex items-center justify-center transition-opacity hover:opacity-100" aria-label="Upload">
-                          <div className="w-5 h-5 overflow-hidden flex items-center justify-center">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M10.5 7.5V9.5C10.5 10.0523 10.0523 10.5 9.5 10.5H2.5C1.94772 10.5 1.5 10.0523 1.5 9.5V7.5M6 1.5V7.5M6 1.5L3.5 4M6 1.5L8.5 4" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        </button>
-                        {/* Thinking icon */}
-                        <button className="w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center transition-opacity hover:opacity-100" aria-label="Thinking">
-                          <div className="w-4 h-4 relative overflow-hidden">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="8" cy="8" r="5.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33"/>
-                              <circle cx="5.5" cy="8" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
-                              <circle cx="8" cy="8" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
-                              <circle cx="10.5" cy="8" r="1" fill={dk ? '#fff' : '#0c0a09'}/>
-                            </svg>
-                          </div>
-                        </button>
-                      </div>
+                      <button className={cn(
+                        "w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center gap-2 transition-opacity hover:opacity-100",
+                        dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
+                      )} aria-label="Attach">
+                        <div className="w-5 h-5 relative flex items-center justify-center">
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12.25 8.75V11.08C12.25 11.73 11.73 12.25 11.08 12.25H2.92C2.27 12.25 1.75 11.73 1.75 11.08V8.75M7 1.75V8.75M7 1.75L4.08 4.67M7 1.75L9.92 4.67" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </button>
                     </div>
 
                     {/* Right — send button */}
