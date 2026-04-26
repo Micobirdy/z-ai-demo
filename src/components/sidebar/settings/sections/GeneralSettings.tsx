@@ -1,6 +1,12 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { useSidebar } from '@/hooks/useSidebar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function GeneralSettings() {
   const { theme } = useSidebar();
@@ -11,7 +17,12 @@ export function GeneralSettings() {
 
   const fg = dk ? 'text-white' : 'text-[#0d0d0d]';
   const border = dk ? 'border-white/[0.08]' : 'border-[#e5e5e5]';
-  const selectBg = dk ? 'bg-white/[0.04]' : 'bg-white';
+
+  const triggerClass = `w-[320px] h-9 px-3 rounded-[8px] border text-[14px] leading-[20px] tracking-[-0.18px] cursor-pointer transition-colors ${
+    dk
+      ? 'border-white/[0.08] bg-white/[0.04] text-white hover:bg-white/[0.06]'
+      : 'border-[#e5e5e5] bg-white text-[#0d0d0d] hover:bg-[#0d0d0d]/[0.02]'
+  }`;
 
   return (
     <div className="flex flex-col">
@@ -19,31 +30,46 @@ export function GeneralSettings() {
       <div className={`h-px mt-[16px] mb-[24px] ${border}`} />
 
       <SettingRow label="Appearance" dk={dk}>
-        <SelectBox value={appearance} onChange={setAppearance} dk={dk} selectBg={selectBg} border={border} fg={fg}>
-          <option value="system">System Mode</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </SelectBox>
+        <Select value={appearance} onValueChange={setAppearance}>
+          <SelectTrigger className={triggerClass}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="center">
+            <SelectItem value="system">System Mode</SelectItem>
+            <SelectItem value="light">Light</SelectItem>
+            <SelectItem value="dark">Dark</SelectItem>
+          </SelectContent>
+        </Select>
       </SettingRow>
 
       <SettingRow label="Language" dk={dk}>
-        <SelectBox value={language} onChange={setLanguage} dk={dk} selectBg={selectBg} border={border} fg={fg}>
-          <option value="en-us">English (US)</option>
-          <option value="zh-cn">Chinese (Simplified)</option>
-          <option value="ja">Japanese</option>
-          <option value="ko">Korean</option>
-        </SelectBox>
+        <Select value={language} onValueChange={setLanguage}>
+          <SelectTrigger className={triggerClass}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="center">
+            <SelectItem value="en-us">English (US)</SelectItem>
+            <SelectItem value="zh-cn">Chinese (Simplified)</SelectItem>
+            <SelectItem value="ja">Japanese</SelectItem>
+            <SelectItem value="ko">Korean</SelectItem>
+          </SelectContent>
+        </Select>
       </SettingRow>
 
       <SettingRow label="Time zone" dk={dk}>
-        <SelectBox value={timezone} onChange={setTimezone} dk={dk} selectBg={selectBg} border={border} fg={fg}>
-          <option value="gmt+3">{"(GMT+3:00)  Istanbul"}</option>
-          <option value="gmt-8">{"(UTC-8)  Pacific Time"}</option>
-          <option value="gmt-5">{"(UTC-5)  Eastern Time"}</option>
-          <option value="gmt+0">{"(GMT+0:00)  London"}</option>
-          <option value="gmt+8">{"(GMT+8:00)  Beijing"}</option>
-          <option value="auto">{"Time zone - Autodetect"}</option>
-        </SelectBox>
+        <Select value={timezone} onValueChange={setTimezone}>
+          <SelectTrigger className={triggerClass}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="center">
+            <SelectItem value="gmt+3">{"(GMT+3:00)  Istanbul"}</SelectItem>
+            <SelectItem value="gmt-8">{"(UTC-8)  Pacific Time"}</SelectItem>
+            <SelectItem value="gmt-5">{"(UTC-5)  Eastern Time"}</SelectItem>
+            <SelectItem value="gmt+0">{"(GMT+0:00)  London"}</SelectItem>
+            <SelectItem value="gmt+8">{"(GMT+8:00)  Beijing"}</SelectItem>
+            <SelectItem value="auto">{"Time zone - Autodetect"}</SelectItem>
+          </SelectContent>
+        </Select>
       </SettingRow>
     </div>
   );
@@ -54,23 +80,6 @@ function SettingRow({ label, dk, children }: { label: string; dk: boolean; child
     <div className="flex items-center justify-between py-[16px]">
       <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`}>{label}</span>
       {children}
-    </div>
-  );
-}
-
-function SelectBox({ value, onChange, dk, selectBg, border, fg, children }: {
-  value: string; onChange: (v: string) => void; dk: boolean; selectBg: string; border: string; fg: string; children: React.ReactNode;
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none w-[320px] pl-[14px] pr-[36px] py-[10px] rounded-[8px] border text-[14px] leading-[20px] tracking-[-0.18px] cursor-pointer focus:outline-none transition-colors ${selectBg} ${border} ${fg} ${dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.02]'}`}
-      >
-        {children}
-      </select>
-      <ChevronDown className={`absolute right-[12px] top-1/2 -translate-y-1/2 size-[14px] pointer-events-none ${dk ? 'text-white/30' : 'text-[#0d0d0d]/30'}`} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link2 } from 'lucide-react';
 import { useSidebar } from '@/hooks/useSidebar';
+import { Button } from '@/components/ui/button';
 
 const connections = [
   { name: 'Github', icon: '/icons/github.svg', connected: true },
@@ -76,9 +77,9 @@ export function ConnectorsSettings() {
                   Connected
                 </span>
               ) : (
-                <button className={`px-[14px] py-[6px] rounded-[8px] border text-[13px] leading-[20px] tracking-[-0.18px] transition-colors cursor-pointer ${border} ${fg} ${dk ? 'hover:bg-white/[0.04]' : 'hover:bg-[#0d0d0d]/[0.02]'}`}>
+                <Button variant="outline" className={`text-[13px] ${dk ? 'border-white/[0.08] text-white hover:bg-white/[0.04]' : ''}`}>
                   Connect
-                </button>
+                </Button>
               )}
             </div>
           ))}

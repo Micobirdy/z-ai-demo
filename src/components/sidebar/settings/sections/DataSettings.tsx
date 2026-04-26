@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useSidebar } from '@/hooks/useSidebar';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 
 export function DataSettings() {
   const { theme } = useSidebar();
@@ -23,39 +25,26 @@ export function DataSettings() {
             By sharing your data to train our model, you can help improve your own experience and the quality of all users' models. We take measures to ensure your privacy is protected throughout the process.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setImproveModel(!improveModel)}
-          className={`relative shrink-0 w-[44px] h-[24px] rounded-full transition-colors cursor-pointer ${
-            improveModel
-              ? dk ? 'bg-white' : 'bg-[#0d0d0d]'
-              : dk ? 'bg-white/20' : 'bg-[#d4d4d4]'
-          }`}
-        >
-          <div className={`absolute top-[2px] size-[20px] rounded-full transition-transform ${
-            improveModel ? 'translate-x-[22px]' : 'translate-x-[2px]'
-          } ${
-            improveModel
-              ? dk ? 'bg-[#161616]' : 'bg-white'
-              : dk ? 'bg-[#161616]' : 'bg-white'
-          } shadow-sm`} />
-        </button>
+        <Switch
+          checked={improveModel}
+          onCheckedChange={setImproveModel}
+        />
       </div>
 
       {/* Import data */}
       <div className="flex items-center justify-between py-[16px]">
         <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>Import data</span>
-        <button className={`px-[14px] py-[8px] rounded-[8px] border text-[14px] leading-[20px] tracking-[-0.18px] transition-colors cursor-pointer ${border} ${fg} ${dk ? 'hover:bg-white/[0.04]' : 'hover:bg-[#0d0d0d]/[0.02]'}`}>
+        <Button variant="outline" className={`text-[14px] ${dk ? 'border-white/[0.08] text-white hover:bg-white/[0.04]' : ''}`}>
           Import data
-        </button>
+        </Button>
       </div>
 
       {/* Export data */}
       <div className="flex items-center justify-between py-[16px]">
         <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>Export data</span>
-        <button className={`px-[14px] py-[8px] rounded-[8px] border text-[14px] leading-[20px] tracking-[-0.18px] transition-colors cursor-pointer ${border} ${fg} ${dk ? 'hover:bg-white/[0.04]' : 'hover:bg-[#0d0d0d]/[0.02]'}`}>
+        <Button variant="outline" className={`text-[14px] ${dk ? 'border-white/[0.08] text-white hover:bg-white/[0.04]' : ''}`}>
           Export data
-        </button>
+        </Button>
       </div>
     </div>
   );
