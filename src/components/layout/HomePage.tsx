@@ -76,10 +76,10 @@ export function HomePage() {
         {/* Left — Model selector */}
         <button className={`pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
           dk
-            ? 'shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)] hover:bg-white/[0.06]'
-            : 'shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] hover:bg-[#0d0d0d]/[0.02]'
+            ? 'hover:bg-white/[0.06]'
+            : 'hover:bg-[#0d0d0d]/[0.02]'
         }`}>
-          <span className={`text-[18px] font-normal leading-[28px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
+          <span className={`text-[16px] font-normal leading-[24px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
           <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
             <ChevronDown className={`size-[12px] ${dk ? 'text-white/50' : 'text-[#0d0d0d]'}`} />
           </div>
@@ -92,8 +92,8 @@ export function HomePage() {
             onClick={toggleTheme}
             className={`pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
               dk
-                ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)] hover:bg-white/[0.06]'
-                : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)] hover:bg-[#0d0d0d]/[0.02]'
+                ? 'hover:bg-white/[0.06]'
+                : 'hover:bg-[#0d0d0d]/[0.02]'
             }`}
             title={dk ? 'Switch to light mode' : 'Switch to dark mode'}
           >
@@ -108,14 +108,10 @@ export function HomePage() {
           {/* Background Tasks */}
           <div className={`pl-[6px] pr-[8px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden ${
             dk
-              ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)]'
-              : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)]'
+              ? 'hover:bg-white/[0.06]'
+              : 'hover:bg-[#0d0d0d]/[0.02]'
           }`}>
-            <div className={`p-[4px] rounded-full flex items-center justify-center ${
-              dk
-                ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)]'
-                : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)]'
-            }`}>
+            <div className={`p-[4px] rounded-full flex items-center justify-center`}>
               <div className="w-[8px] h-[8px] relative">
                 <div className="w-[6px] h-[6px] absolute left-[1px] top-[1px] bg-green-500 rounded-full outline outline-[3px] outline-green-500/20" />
               </div>
@@ -131,8 +127,8 @@ export function HomePage() {
           {/* Usage indicator */}
           <div className={`pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden ${
             dk
-              ? 'shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] shadow-[0px_0px_0px_1px_rgba(255,255,255,0.12)]'
-              : 'shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shadow-[0px_0px_0px_1px_rgba(0,0,0,0.11)]'
+              ? 'hover:bg-white/[0.06]'
+              : 'hover:bg-[#0d0d0d]/[0.02]'
           }`}>
             <div className="w-[20px] h-[20px] relative opacity-80 flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">

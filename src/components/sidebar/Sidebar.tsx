@@ -110,8 +110,8 @@ export function Sidebar() {
                     'flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] w-full text-left cursor-pointer overflow-hidden transition-all opacity-80 hover:opacity-100',
                     activeNav === item.id ? `opacity-100 ${activeBg}` : `${hoverBg} ${activeBgPress}`
                   )}>
-                  <div className="size-[18px] shrink-0 flex items-center justify-center">
-                    <img src={item.icon} alt="" className="max-w-[18px] max-h-[18px]" style={{ filter: iconFilter }} />
+                  <div className="w-[20px] h-[20px] shrink-0 flex items-center justify-center">
+                    <img src={item.icon} alt="" className="w-[16px] h-[16px]" style={{ filter: iconFilter }} />
                   </div>
                   <span className={clsx(
                     'text-[14px] leading-[20px] tracking-[-0.18px] whitespace-nowrap transition-opacity duration-200',
@@ -132,8 +132,8 @@ export function Sidebar() {
                     'flex items-center gap-[8px] px-[12px] py-[7px] rounded-[6px] w-full text-left cursor-pointer overflow-hidden transition-all opacity-80 hover:opacity-100',
                     activeNav === item.id ? `opacity-100 ${activeBg}` : `${hoverBg} ${activeBgPress}`
                   )}>
-                  <div className="size-[18px] shrink-0 flex items-center justify-center">
-                    <img src={item.icon} alt="" className="max-w-[18px] max-h-[18px]" style={{ filter: iconFilter }} />
+                  <div className="w-[20px] h-[20px] shrink-0 flex items-center justify-center">
+                    <img src={item.icon} alt="" className="w-[16px] h-[16px]" style={{ filter: iconFilter }} />
                   </div>
                   <span className={clsx(
                     'text-[14px] leading-[20px] tracking-[-0.18px] whitespace-nowrap transition-opacity duration-200 flex items-center gap-[8px] flex-1 min-w-0',
