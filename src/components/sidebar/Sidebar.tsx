@@ -107,10 +107,12 @@ export function Sidebar() {
               {cardItems.map((item) => (
                 <button key={item.id} type="button" onClick={() => { setActiveNav(item.id); closeSettings(); }}
                   className={clsx(
-                    'flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] w-full text-left transition-colors cursor-pointer overflow-hidden',
-                    activeNav === item.id ? activeBg : `${hoverBg} ${activeBgPress}`
+                    'flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] w-full text-left cursor-pointer overflow-hidden transition-all opacity-80 hover:opacity-100',
+                    activeNav === item.id ? `opacity-100 ${activeBg}` : `${hoverBg} ${activeBgPress}`
                   )}>
-                  <img src={item.icon} alt="" className="size-[18px] shrink-0" style={{ filter: iconFilter }} />
+                  <div className="size-[18px] shrink-0 flex items-center justify-center">
+                    <img src={item.icon} alt="" className="max-w-[18px] max-h-[18px]" style={{ filter: iconFilter }} />
+                  </div>
                   <span className={clsx(
                     'text-[14px] leading-[20px] tracking-[-0.18px] whitespace-nowrap transition-opacity duration-200',
                     fg,
@@ -127,11 +129,12 @@ export function Sidebar() {
                   title={!showExpanded ? item.label : undefined}
                   onClick={() => { setActiveNav(item.id); closeSettings(); }}
                   className={clsx(
-                    'flex items-center gap-[8px] px-[12px] py-[7px] rounded-[6px] w-full text-left transition-colors cursor-pointer overflow-hidden',
-                    hoverBg, activeBgPress,
-                    activeNav === item.id && activeBg
+                    'flex items-center gap-[8px] px-[12px] py-[7px] rounded-[6px] w-full text-left cursor-pointer overflow-hidden transition-all opacity-80 hover:opacity-100',
+                    activeNav === item.id ? `opacity-100 ${activeBg}` : `${hoverBg} ${activeBgPress}`
                   )}>
-                  <img src={item.icon} alt="" className="w-[18px] h-[18px] shrink-0 object-contain" style={{ filter: iconFilter }} />
+                  <div className="size-[18px] shrink-0 flex items-center justify-center">
+                    <img src={item.icon} alt="" className="max-w-[18px] max-h-[18px]" style={{ filter: iconFilter }} />
+                  </div>
                   <span className={clsx(
                     'text-[14px] leading-[20px] tracking-[-0.18px] whitespace-nowrap transition-opacity duration-200 flex items-center gap-[8px] flex-1 min-w-0',
                     showExpanded ? 'opacity-100' : 'opacity-0'
