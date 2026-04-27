@@ -292,9 +292,9 @@ export function HomePage() {
               label="IM"
             />
 
-            {/* Separator */}
-            <div className="px-2 flex justify-start items-center gap-2.5">
-              <div className={cn("w-0 h-4 opacity-20 outline outline-1 outline-offset-[-0.5px]", dk ? "outline-white" : "outline-stone-950")} />
+            {/* Separator — no stagger animation */}
+            <div className="px-2 flex justify-start items-center">
+              <div className={cn("w-px h-4 opacity-20", dk ? "bg-white" : "bg-stone-950")} />
             </div>
 
             {/* AI PPT */}
