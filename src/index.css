@@ -140,6 +140,11 @@
   --icon-primary: var(--neutral-0);
   --icon-secondary: #555555;
   --icon-tertiary: var(--neutral-500);
+  --icon-blue: var(--blue-400);
+  --icon-red: var(--red-400);
+  --icon-orange: var(--orange-400);
+  --icon-green: var(--green-400);
+  --text-on-dark: var(--neutral-50);
 
   /* ── Accent blue (light) ── */
   --accent-blue: var(--blue-400);
@@ -227,6 +232,12 @@ body {
   --color-icon-primary: var(--icon-primary);
   --color-icon-secondary: var(--icon-secondary);
   --color-icon-tertiary: var(--icon-tertiary);
+  --color-icon-blue: var(--icon-blue);
+  --color-icon-red: var(--icon-red);
+  --color-icon-orange: var(--icon-orange);
+  --color-icon-green: var(--icon-green);
+  --color-text-on-dark: var(--text-on-dark, var(--neutral-50));
+  --color-text-on-light: var(--text-on-light, var(--neutral-900));
 
   /* ── Accent colors ── */
   --color-accent-blue: var(--accent-blue);
@@ -308,6 +319,11 @@ body {
   --icon-primary: #F0F0F0;
   --icon-secondary: var(--neutral-400);
   --icon-tertiary: var(--neutral-600);
+  --icon-blue: var(--blue-300);
+  --icon-red: var(--red-300);
+  --icon-orange: var(--orange-300);
+  --icon-green: var(--green-300);
+  --text-on-light: var(--neutral-900);
 
   /* ── Accent blue (dark) ── */
   --accent-blue: var(--blue-300);
