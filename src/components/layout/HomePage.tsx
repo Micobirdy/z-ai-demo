@@ -50,15 +50,15 @@ export function HomePage() {
       opacity: 1,
       transition: reduceMotion
         ? { duration: 0.01 }
-        : { staggerChildren: 0.07, delayChildren: 0.52 },
+        : { staggerChildren: 0.04, delayChildren: 0.35 },
     },
   }
   const featureItem = {
-    hidden: { opacity: 0, y: 14 },
+    hidden: { opacity: 0, y: 6 },
     show: {
       opacity: 1,
       y: 0,
-      transition: reduceMotion ? { duration: 0.01 } : { duration: 0.4, ease: easeOut },
+      transition: reduceMotion ? { duration: 0.01 } : { duration: 0.25, ease: easeOut },
     },
   }
 
