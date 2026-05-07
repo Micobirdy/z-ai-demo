@@ -191,7 +191,7 @@ export function HomePage() {
                 colorVariant="sunset"
                 theme={dk ? 'dark' : 'light'}
                 borderRadius={12}
-                strength={dk ? 0.7 : 0.5}
+                strength={dk ? 0.7 : 0.85}
                 duration={1.96}
                 active={hasInput}
               >
