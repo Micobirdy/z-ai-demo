@@ -274,50 +274,65 @@ export function HomePage() {
                 </div>
 
                 {/* Bottom toolbar */}
-                <div className="self-stretch p-3 inline-flex justify-between items-center flex-wrap content-center overflow-hidden">
+                <div className="self-stretch px-3 py-2.5 inline-flex justify-between items-center overflow-hidden">
                   <div className="flex-1 flex justify-between items-center">
-                    {/* Left — attach & mic icons */}
-                    <div className="flex justify-start items-center gap-2">
+                    {/* Left — attach */}
+                    <div className="flex justify-start items-center gap-1.5">
                       <button className={cn(
-                        "w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center gap-2 transition-opacity hover:opacity-100",
+                        "w-[28px] h-[28px] rounded-[999px] flex justify-center items-center transition-opacity opacity-70 hover:opacity-100",
                         dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
                       )} aria-label="Attach">
-                        <div className="w-5 h-5 relative flex items-center justify-center">
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.25 8.75V11.08C12.25 11.73 11.73 12.25 11.08 12.25H2.92C2.27 12.25 1.75 11.73 1.75 11.08V8.75M7 1.75V8.75M7 1.75L4.08 4.67M7 1.75L9.92 4.67" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M14 10V12.66C14 13.4 13.4 14 12.66 14H3.34C2.6 14 2 13.4 2 12.66V10M8 2V10M8 2L4.67 5.33M8 2L11.33 5.33" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                       </button>
+
+                      {/* Listening indicator */}
+                      {isListening && (
+                        <div className="flex items-center gap-1.5 pl-1">
+                          <span className="flex items-center gap-[3px]">
+                            <span className="w-[4px] h-[4px] rounded-full bg-red-500 animate-pulse" style={{ animationDelay: '0ms' }} />
+                            <span className="w-[4px] h-[4px] rounded-full bg-red-500 animate-pulse" style={{ animationDelay: '150ms' }} />
+                            <span className="w-[4px] h-[4px] rounded-full bg-red-500 animate-pulse" style={{ animationDelay: '300ms' }} />
+                          </span>
+                          <span className={cn(
+                            "text-[12px] leading-4 font-medium",
+                            dk ? "text-red-400" : "text-red-500"
+                          )} style={{ fontFamily: "'Geist', sans-serif" }}>
+                            Listening...
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right — mic + send */}
+                    <div className="flex justify-start items-center gap-2">
                       {/* Mic button */}
                       <button
                         onClick={toggleListening}
                         disabled={!SpeechRecognition}
                         className={cn(
-                          "w-7 h-7 p-1 rounded-[999px] flex justify-center items-center transition-all relative",
+                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center transition-all relative",
                           !SpeechRecognition && "opacity-30 cursor-not-allowed",
                           isListening
-                            ? "opacity-100"
-                            : "opacity-70 hover:opacity-100",
-                          dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
+                            ? dk
+                              ? "bg-red-500/20 opacity-100"
+                              : "bg-red-50 opacity-100"
+                            : "opacity-60 hover:opacity-100"
                         )}
                         aria-label={isListening ? "Stop voice input" : "Start voice input"}
                       >
-                        {isListening && (
-                          <span className="absolute inset-0 rounded-[999px] bg-red-500/20 animate-pulse" />
-                        )}
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10">
-                          <rect x="5" y="1" width="4" height="7" rx="2" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33"/>
-                          <path d="M3 6.5C3 8.71 4.79 10.5 7 10.5C9.21 10.5 11 8.71 11 6.5" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
-                          <path d="M7 10.5V13M5 13H9" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="5.5" y="1.5" width="5" height="7.5" rx="2.5" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33"/>
+                          <path d="M3.5 7.5C3.5 9.98 5.52 12 8 12C10.48 12 12.5 9.98 12.5 7.5" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
+                          <path d="M8 12V14.5M6 14.5H10" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
                         </svg>
                       </button>
-                    </div>
 
-                    {/* Right — send button */}
-                    <div className="flex justify-start items-center gap-3">
+                      {/* Send button */}
                       <button
                         className={cn(
-                          "p-1.5 rounded-[8px] flex justify-center items-center gap-1 overflow-hidden",
+                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden",
                           dk
                             ? "opacity-25 bg-white shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] outline outline-1 outline-offset-[-1px] outline-stone-950/10"
                             : "bg-neutral-200"
