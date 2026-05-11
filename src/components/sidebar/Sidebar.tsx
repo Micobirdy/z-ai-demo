@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useSidebar } from '@/hooks/useSidebar';
+import { useAuth } from '@/hooks/useAuth';
 import type { NavItemId } from '@/types/sidebar';
 
 interface NavConfig {
@@ -35,6 +36,7 @@ export function Sidebar() {
     isExpanded, activeNav, setActiveNav, theme,
     openSettings, closeSettings, isSettingsOpen,
   } = useSidebar();
+  const { user } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [logoHovered, setLogoHovered] = useState(false);
   const dk = theme === 'dark';
@@ -194,8 +196,8 @@ export function Sidebar() {
               showExpanded ? 'opacity-100' : 'opacity-0'
             )}>
               <div className="flex-1 flex flex-col min-w-0">
-                <span className={`text-[14px] leading-[20px] tracking-[-0.18px] truncate whitespace-nowrap ${fg}`}>Mico Yun</span>
-                <span className={`text-[12px] leading-[16px] tracking-[-0.18px] truncate whitespace-nowrap ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>Lite plan</span>
+                <span className={`text-[14px] leading-[20px] tracking-[-0.18px] truncate whitespace-nowrap ${fg}`}>{user?.name || 'User'}</span>
+                <span className={`text-[12px] leading-[16px] tracking-[-0.18px] truncate whitespace-nowrap ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>{user?.plan ? `${user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} plan` : ''}</span>
               </div>
               <button type="button" onClick={(e) => { e.stopPropagation(); openSettings(); }} aria-label="Settings"
                 className={clsx(
