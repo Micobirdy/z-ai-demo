@@ -316,16 +316,16 @@ export function HomePage() {
                           !SpeechRecognition && "opacity-30 cursor-not-allowed",
                           isListening
                             ? dk
-                              ? "bg-red-500/20 opacity-100"
-                              : "bg-red-50 opacity-100"
+                              ? "bg-white/[0.08] opacity-100"
+                              : "bg-stone-950/[0.05] opacity-100"
                             : "opacity-60 hover:opacity-100"
                         )}
                         aria-label={isListening ? "Stop voice input" : "Start voice input"}
                       >
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="5.5" y="1.5" width="5" height="7.5" rx="2.5" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33"/>
-                          <path d="M3.5 7.5C3.5 9.98 5.52 12 8 12C10.48 12 12.5 9.98 12.5 7.5" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
-                          <path d="M8 12V14.5M6 14.5H10" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
+                          <rect x="5.5" y="1.5" width="5" height="7.5" rx="2.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33"/>
+                          <path d="M3.5 7.5C3.5 9.98 5.52 12 8 12C10.48 12 12.5 9.98 12.5 7.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
+                          <path d="M8 12V14.5M6 14.5H10" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
                         </svg>
                       </button>
 
