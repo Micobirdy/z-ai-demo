@@ -166,8 +166,8 @@ function CronGroup({ platform, platformIcon, tasks: initialTasks, dk }: {
   if (tasks.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-[4px]">
-      <div className="flex items-center gap-[8px] px-[4px] py-[4px]">
+    <div className="flex flex-col">
+      <div className="flex items-center gap-[8px] py-[6px]">
         {PLATFORM_ICONS[platformIcon] || <div className="size-[20px] rounded-full bg-text-tertiary" />}
         <span className="text-[14px] leading-[20px] tracking-[-0.18px] font-medium text-text-primary">{platform}</span>
       </div>
@@ -180,7 +180,7 @@ function CronGroup({ platform, platformIcon, tasks: initialTasks, dk }: {
             key={task.id}
             onMouseEnter={() => setHoveredId(task.id)}
             onMouseLeave={() => setHoveredId(null)}
-            className={`flex items-center gap-[8px] px-[12px] py-[10px] rounded-[10px] transition-colors relative group ${
+            className={`flex items-center gap-[8px] py-[10px] px-[8px] -mx-[8px] rounded-[10px] transition-colors ${
               isRunning && !isPaused
                 ? dk ? 'bg-accent-blue-subtle/40' : 'bg-bg-surface'
                 : isHovered
@@ -197,28 +197,27 @@ function CronGroup({ platform, platformIcon, tasks: initialTasks, dk }: {
             </div>
             <span className={`flex-1 text-[14px] leading-[20px] tracking-[-0.18px] ${isPaused ? 'line-through' : ''} text-text-secondary`}>{task.text}</span>
 
-            {/* Hover actions */}
-            {isHovered && (
-              <div className="flex items-center gap-[2px] shrink-0">
-                <button className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title="Details">
-                  <ClipboardList className="size-[14px]" />
-                </button>
-                <button onClick={() => togglePause(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title={isPaused ? 'Resume' : 'Pause'}>
-                  {isPaused ? <PlayCircle className="size-[14px]" /> : <PauseCircle className="size-[14px]" />}
-                </button>
-                <button onClick={() => deleteTask(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-accent-red hover:bg-accent-red-subtle" title="Delete">
-                  <Trash2 className="size-[14px]" />
-                </button>
-              </div>
-            )}
-
-            {/* Interval — hidden when actions visible */}
-            {!isHovered && (
-              <div className="flex items-center gap-[4px] shrink-0">
-                <RefreshCw className="size-[14px] text-accent-green" />
-                <span className="text-[12px] leading-[20px] text-accent-green tracking-[-0.18px] whitespace-nowrap">{task.interval}</span>
-              </div>
-            )}
+            {/* Right side — fixed width, swap content on hover */}
+            <div className="w-[140px] flex items-center justify-end shrink-0">
+              {isHovered ? (
+                <div className="flex items-center gap-[2px]">
+                  <button className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title="Details">
+                    <ClipboardList className="size-[14px]" />
+                  </button>
+                  <button onClick={() => togglePause(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title={isPaused ? 'Resume' : 'Pause'}>
+                    {isPaused ? <PlayCircle className="size-[14px]" /> : <PauseCircle className="size-[14px]" />}
+                  </button>
+                  <button onClick={() => deleteTask(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-accent-red hover:bg-accent-red-subtle" title="Delete">
+                    <Trash2 className="size-[14px]" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-[4px]">
+                  <RefreshCw className="size-[14px] text-accent-green" />
+                  <span className="text-[12px] leading-[20px] text-accent-green tracking-[-0.18px] whitespace-nowrap">{task.interval}</span>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}
