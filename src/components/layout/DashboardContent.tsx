@@ -1,4 +1,5 @@
-import { Info, RefreshCw, Lock, ExternalLink, Star } from 'lucide-react';
+import { useState } from 'react';
+import { Info, RefreshCw, Lock, ExternalLink, Star, ClipboardList, PauseCircle, PlayCircle, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useSidebar } from '@/hooks/useSidebar';
 
@@ -62,15 +63,15 @@ export function DashboardContent() {
         <div className="flex flex-col">
           <h2 className="text-[14px] font-medium leading-[20px] tracking-[-0.18px] py-[8px] text-text-primary">Cron jobs</h2>
           <div className="flex flex-col gap-[16px] mt-[4px]">
-            <CronGroup platform="Lark" dotColor="#3b82f6" dk={dk} tasks={[
-              { text: 'Summarize the report and share it with everyone in the group within ten minutes.', interval: 'Every 2 hours' },
-              { text: 'Send me stock market open reminders every morning.', interval: 'Weds at 7AM' },
+            <CronGroup platform="Lark" platformIcon="lark" dk={dk} tasks={[
+              { id: '1', text: 'Summarize the report and share it with everyone in the group within ten minutes.', interval: 'Every 2 hours', status: 'running' },
+              { id: '2', text: 'Send me stock market open reminders every morning.', interval: 'Weds at 7AM', status: 'idle' },
             ]} />
-            <CronGroup platform="WeChat" dotColor="#22c55e" dk={dk} tasks={[
-              { text: 'Complete the research document for the prospective AI product before 3 PM.', interval: 'Starts in 30min' },
+            <CronGroup platform="WeChat" platformIcon="wechat" dk={dk} tasks={[
+              { id: '3', text: 'Complete the research document for the prospective AI product before 3 PM.', interval: 'Starts in 30min', status: 'idle' },
             ]} />
-            <CronGroup platform="Discord" dotColor="#a78bfa" dk={dk} tasks={[
-              { text: 'Design a banner on the canvas and develop it to the cursor.', interval: 'Daily 8PM' },
+            <CronGroup platform="Discord" platformIcon="discord" dk={dk} tasks={[
+              { id: '4', text: 'Design a banner on the canvas and develop it to the cursor.', interval: 'Daily 8PM', status: 'idle' },
             ]} />
           </div>
         </div>
@@ -78,10 +79,9 @@ export function DashboardContent() {
         {/* Sandbox */}
         <div className="flex flex-col">
           <h2 className="text-[14px] font-medium leading-[20px] tracking-[-0.18px] py-[8px] text-text-primary">Sandbox</h2>
-          <div className="grid grid-cols-3 gap-[16px] mt-[4px]">
-            <SandboxCard status="Live" expiry="Expires in 5D" title="Super Z AI Assistant Manual" tag="Release" dk={dk} />
-            <SandboxCard status="Live" expiry="Expires in 2h" title="StarCraft Game Dev Update" tag="Release" dk={dk} />
-            <SandboxCard status="" expiry="" title="—" tag="Unavailable on Trial" locked dk={dk} />
+          <div className="grid grid-cols-2 gap-[16px] mt-[4px]">
+            <SandboxCard status="Live" expiryLabel="Expires in" expiryValue="5D" title="Super Z AI Assistant Manual" tag="Release" dk={dk} />
+            <SandboxCard status="Live" expiryLabel="Expires in" expiryValue="2h" title="StarCraft Game Dev Update" tag="Release" dk={dk} />
           </div>
         </div>
       </div>
@@ -128,57 +128,120 @@ function QuotaRow({ label, value, progress, hasInfo, dk }: {
   );
 }
 
-function CronGroup({ platform, dotColor, tasks, dk }: {
-  platform: string; dotColor: string; tasks: { text: string; interval: string }[]; dk: boolean;
+const PLATFORM_ICONS: Record<string, JSX.Element> = {
+  lark: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect width="20" height="20" rx="4" fill="#3370FF"/><path d="M5.5 8.5L10 5l4.5 3.5L10 12 5.5 8.5z" fill="#fff"/><path d="M10 12v3l4.5-3.5" fill="#fff" fillOpacity="0.7"/></svg>
+  ),
+  wechat: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect width="20" height="20" rx="4" fill="#07C160"/><circle cx="8" cy="9" r="3.5" fill="#fff"/><circle cx="12.5" cy="11" r="2.8" fill="#fff" fillOpacity="0.85"/></svg>
+  ),
+  discord: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect width="20" height="20" rx="4" fill="#7C5CFC"/><path d="M7.5 8.5a1 1 0 110 2 1 1 0 010-2zm5 0a1 1 0 110 2 1 1 0 010-2z" fill="#fff"/><path d="M6 7c1.5-1 3-1.2 4-1.2s2.5.2 4 1.2M6 13c1.5 1 3 1.2 4 1.2s2.5-.2 4-1.2" stroke="#fff" strokeWidth="1.2" strokeLinecap="round"/></svg>
+  ),
+};
+
+interface CronTask {
+  id: string;
+  text: string;
+  interval: string;
+  status: 'running' | 'paused' | 'idle';
+}
+
+function CronGroup({ platform, platformIcon, tasks: initialTasks, dk }: {
+  platform: string; platformIcon: string; tasks: CronTask[]; dk: boolean;
 }) {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const togglePause = (id: string) => {
+    setTasks(prev => prev.map(t =>
+      t.id === id ? { ...t, status: t.status === 'paused' ? 'running' : 'paused' as CronTask['status'] } : t
+    ));
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+  };
+
+  if (tasks.length === 0) return null;
+
   return (
-    <div className="flex flex-col gap-[8px]">
-      <div className="flex items-center gap-[6px] px-[4px]">
-        <div className="size-[20px] flex items-center justify-center">
-          <div className="size-[10px] rounded-full" style={{ backgroundColor: dotColor }} />
-        </div>
+    <div className="flex flex-col gap-[4px]">
+      <div className="flex items-center gap-[8px] px-[4px] py-[4px]">
+        {PLATFORM_ICONS[platformIcon] || <div className="size-[20px] rounded-full bg-text-tertiary" />}
         <span className="text-[14px] leading-[20px] tracking-[-0.18px] font-medium text-text-primary">{platform}</span>
       </div>
-      {tasks.map((task, i) => (
-        <div key={i} className="flex items-start gap-[6px] px-[4px]">
-          <div className="size-[20px] flex items-center justify-center shrink-0 mt-px">
-            <div className="size-[12px] rounded-full border-[1.5px] border-border-default" />
+      {tasks.map((task) => {
+        const isHovered = hoveredId === task.id;
+        const isRunning = task.status === 'running';
+        const isPaused = task.status === 'paused';
+        return (
+          <div
+            key={task.id}
+            onMouseEnter={() => setHoveredId(task.id)}
+            onMouseLeave={() => setHoveredId(null)}
+            className={`flex items-center gap-[8px] px-[12px] py-[10px] rounded-[10px] transition-colors relative group ${
+              isRunning && !isPaused
+                ? dk ? 'bg-accent-blue-subtle/40' : 'bg-bg-surface'
+                : isHovered
+                  ? dk ? 'bg-bg-subtle/50' : 'bg-bg-surface'
+                  : ''
+            } ${isPaused ? 'opacity-50' : ''}`}
+          >
+            <div className="size-[16px] flex items-center justify-center shrink-0">
+              {isRunning && !isPaused ? (
+                <div className="size-[8px] rounded-full bg-accent-green animate-pulse" />
+              ) : (
+                <div className="size-[12px] rounded-full border-[1.5px] border-border-default" />
+              )}
+            </div>
+            <span className={`flex-1 text-[14px] leading-[20px] tracking-[-0.18px] ${isPaused ? 'line-through' : ''} text-text-secondary`}>{task.text}</span>
+
+            {/* Hover actions */}
+            {isHovered && (
+              <div className="flex items-center gap-[2px] shrink-0">
+                <button className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title="Details">
+                  <ClipboardList className="size-[14px]" />
+                </button>
+                <button onClick={() => togglePause(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title={isPaused ? 'Resume' : 'Pause'}>
+                  {isPaused ? <PlayCircle className="size-[14px]" /> : <PauseCircle className="size-[14px]" />}
+                </button>
+                <button onClick={() => deleteTask(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-accent-red hover:bg-accent-red-subtle" title="Delete">
+                  <Trash2 className="size-[14px]" />
+                </button>
+              </div>
+            )}
+
+            {/* Interval — hidden when actions visible */}
+            {!isHovered && (
+              <div className="flex items-center gap-[4px] shrink-0">
+                <RefreshCw className="size-[14px] text-accent-green" />
+                <span className="text-[12px] leading-[20px] text-accent-green tracking-[-0.18px] whitespace-nowrap">{task.interval}</span>
+              </div>
+            )}
           </div>
-          <span className="flex-1 text-[14px] leading-[20px] tracking-[-0.18px] text-text-secondary">{task.text}</span>
-          <div className="flex items-center gap-[4px] shrink-0 ml-[8px]">
-            <RefreshCw className="size-[14px] text-accent-green" />
-            <span className="text-[12px] leading-[20px] text-accent-green tracking-[-0.18px] whitespace-nowrap">{task.interval}</span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
-function SandboxCard({ status, expiry, title, tag, locked, dk }: {
-  status: string; expiry: string; title: string; tag: string; locked?: boolean; dk: boolean;
+function SandboxCard({ status, expiryLabel, expiryValue, title, tag, dk }: {
+  status: string; expiryLabel: string; expiryValue: string; title: string; tag: string; dk: boolean;
 }) {
   return (
     <div className={`rounded-[12px] border border-border-default overflow-hidden relative h-[120px] flex flex-col justify-between p-[16px] hover:shadow-sm transition-shadow cursor-pointer ${
       dk ? 'bg-bg-overlay' : 'bg-bg-bg'
     }`}>
-      <div className={`absolute bottom-0 left-0 right-0 h-[60px] pointer-events-none ${dk ? 'bg-gradient-to-t from-[#161616]/40 to-transparent' : 'bg-gradient-to-t from-[#f8f8f8]/40 to-transparent'}`} />
       <div className="flex items-center justify-between relative z-10">
-        {status ? (
-          <span className="px-[4px] py-[2px] rounded-[4px] text-[12px] leading-[16px] font-medium bg-accent-green-subtle text-accent-green-text">{status}</span>
-        ) : <span />}
-        {expiry && <span className="text-[12px] leading-[20px] tracking-[-0.18px] text-text-tertiary">{expiry}</span>}
+        <span className="px-[6px] py-[2px] rounded-[4px] text-[12px] leading-[16px] font-medium bg-accent-green-subtle text-accent-green-text">{status}</span>
+        <span className="text-[12px] leading-[20px] tracking-[-0.18px] text-text-tertiary">
+          {expiryLabel} <span className="text-accent-green font-medium">{expiryValue}</span>
+        </span>
       </div>
       <span className="text-[14px] leading-[20px] tracking-[-0.18px] relative z-10 text-text-primary">{title}</span>
       <div className="relative z-10">
-        {locked ? (
-          <span className={`inline-flex items-center gap-[4px] px-[8px] py-[4px] rounded-[6px] text-[11px] leading-[16px] ${dk ? 'bg-bg-subtle text-text-tertiary' : 'bg-bg-surface text-text-tertiary'}`}>
-            <Lock className="size-[12px]" />
-            {tag}
-          </span>
-        ) : (
-          <span className={`inline-block px-[8px] py-[4px] rounded-[6px] text-[11px] leading-[16px] ${dk ? 'bg-bg-subtle text-text-tertiary' : 'bg-bg-surface text-text-tertiary'}`}>{tag}</span>
-        )}
+        <span className={`inline-block px-[8px] py-[4px] rounded-[6px] text-[11px] leading-[16px] ${dk ? 'bg-bg-subtle text-text-tertiary' : 'bg-bg-surface text-text-tertiary'}`}>{tag}</span>
       </div>
     </div>
   );
