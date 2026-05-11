@@ -286,27 +286,27 @@ export function HomePage() {
                           <path d="M14 10V12.66C14 13.4 13.4 14 12.66 14H3.34C2.6 14 2 13.4 2 12.66V10M8 2V10M8 2L4.67 5.33M8 2L11.33 5.33" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
+                    </div>
 
+                    {/* Right — mic + send */}
+                    <div className="flex justify-start items-center gap-2">
                       {/* Listening indicator */}
                       {isListening && (
-                        <div className="flex items-center gap-1.5 pl-1">
+                        <div className="flex items-center gap-1.5 pr-0.5">
                           <span className="flex items-center gap-[3px]">
-                            <span className="w-[4px] h-[4px] rounded-full bg-red-500 animate-pulse" style={{ animationDelay: '0ms' }} />
-                            <span className="w-[4px] h-[4px] rounded-full bg-red-500 animate-pulse" style={{ animationDelay: '150ms' }} />
-                            <span className="w-[4px] h-[4px] rounded-full bg-red-500 animate-pulse" style={{ animationDelay: '300ms' }} />
+                            <span className={cn("w-[4px] h-[4px] rounded-full animate-pulse", dk ? "bg-white/60" : "bg-stone-950/50")} style={{ animationDelay: '0ms' }} />
+                            <span className={cn("w-[4px] h-[4px] rounded-full animate-pulse", dk ? "bg-white/60" : "bg-stone-950/50")} style={{ animationDelay: '150ms' }} />
+                            <span className={cn("w-[4px] h-[4px] rounded-full animate-pulse", dk ? "bg-white/60" : "bg-stone-950/50")} style={{ animationDelay: '300ms' }} />
                           </span>
                           <span className={cn(
                             "text-[12px] leading-4 font-medium",
-                            dk ? "text-red-400" : "text-red-500"
+                            dk ? "text-white/60" : "text-stone-950/50"
                           )} style={{ fontFamily: "'Geist', sans-serif" }}>
                             Listening...
                           </span>
                         </div>
                       )}
-                    </div>
 
-                    {/* Right — mic + send */}
-                    <div className="flex justify-start items-center gap-2">
                       {/* Mic button */}
                       <button
                         onClick={toggleListening}
