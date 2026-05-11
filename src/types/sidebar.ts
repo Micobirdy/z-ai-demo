@@ -26,6 +26,11 @@ export interface SidebarContextValue {
   activeNav: NavItemId;
   setActiveNav: (id: NavItemId) => void;
 
+  // Chat
+  chatInitialMessage: string | null;
+  startChat: (message: string) => void;
+  clearChat: () => void;
+
   // Settings panel
   isSettingsOpen: boolean;
   openSettings: () => void;

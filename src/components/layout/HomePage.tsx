@@ -15,7 +15,7 @@ const SpeechRecognition = typeof window !== 'undefined'
   : null
 
 export function HomePage() {
-  const { theme, toggleTheme } = useSidebar()
+  const { theme, toggleTheme, startChat } = useSidebar()
   const dk = theme === 'dark'
   const reduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState('')
@@ -264,6 +264,7 @@ export function HomePage() {
                     ref={textareaRef}
                     value={inputValue}
                     onChange={handleInputChange}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim()) startChat(inputValue.trim()); } }}
                     maxLength={maxChars}
                     className={cn(
                       "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
@@ -331,15 +332,20 @@ export function HomePage() {
 
                       {/* Send button */}
                       <button
+                        onClick={() => { if (inputValue.trim()) startChat(inputValue.trim()); }}
                         className={cn(
-                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden",
-                          dk
-                            ? "opacity-25 bg-white shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] outline outline-1 outline-offset-[-1px] outline-stone-950/10"
-                            : "bg-neutral-200"
+                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all",
+                          inputValue.trim()
+                            ? dk
+                              ? "bg-white text-black"
+                              : "bg-[#0d0d0d] text-white"
+                            : dk
+                              ? "opacity-25 bg-white shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] outline outline-1 outline-offset-[-1px] outline-stone-950/10"
+                              : "bg-neutral-200"
                         )}
                         aria-label="Send"
                       >
-                        <div className={cn("w-4 h-4 relative overflow-hidden", dk ? "" : "opacity-20")}>
+                        <div className={cn("w-4 h-4 relative overflow-hidden", inputValue.trim() ? "" : dk ? "" : "opacity-20")}>
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>

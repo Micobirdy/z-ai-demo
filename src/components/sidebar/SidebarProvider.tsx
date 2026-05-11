@@ -16,6 +16,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHoverExpanded, setIsHoverExpanded] = useState(false);
   const [activeNav, setActiveNav] = useState<NavItemId>('chat');
+  const [chatInitialMessage, setChatInitialMessage] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeSettingsSection, setActiveSettingsSection] =
     useState<SettingsSection>('general');
@@ -55,6 +56,15 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setIsSettingsOpen(false);
   }, []);
 
+  const startChat = useCallback((message: string) => {
+    setChatInitialMessage(message);
+    setIsSettingsOpen(false);
+  }, []);
+
+  const clearChat = useCallback(() => {
+    setChatInitialMessage(null);
+  }, []);
+
   // Escape key handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -84,6 +94,9 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       isExpanded,
       activeNav,
       setActiveNav,
+      chatInitialMessage,
+      startChat,
+      clearChat,
       isSettingsOpen,
       openSettings,
       closeSettings,
@@ -100,6 +113,9 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       handleSetHoverExpanded,
       isExpanded,
       activeNav,
+      chatInitialMessage,
+      startChat,
+      clearChat,
       isSettingsOpen,
       openSettings,
       closeSettings,
