@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { ChevronDown, Sun, Moon, MessageSquare, BarChart3, FileText, PenTool, Monitor } from 'lucide-react'
 import { BorderBeam } from 'border-beam'
@@ -10,13 +10,19 @@ const easeOut = [0.4, 0, 0.2, 1] as const
 
 type AgentKey = 'im' | 'ai-ppt' | 'full-stack' | 'data-analysis' | 'file-processing' | 'ai-writing'
 
+const SpeechRecognition = typeof window !== 'undefined'
+  ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  : null
+
 export function HomePage() {
   const { theme, toggleTheme } = useSidebar()
   const dk = theme === 'dark'
   const reduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState('')
   const [selectedAgent, setSelectedAgent] = useState<AgentKey>('im')
+  const [isListening, setIsListening] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const recognitionRef = useRef<any>(null)
   const maxChars = 3000
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -33,6 +39,47 @@ export function HomePage() {
       textarea.style.height = `${Math.min(textarea.scrollHeight, 72)}px`
     }
   }, [inputValue])
+
+  const toggleListening = useCallback(() => {
+    if (!SpeechRecognition) return
+
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'zh-CN'
+    recognitionRef.current = recognition
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript
+        }
+      }
+      if (finalTranscript) {
+        setInputValue(prev => {
+          const next = prev + finalTranscript
+          return next.length <= maxChars ? next : prev
+        })
+      }
+    }
+
+    recognition.onerror = () => setIsListening(false)
+    recognition.onend = () => setIsListening(false)
+
+    recognition.start()
+    setIsListening(true)
+  }, [isListening, maxChars])
+
+  useEffect(() => {
+    return () => { recognitionRef.current?.stop() }
+  }, [])
 
   const enterTrans = reduceMotion
     ? { duration: 0.01 }
@@ -229,7 +276,7 @@ export function HomePage() {
                 {/* Bottom toolbar */}
                 <div className="self-stretch p-3 inline-flex justify-between items-center flex-wrap content-center overflow-hidden">
                   <div className="flex-1 flex justify-between items-center">
-                    {/* Left — attach icon */}
+                    {/* Left — attach & mic icons */}
                     <div className="flex justify-start items-center gap-2">
                       <button className={cn(
                         "w-7 h-7 p-1 opacity-70 rounded-[999px] flex justify-center items-center gap-2 transition-opacity hover:opacity-100",
@@ -240,6 +287,29 @@ export function HomePage() {
                             <path d="M12.25 8.75V11.08C12.25 11.73 11.73 12.25 11.08 12.25H2.92C2.27 12.25 1.75 11.73 1.75 11.08V8.75M7 1.75V8.75M7 1.75L4.08 4.67M7 1.75L9.92 4.67" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </div>
+                      </button>
+                      {/* Mic button */}
+                      <button
+                        onClick={toggleListening}
+                        disabled={!SpeechRecognition}
+                        className={cn(
+                          "w-7 h-7 p-1 rounded-[999px] flex justify-center items-center transition-all relative",
+                          !SpeechRecognition && "opacity-30 cursor-not-allowed",
+                          isListening
+                            ? "opacity-100"
+                            : "opacity-70 hover:opacity-100",
+                          dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
+                        )}
+                        aria-label={isListening ? "Stop voice input" : "Start voice input"}
+                      >
+                        {isListening && (
+                          <span className="absolute inset-0 rounded-[999px] bg-red-500/20 animate-pulse" />
+                        )}
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10">
+                          <rect x="5" y="1" width="4" height="7" rx="2" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33"/>
+                          <path d="M3 6.5C3 8.71 4.79 10.5 7 10.5C9.21 10.5 11 8.71 11 6.5" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
+                          <path d="M7 10.5V13M5 13H9" stroke={isListening ? '#ef4444' : (dk ? '#fff' : '#0c0a09')} strokeWidth="1.33" strokeLinecap="round"/>
+                        </svg>
                       </button>
                     </div>
 
