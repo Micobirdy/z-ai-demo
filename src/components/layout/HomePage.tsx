@@ -289,15 +289,15 @@ export function HomePage() {
                       </button>
                     </div>
 
-                    {/* Right — image upload + mic */}
+                    {/* Right — mic + send */}
                     <div className="flex justify-start items-center gap-2">
                       {/* Listening indicator */}
                       {isListening && (
-                        <div className="flex items-center gap-1.5 pr-0.5">
-                          <span className="flex items-center gap-[3px]">
-                            <span className={cn("w-[4px] h-[4px] rounded-full animate-pulse", dk ? "bg-white/60" : "bg-stone-950/50")} style={{ animationDelay: '0ms' }} />
-                            <span className={cn("w-[4px] h-[4px] rounded-full animate-pulse", dk ? "bg-white/60" : "bg-stone-950/50")} style={{ animationDelay: '150ms' }} />
-                            <span className={cn("w-[4px] h-[4px] rounded-full animate-pulse", dk ? "bg-white/60" : "bg-stone-950/50")} style={{ animationDelay: '300ms' }} />
+                        <div className="flex items-center gap-2 pr-0.5">
+                          <span className="flex items-center gap-[4px]">
+                            <span className={cn("w-[5px] h-[5px] rounded-full", dk ? "bg-white/70" : "bg-stone-950/60")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '0ms' }} />
+                            <span className={cn("w-[5px] h-[5px] rounded-full", dk ? "bg-white/70" : "bg-stone-950/60")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '200ms' }} />
+                            <span className={cn("w-[5px] h-[5px] rounded-full", dk ? "bg-white/70" : "bg-stone-950/60")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '400ms' }} />
                           </span>
                           <span className={cn(
                             "text-[12px] leading-4 font-medium",
@@ -308,17 +308,6 @@ export function HomePage() {
                         </div>
                       )}
 
-                      {/* Image upload */}
-                      <button className={cn(
-                        "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center transition-opacity opacity-50 hover:opacity-80"
-                      )} aria-label="Upload image">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.2"/>
-                          <circle cx="5" cy="6" r="1.2" fill={dk ? '#fff' : '#0c0a09'}/>
-                          <path d="M1.5 11l3.5-3.5 2.5 2.5 2-2L14.5 13" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-
                       {/* Mic button — round, dark bg */}
                       <button
                         onClick={toggleListening}
@@ -327,7 +316,7 @@ export function HomePage() {
                           "w-[32px] h-[32px] rounded-full flex justify-center items-center transition-all",
                           !SpeechRecognition && "opacity-30 cursor-not-allowed",
                           isListening
-                            ? dk ? "bg-white" : "bg-[#0d0d0d] ring-2 ring-[#0d0d0d]/20"
+                            ? dk ? "bg-white ring-2 ring-white/20" : "bg-[#0d0d0d] ring-2 ring-[#0d0d0d]/20"
                             : dk ? "bg-white" : "bg-[#0d0d0d]"
                         )}
                         aria-label={isListening ? "Stop voice input" : "Start voice input"}
@@ -337,6 +326,26 @@ export function HomePage() {
                           <path d="M3.5 7.5C3.5 9.98 5.52 12 8 12C10.48 12 12.5 9.98 12.5 7.5" stroke={dk ? '#0c0a09' : '#fff'} strokeWidth="1.33" strokeLinecap="round"/>
                           <path d="M8 12V14.5M6 14.5H10" stroke={dk ? '#0c0a09' : '#fff'} strokeWidth="1.33" strokeLinecap="round"/>
                         </svg>
+                      </button>
+
+                      {/* Send button */}
+                      <button
+                        onClick={() => { if (inputValue.trim()) startChat(inputValue.trim()); }}
+                        className={cn(
+                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all",
+                          inputValue.trim()
+                            ? dk ? "bg-white text-black" : "bg-[#0d0d0d] text-white"
+                            : dk
+                              ? "opacity-25 bg-white outline outline-1 outline-offset-[-1px] outline-stone-950/10"
+                              : "bg-neutral-200"
+                        )}
+                        aria-label="Send"
+                      >
+                        <div className={cn("w-4 h-4 relative overflow-hidden", inputValue.trim() ? "" : dk ? "" : "opacity-20")}>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </button>
                     </div>
                   </div>
