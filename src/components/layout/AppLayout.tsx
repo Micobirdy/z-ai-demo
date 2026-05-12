@@ -1,13 +1,9 @@
-import { useSidebar } from '@/hooks/useSidebar';
 import { Sidebar } from '@/components/sidebar/Sidebar';
 import { MainContent } from './MainContent';
 
 export function AppLayout() {
-  const { theme } = useSidebar();
-  const dk = theme === 'dark';
-
   return (
-    <div className={`flex h-screen overflow-hidden ${dk ? 'bg-[#161616]' : 'bg-[#F8F8F8]'}`}>
+    <div className="flex h-screen overflow-hidden bg-bg-page">
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <MainContent />

@@ -22,15 +22,13 @@ export function MainContent() {
   if (!isSettingsOpen) return <HomePage />;
 
   // Settings
-  const bg = dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]';
-
   return (
-    <div className={`flex-1 h-full overflow-y-auto ${bg}`}>
+    <div className="flex-1 h-full overflow-y-auto bg-bg-page">
       <div className="mx-auto mt-4 w-full flex-1 px-4 md:px-8 lg:mt-6 max-w-7xl">
         <div className="flex gap-8">
           <div className="w-[220px] shrink-0 pt-8">
-            <div className={`px-4 pb-4 border-b mb-2 ${dk ? 'border-white/[0.06]' : 'border-[#dbdbdb]'}`}>
-              <h1 className={`text-2xl font-bold leading-8 ${dk ? 'text-white' : 'text-stone-950'}`}
+            <div className="px-4 pb-4 border-b mb-2 border-border-default">
+              <h1 className="text-2xl font-bold leading-8 text-text-primary"
                 style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif' }}>
                 Settings
               </h1>

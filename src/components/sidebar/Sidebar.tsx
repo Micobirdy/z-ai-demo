@@ -43,14 +43,14 @@ export function Sidebar() {
 
   const showExpanded = isExpanded;
 
-  const fg = dk ? 'text-white' : 'text-[#0d0d0d]';
-  const fgMuted = dk ? 'text-white/50' : 'text-[#0d0d0d]/50';
-  const hoverBg = dk ? 'hover:bg-white/[0.06]' : 'hover:bg-[#0d0d0d]/[0.04]';
-  const activeBg = dk ? 'bg-white/[0.08]' : 'bg-[#0d0d0d]/[0.04]';
-  const activeBgPress = dk ? 'active:bg-white/[0.1]' : 'active:bg-[#0d0d0d]/[0.08]';
-  const toggleFg = dk ? 'text-white/40 hover:text-white/80' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/80';
-  const sidebarBg = dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]';
-  const borderColor = dk ? 'border-white/[0.06]' : 'border-[#dbdbdb]';
+  const fg = 'text-text-primary';
+  const fgMuted = 'text-text-tertiary';
+  const hoverBg = 'hover:bg-bg-hover';
+  const activeBg = 'bg-interactive-secondary-selected';
+  const activeBgPress = 'active:bg-interactive-secondary-press';
+  const toggleFg = 'text-icon-tertiary hover:text-icon-secondary';
+  const sidebarBg = 'bg-bg-page';
+  const borderColor = 'border-border-default';
   const iconFilter = dk ? 'invert(1)' : 'none';
 
   return (
@@ -104,7 +104,7 @@ export function Sidebar() {
             {/* Card group — single DOM, text clips on collapse */}
             <div className={clsx(
               'relative flex flex-col gap-[2px] p-[4px] rounded-[8px] transition-[background-color,box-shadow] duration-[320ms]',
-              dk ? 'bg-white/[0.06]' : 'bg-white shadow-[0_0_0_1px_rgba(219,219,219,0.8),0_2px_8px_rgba(0,0,0,0.06)]'
+              dk ? 'bg-interactive-secondary-selected' : 'bg-bg-bg shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)]'
             )}>
               {cardItems.map((item) => (
                 <button key={item.id} type="button" onClick={() => { setActiveNav(item.id); closeSettings(); }}
@@ -143,7 +143,7 @@ export function Sidebar() {
                   )}>
                     <span className={fg}>{item.label}</span>
                     {item.badge && (
-                      <span className={`ml-auto px-[6px] py-[1px] rounded-[4px] text-[10px] font-medium leading-[14px] ${dk ? 'bg-white text-[#111]' : 'bg-[#0d0d0d] text-white'}`}>
+                      <span className="ml-auto px-[6px] py-[1px] rounded-[4px] text-[10px] font-medium leading-[14px] bg-interactive-primary text-text-inverted">
                         {item.badge}
                       </span>
                     )}
@@ -159,7 +159,7 @@ export function Sidebar() {
             )}>
               <button className="flex items-center gap-[4px] px-[12px] py-[6px] group cursor-pointer">
                 <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fgMuted} transition-colors whitespace-nowrap`}>Zai Web</span>
-                <ChevronDown className={`size-[14px] ${dk ? 'text-white/30' : 'text-[#0d0d0d]/30'} transition-colors`} />
+                <ChevronDown className="size-[14px] text-icon-tertiary transition-colors" />
               </button>
               {recentItems.map((item, i) => (
                 <button key={i} type="button" className={`px-[12px] py-[6px] text-left rounded-[6px] ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
@@ -197,14 +197,14 @@ export function Sidebar() {
             )}>
               <div className="flex-1 flex flex-col min-w-0">
                 <span className={`text-[14px] leading-[20px] tracking-[-0.18px] truncate whitespace-nowrap ${fg}`}>{user?.name || 'User'}</span>
-                <span className={`text-[12px] leading-[16px] tracking-[-0.18px] truncate whitespace-nowrap ${dk ? 'text-white/40' : 'text-[#0d0d0d]/50'}`}>{user?.plan ? `${user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} plan` : ''}</span>
+                <span className="text-[12px] leading-[16px] tracking-[-0.18px] truncate whitespace-nowrap text-text-tertiary">{user?.plan ? `${user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} plan` : ''}</span>
               </div>
               <button type="button" onClick={(e) => { e.stopPropagation(); openSettings(); }} aria-label="Settings"
                 className={clsx(
                   'size-[24px] shrink-0 rounded-[6px] flex items-center justify-center transition-colors cursor-pointer',
                   isSettingsOpen
-                    ? dk ? 'bg-white/[0.1] text-white/80' : 'bg-[#0d0d0d]/[0.06] text-[#0d0d0d]/80'
-                    : dk ? 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]' : 'text-[#0d0d0d]/40 hover:text-[#0d0d0d]/70 hover:bg-[#0d0d0d]/[0.04]'
+                    ? 'bg-interactive-secondary-selected text-icon-primary'
+                    : 'text-icon-tertiary hover:text-icon-secondary hover:bg-bg-hover'
                 )}>
                 <Settings className="size-[16px]" />
               </button>

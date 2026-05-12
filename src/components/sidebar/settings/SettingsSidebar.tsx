@@ -24,18 +24,14 @@ export function SettingsSidebar() {
           <button key={cat.id} type="button" onClick={() => setActiveSettingsSection(cat.id)}
             className={clsx(
               'self-stretch h-9 p-2 rounded-md inline-flex justify-start items-center gap-2 overflow-hidden transition-colors cursor-pointer',
-              isActive
-                ? dk ? 'bg-white/[0.08]' : 'bg-stone-950/5'
-                : dk ? 'hover:bg-white/[0.04]' : 'hover:bg-stone-950/[0.03]'
+              isActive ? 'bg-interactive-secondary-selected' : 'hover:bg-bg-hover'
             )}>
             <div className={clsx('w-5 h-5 relative flex items-center justify-center', !isActive && 'opacity-80')}>
               <img src={cat.icon} alt="" className="w-4 h-4" style={{ filter: iconFilter }} />
             </div>
             <span className={clsx(
               'flex-1 text-sm font-normal leading-5 text-left',
-              isActive
-                ? dk ? 'text-white' : 'text-stone-950'
-                : dk ? 'text-white/80 opacity-80' : 'text-stone-950 opacity-80'
+              isActive ? 'text-text-primary' : 'text-text-secondary opacity-80'
             )} style={{ fontFamily: "'Geist', sans-serif" }}>
               {cat.label}
             </span>

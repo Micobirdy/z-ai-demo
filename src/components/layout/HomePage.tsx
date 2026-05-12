@@ -117,7 +117,7 @@ export function HomePage() {
   const hasInput = inputValue.length > 0
 
   return (
-    <div className={`relative w-full h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]'}`} {...dragHandlers}>
+    <div className="relative w-full h-full overflow-y-auto bg-bg-page" {...dragHandlers}>
       <FileInput />
 
       {/* Drop zone overlay */}
@@ -145,7 +145,7 @@ export function HomePage() {
             ? 'hover:bg-white/[0.06]'
             : 'hover:bg-[#0d0d0d]/[0.02]'
         }`}>
-          <span className={`text-[16px] font-normal leading-[24px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
+          <span className={`text-[16px] font-normal leading-[24px] ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
           <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
             <ChevronDown className={`size-[12px] ${dk ? 'text-white/50' : 'text-[#0d0d0d]'}`} />
           </div>
@@ -166,7 +166,7 @@ export function HomePage() {
             <div className="w-[20px] h-[20px] flex items-center justify-center opacity-80">
               {dk ? <Sun className="size-[16px] text-white" /> : <Moon className="size-[16px] text-[#0d0d0d]" />}
             </div>
-            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>
               {dk ? 'Light' : 'Dark'}
             </span>
           </button>
@@ -182,11 +182,11 @@ export function HomePage() {
                 <div className="w-[6px] h-[6px] absolute left-[1px] top-[1px] bg-green-500 rounded-full outline outline-[3px] outline-green-500/20" />
               </div>
             </div>
-            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>
               Background Tasks
             </span>
             <div className="w-[16px] h-[16px] relative opacity-40 flex items-center justify-center">
-              <ChevronDown className={`size-[12px] ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} />
+              <ChevronDown className={`size-[12px] ${"text-text-primary"}`} />
             </div>
           </div>
 
@@ -202,7 +202,7 @@ export function HomePage() {
                 <rect x="3.5" y="8.5" width="4" height="2" rx="0.5" fill={dk ? '#fff' : '#0d0d0d'}/>
               </svg>
             </div>
-            <span className={`opacity-80 text-[14px] font-normal leading-[20px] line-clamp-1 ${dk ? 'text-white' : 'text-[#0d0d0d]'}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] line-clamp-1 ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>
               50%
             </span>
           </div>
