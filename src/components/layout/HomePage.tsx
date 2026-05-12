@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { ChevronDown, Sun, Moon, MessageSquare, BarChart3, FileText, PenTool, Monitor } from 'lucide-react'
+import { ChevronDown, Sun, Moon, MessageSquare, BarChart3, FileText, PenTool, Monitor, X, Plus } from 'lucide-react'
 import { BorderBeam } from 'border-beam'
 import ZHoverEffect from '@/components/home/ZHoverEffect'
 import { useSidebar } from '@/hooks/useSidebar'
+import { useFileUpload, formatFileSize } from '@/hooks/useFileUpload'
 import { cn } from '@/lib/utils'
 
 const easeOut = [0.4, 0, 0.2, 1] as const
@@ -23,6 +24,7 @@ export function HomePage() {
   const [isListening, setIsListening] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
+  const { files, isDragging, removeFile, clearFiles, openFilePicker, dragHandlers, FileInput } = useFileUpload()
   const maxChars = 3000
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -115,7 +117,24 @@ export function HomePage() {
   const hasInput = inputValue.length > 0
 
   return (
-    <div className={`relative w-full h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]'}`}>
+    <div className={`relative w-full h-full overflow-y-auto ${dk ? 'bg-[#161616]' : 'bg-[#f8f8f8]'}`} {...dragHandlers}>
+      <FileInput />
+
+      {/* Drop zone overlay */}
+      {isDragging && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-page/80 backdrop-blur-sm">
+          <div className={cn(
+            "w-[600px] h-[200px] rounded-[16px] border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors",
+            dk ? "border-white/20 bg-white/[0.04]" : "border-[#0d0d0d]/15 bg-[#0d0d0d]/[0.02]"
+          )}>
+            <Plus className={cn("size-[24px]", dk ? "text-white/40" : "text-[#0d0d0d]/30")} />
+            <span className={cn("text-[14px] font-medium", dk ? "text-white/50" : "text-[#0d0d0d]/40")} style={{ fontFamily: "'Geist', sans-serif" }}>
+              Drop files here to add as attachments
+            </span>
+          </div>
+        </div>
+      )}
+
       <ZHoverEffect />
 
       {/* Top bar */}
@@ -248,11 +267,31 @@ export function HomePage() {
               )}>
                 {/* Textarea area */}
                 <div className={cn(
-                  "self-stretch h-24 p-3 relative rounded-t-[12px] outline outline-1 flex flex-col justify-start items-start gap-2",
+                  "self-stretch p-3 relative rounded-t-[12px] outline outline-1 flex flex-col justify-start items-start gap-2",
+                  files.length > 0 ? "min-h-[96px]" : "h-24",
                   dk ? "bg-zinc-800 outline-white/[0.06]" : "bg-white outline-transparent"
                 )}>
+                  {/* Uploaded files */}
+                  {files.length > 0 && (
+                    <div className="flex flex-wrap gap-2 w-full relative z-20 mb-1">
+                      {files.map((f, i) => (
+                        <div key={i} className={cn(
+                          "flex items-center gap-2 pl-2.5 pr-1.5 py-1.5 rounded-[8px] text-[12px] leading-[16px] max-w-[220px]",
+                          dk ? "bg-white/[0.06] text-white/70" : "bg-[#0d0d0d]/[0.04] text-[#0d0d0d]/70"
+                        )} style={{ fontFamily: "'Geist', sans-serif" }}>
+                          <FileText className="size-[14px] shrink-0 opacity-50" />
+                          <span className="truncate">{f.name}</span>
+                          <span className="text-[10px] opacity-40 shrink-0">{formatFileSize(f.size)}</span>
+                          <button onClick={() => removeFile(i)} className="size-[16px] rounded-full flex items-center justify-center shrink-0 opacity-40 hover:opacity-100 transition-opacity">
+                            <X className="size-[10px]" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Placeholder */}
-                  {!inputValue && (
+                  {!inputValue && files.length === 0 && (
                     <div className={cn(
                       "self-stretch flex-1 text-base font-normal leading-5 pointer-events-none",
                       dk ? "text-white/40" : "text-stone-950 opacity-30"
@@ -264,7 +303,7 @@ export function HomePage() {
                     ref={textareaRef}
                     value={inputValue}
                     onChange={handleInputChange}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim()) startChat(inputValue.trim()); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files'); clearFiles(); } } }}
                     maxLength={maxChars}
                     className={cn(
                       "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
@@ -279,7 +318,7 @@ export function HomePage() {
                   <div className="flex-1 flex justify-between items-center">
                     {/* Left — attach */}
                     <div className="flex justify-start items-center gap-1.5">
-                      <button className={cn(
+                      <button onClick={openFilePicker} className={cn(
                         "w-[28px] h-[28px] rounded-[999px] flex justify-center items-center transition-opacity opacity-70 hover:opacity-100",
                         dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
                       )} aria-label="Attach">
@@ -330,10 +369,10 @@ export function HomePage() {
 
                       {/* Send button */}
                       <button
-                        onClick={() => { if (inputValue.trim()) startChat(inputValue.trim()); }}
+                        onClick={() => { if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files'); clearFiles(); } }}
                         className={cn(
                           "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all",
-                          inputValue.trim()
+                          (inputValue.trim() || files.length > 0)
                             ? dk ? "bg-white text-black" : "bg-[#0d0d0d] text-white"
                             : dk
                               ? "opacity-25 bg-white outline outline-1 outline-offset-[-1px] outline-stone-950/10"
@@ -341,7 +380,7 @@ export function HomePage() {
                         )}
                         aria-label="Send"
                       >
-                        <div className={cn("w-4 h-4 relative overflow-hidden", inputValue.trim() ? "" : dk ? "" : "opacity-20")}>
+                        <div className={cn("w-4 h-4 relative overflow-hidden", (inputValue.trim() || files.length > 0) ? "" : dk ? "" : "opacity-20")}>
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
