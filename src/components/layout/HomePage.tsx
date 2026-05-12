@@ -125,10 +125,10 @@ export function HomePage() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-page/80 backdrop-blur-sm">
           <div className={cn(
             "w-[600px] h-[200px] rounded-[16px] border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors",
-            dk ? "border-white/20 bg-white/[0.04]" : "border-[#0d0d0d]/15 bg-[#0d0d0d]/[0.02]"
+            "border-border-strong bg-bg-surface/50"
           )}>
-            <Plus className={cn("size-[24px]", dk ? "text-white/40" : "text-[#0d0d0d]/30")} />
-            <span className={cn("text-[14px] font-medium", dk ? "text-white/50" : "text-[#0d0d0d]/40")} style={{ fontFamily: "'Geist', sans-serif" }}>
+            <Plus className={cn("size-[24px]", "text-icon-tertiary")} />
+            <span className={cn("text-[14px] font-medium", "text-text-tertiary")} style={{ fontFamily: "'Geist', sans-serif" }}>
               Drop files here to add as attachments
             </span>
           </div>
@@ -138,16 +138,14 @@ export function HomePage() {
       <ZHoverEffect />
 
       {/* Top bar */}
-      <div className={`flex items-center justify-between px-[12px] py-[8px] sticky top-0 z-10 backdrop-blur-sm ${dk ? 'bg-[#161616]/80' : 'bg-[#f8f8f8]/80'}`}>
+      <div className={`flex items-center justify-between px-[12px] py-[8px] sticky top-0 z-10 backdrop-blur-sm ${dk ? 'bg-[var(--gray-900)]/80' : 'bg-[var(--gray-50)]/80'}`}>
         {/* Left — Model selector */}
         <button className={`pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
-          dk
-            ? 'hover:bg-white/[0.06]'
-            : 'hover:bg-[#0d0d0d]/[0.02]'
+          "hover:bg-bg-hover"
         }`}>
-          <span className={`text-[16px] font-normal leading-[24px] ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
+          <span className={`text-[16px] font-normal leading-[24px] text-text-primary`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
           <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
-            <ChevronDown className={`size-[12px] ${dk ? 'text-white/50' : 'text-[#0d0d0d]'}`} />
+            <ChevronDown className={`size-[12px] text-icon-tertiary`} />
           </div>
         </button>
 
@@ -157,52 +155,46 @@ export function HomePage() {
           <button
             onClick={toggleTheme}
             className={`pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
-              dk
-                ? 'hover:bg-white/[0.06]'
-                : 'hover:bg-[#0d0d0d]/[0.02]'
+              "hover:bg-bg-hover"
             }`}
             title={dk ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             <div className="w-[20px] h-[20px] flex items-center justify-center opacity-80">
-              {dk ? <Sun className="size-[16px] text-white" /> : <Moon className="size-[16px] text-[#0d0d0d]" />}
+              {dk ? <Sun className="size-[16px] text-text-primary" /> : <Moon className="size-[16px] text-text-primary" />}
             </div>
-            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] text-text-primary`} style={{ fontFamily: 'Geist, sans-serif' }}>
               {dk ? 'Light' : 'Dark'}
             </span>
           </button>
 
           {/* Background Tasks */}
           <div className={`pl-[6px] pr-[8px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden ${
-            dk
-              ? 'hover:bg-white/[0.06]'
-              : 'hover:bg-[#0d0d0d]/[0.02]'
+            "hover:bg-bg-hover"
           }`}>
             <div className={`p-[4px] rounded-full flex items-center justify-center`}>
               <div className="w-[8px] h-[8px] relative">
                 <div className="w-[6px] h-[6px] absolute left-[1px] top-[1px] bg-green-500 rounded-full outline outline-[3px] outline-green-500/20" />
               </div>
             </div>
-            <span className={`opacity-80 text-[14px] font-normal leading-[20px] ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] text-text-primary`} style={{ fontFamily: 'Geist, sans-serif' }}>
               Background Tasks
             </span>
             <div className="w-[16px] h-[16px] relative opacity-40 flex items-center justify-center">
-              <ChevronDown className={`size-[12px] ${"text-text-primary"}`} />
+              <ChevronDown className={`size-[12px] text-text-primary`} />
             </div>
           </div>
 
           {/* Usage indicator */}
           <div className={`pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] overflow-hidden ${
-            dk
-              ? 'hover:bg-white/[0.06]'
-              : 'hover:bg-[#0d0d0d]/[0.02]'
+            "hover:bg-bg-hover"
           }`}>
             <div className="w-[20px] h-[20px] relative opacity-80 flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1.5" y="6.5" width="13" height="6" rx="1" stroke={dk ? '#fff' : '#0d0d0d'} strokeWidth="1.33"/>
-                <rect x="3.5" y="8.5" width="4" height="2" rx="0.5" fill={dk ? '#fff' : '#0d0d0d'}/>
+                <rect x="1.5" y="6.5" width="13" height="6" rx="1" stroke="currentColor" strokeWidth="1.33"/>
+                <rect x="3.5" y="8.5" width="4" height="2" rx="0.5" fill="currentColor"/>
               </svg>
             </div>
-            <span className={`opacity-80 text-[14px] font-normal leading-[20px] line-clamp-1 ${"text-text-primary"}`} style={{ fontFamily: 'Geist, sans-serif' }}>
+            <span className={`opacity-80 text-[14px] font-normal leading-[20px] line-clamp-1 text-text-primary`} style={{ fontFamily: 'Geist, sans-serif' }}>
               50%
             </span>
           </div>
@@ -218,7 +210,7 @@ export function HomePage() {
           {/* Chatbot area */}
           <div className="flex flex-col gap-[52px] items-center justify-center relative shrink-0">
             {/* Title */}
-            <div className={`flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full ${dk ? 'text-white' : 'text-[#1b1818]'}`}>
+            <div className={`flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full text-text-primary`}>
               <motion.p
                 className="leading-none not-italic relative shrink-0 text-[52px] text-balance tracking-[-2.08px]"
                 style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif', fontWeight: 'normal' }}
@@ -229,7 +221,7 @@ export function HomePage() {
                 Create anything you can imagine
               </motion.p>
               <motion.p
-                className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty ${dk ? 'text-white/40' : 'text-[#737373]'}`}
+                className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty ${'text-text-tertiary'}`}
                 style={{ fontFamily: 'Geist, sans-serif' }}
                 initial={reduceMotion ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -247,7 +239,7 @@ export function HomePage() {
               transition={scaleTrans}
               style={{
                 borderRadius: 12,
-                outline: dk ? '1px solid rgba(64,64,64,0.8)' : '1px solid #d4d4d8',
+                outline: '1px solid var(--border-default)',
                 outlineOffset: '-1px',
                 boxShadow: '0px 4px 16px 0px rgba(0,0,0,0.05)',
               }}
@@ -263,13 +255,13 @@ export function HomePage() {
               >
               <div className={cn(
                 "rounded-[12px] inline-flex flex-col justify-start items-start w-full overflow-hidden",
-                dk ? "bg-zinc-800" : "bg-white"
+                "bg-bg-bg"
               )}>
                 {/* Textarea area */}
                 <div className={cn(
                   "self-stretch p-3 relative rounded-t-[12px] outline outline-1 flex flex-col justify-start items-start gap-2",
                   files.length > 0 ? "min-h-[96px]" : "h-24",
-                  dk ? "bg-zinc-800 outline-white/[0.06]" : "bg-white outline-transparent"
+                  "bg-bg-bg outline-border-default"
                 )}>
                   {/* Uploaded files */}
                   {files.length > 0 && (
@@ -277,7 +269,7 @@ export function HomePage() {
                       {files.map((f, i) => (
                         <div key={i} className={cn(
                           "flex items-center gap-2 pl-2.5 pr-1.5 py-1.5 rounded-[8px] text-[12px] leading-[16px] max-w-[220px]",
-                          dk ? "bg-white/[0.06] text-white/70" : "bg-[#0d0d0d]/[0.04] text-[#0d0d0d]/70"
+                          "bg-bg-subtle/50 text-text-secondary"
                         )} style={{ fontFamily: "'Geist', sans-serif" }}>
                           <FileText className="size-[14px] shrink-0 opacity-50" />
                           <span className="truncate">{f.name}</span>
@@ -294,7 +286,7 @@ export function HomePage() {
                   {!inputValue && files.length === 0 && (
                     <div className={cn(
                       "self-stretch flex-1 text-base font-normal leading-5 pointer-events-none",
-                      dk ? "text-white/40" : "text-stone-950 opacity-30"
+                      "text-text-placeholder"
                     )} style={{ fontFamily: "'Geist', sans-serif" }}>
                       Chat with z.ai, or start creating.
                     </div>
@@ -307,7 +299,7 @@ export function HomePage() {
                     maxLength={maxChars}
                     className={cn(
                       "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
-                      dk ? "text-white" : "text-stone-950"
+                      "text-text-primary"
                     )}
                     style={{ fontFamily: "'Geist', sans-serif" }}
                   />
@@ -323,7 +315,7 @@ export function HomePage() {
                         dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
                       )} aria-label="Attach">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M14 10V12.66C14 13.4 13.4 14 12.66 14H3.34C2.6 14 2 13.4 2 12.66V10M8 2V10M8 2L4.67 5.33M8 2L11.33 5.33" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M14 10V12.66C14 13.4 13.4 14 12.66 14H3.34C2.6 14 2 13.4 2 12.66V10M8 2V10M8 2L4.67 5.33M8 2L11.33 5.33" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
                     </div>
@@ -334,13 +326,13 @@ export function HomePage() {
                       {isListening && (
                         <div className="flex items-center gap-2 pr-0.5">
                           <span className="flex items-center gap-[4px]">
-                            <span className={cn("w-[5px] h-[5px] rounded-full", dk ? "bg-white/70" : "bg-stone-950/60")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '0ms' }} />
-                            <span className={cn("w-[5px] h-[5px] rounded-full", dk ? "bg-white/70" : "bg-stone-950/60")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '200ms' }} />
-                            <span className={cn("w-[5px] h-[5px] rounded-full", dk ? "bg-white/70" : "bg-stone-950/60")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '400ms' }} />
+                            <span className={cn("w-[5px] h-[5px] rounded-full", "bg-text-secondary")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '0ms' }} />
+                            <span className={cn("w-[5px] h-[5px] rounded-full", "bg-text-secondary")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '200ms' }} />
+                            <span className={cn("w-[5px] h-[5px] rounded-full", "bg-text-secondary")} style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '400ms' }} />
                           </span>
                           <span className={cn(
                             "text-[12px] leading-4 font-medium",
-                            dk ? "text-white/60" : "text-stone-950/50"
+                            "text-text-tertiary"
                           )} style={{ fontFamily: "'Geist', sans-serif" }}>
                             Listening...
                           </span>
@@ -410,47 +402,47 @@ export function HomePage() {
               onSelect={setSelectedAgent}
               triShadow={triShadow}
               triShadowDk={triShadowDk}
-              icon={<MessageSquare className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              icon={<MessageSquare className={cn("size-3", "text-text-primary")} strokeWidth={1.33} />}
               label="IM"
             />
 
             {/* Separator — no stagger animation */}
             <div className="px-2 flex justify-start items-center">
-              <div className={cn("w-px h-4 opacity-20", dk ? "bg-white" : "bg-stone-950")} />
+              <div className={cn("w-px h-4 opacity-20", "bg-text-primary")} />
             </div>
 
             {/* AI PPT */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
               agentKey="ai-ppt" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
               icon={<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="3" width="12" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
-                <rect x="2" y="9" width="5" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
-                <rect x="9" y="9" width="5" height="4" rx="1" stroke={dk ? '#fff' : '#0c0a09'} strokeWidth="1.33" strokeLinecap="round"/>
+                <rect x="2" y="3" width="12" height="4" rx="1" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round"/>
+                <rect x="2" y="9" width="5" height="4" rx="1" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round"/>
+                <rect x="9" y="9" width="5" height="4" rx="1" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round"/>
               </svg>}
               label="AI PPT" />
 
             {/* Full-stack */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
               agentKey="full-stack" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
-              icon={<Monitor className={cn("size-3.5", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              icon={<Monitor className={cn("size-3.5", "text-text-primary")} strokeWidth={1.33} />}
               label="Full-stack" />
 
             {/* Data Analysis */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
               agentKey="data-analysis" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
-              icon={<BarChart3 className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.5} />}
+              icon={<BarChart3 className={cn("size-3", "text-text-primary")} strokeWidth={1.5} />}
               label="Data Analysis" />
 
             {/* File Processing */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
               agentKey="file-processing" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
-              icon={<FileText className={cn("size-3.5", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              icon={<FileText className={cn("size-3.5", "text-text-primary")} strokeWidth={1.33} />}
               label="File Processing" />
 
             {/* AI Writing */}
             <FeatureBtn variants={featureItem} dk={dk} triShadow={triShadow} triShadowDk={triShadowDk}
               agentKey="ai-writing" selectedAgent={selectedAgent} onSelect={setSelectedAgent}
-              icon={<PenTool className={cn("size-3", dk ? "text-white" : "text-stone-950")} strokeWidth={1.33} />}
+              icon={<PenTool className={cn("size-3", "text-text-primary")} strokeWidth={1.33} />}
               label="AI Writing" />
           </motion.div>
         </div>
@@ -478,15 +470,15 @@ function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShado
       className={cn(
         "px-3 py-2 rounded-[99px] flex justify-start items-center gap-1.5 overflow-hidden transition-all cursor-pointer",
         active
-          ? dk ? "bg-white/[0.12]" : "bg-stone-950/5"
-          : dk ? "bg-white/[0.04]" : "bg-transparent"
+          ? "bg-interactive-secondary-selected"
+          : "bg-transparent"
       )}
       style={{ boxShadow: active ? (dk ? triShadowDk : triShadow) : 'none' }}
     >
       <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-50")}>
         {icon}
       </div>
-      <span className={cn("text-xs font-medium leading-4 transition-opacity", dk ? "text-white" : "text-stone-950", active ? "opacity-80" : "opacity-50")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-xs font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-80" : "opacity-50")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
@@ -512,15 +504,15 @@ function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label, agentKe
       className={cn(
         "px-3 py-2 rounded-[8px] flex justify-center items-center gap-2 overflow-hidden transition-all cursor-pointer",
         active
-          ? dk ? "bg-white/[0.1]" : "bg-white"
-          : dk ? "bg-white/[0.04]" : "bg-neutral-50/90"
+          ? "bg-bg-bg"
+          : "bg-bg-surface/90"
       )}
       style={{ boxShadow: dk ? triShadowDk : triShadow }}
     >
       <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-90" : "opacity-60")}>
         {icon}
       </div>
-      <span className={cn("text-xs font-medium leading-4 transition-opacity", dk ? "text-white" : "text-stone-950", active ? "opacity-90" : "opacity-60")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-xs font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-90" : "opacity-60")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
