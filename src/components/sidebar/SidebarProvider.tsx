@@ -27,6 +27,10 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
   // Debounce hover to prevent flicker
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
