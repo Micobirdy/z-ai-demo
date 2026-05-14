@@ -17,8 +17,9 @@ const SpeechRecognition = typeof window !== 'undefined'
   : null
 
 export function HomePage() {
-  const { theme, toggleTheme, startChat } = useSidebar()
+  const { theme, toggleTheme, startChat, activeNav } = useSidebar()
   const dk = theme === 'dark'
+  const isAgent = activeNav === 'agent'
   const reduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState('')
   const [selectedAgent, setSelectedAgent] = useState<AgentKey>('im')
@@ -144,9 +145,14 @@ export function HomePage() {
         <button className={`pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
           "hover:bg-bg-hover"
         }`}>
-          <span className={`text-[16px] font-normal leading-[24px] text-text-primary`} style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
+          <span className="text-[16px] font-normal leading-[24px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
+          {isAgent && (
+            <span className="ml-1 px-1.5 py-0.5 rounded-[4px] text-[10px] font-semibold leading-[14px] tracking-wide uppercase bg-accent-blue-subtle text-accent-blue-text">
+              Agent
+            </span>
+          )}
           <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
-            <ChevronDown className={`size-[12px] text-icon-tertiary`} />
+            <ChevronDown className="size-[12px] text-icon-tertiary" />
           </div>
         </button>
 
@@ -237,7 +243,10 @@ export function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...enterTransShort, delay: reduceMotion ? 0 : 0.08 }}
               >
-                Interact with z.ai and explore the boundless creative world
+                {isAgent
+                  ? 'Agent mode — complex tasks, code generation, and multi-step workflows'
+                  : 'Interact with z.ai and explore the boundless creative world'
+                }
               </motion.p>
             </div>
 
@@ -249,19 +258,19 @@ export function HomePage() {
               transition={scaleTrans}
               style={{
                 borderRadius: 12,
-                outline: '1px solid var(--border-default)',
+                outline: isAgent ? '1px solid var(--accent-blue-border)' : '1px solid var(--border-default)',
                 outlineOffset: '-1px',
                 boxShadow: '0px 4px 16px 0px rgba(0,0,0,0.05)',
               }}
             >
               <BorderBeam
                 size="md"
-                colorVariant="sunset"
+                colorVariant={isAgent ? "ocean" : "sunset"}
                 theme={dk ? 'dark' : 'light'}
                 borderRadius={12}
                 strength={dk ? 0.7 : 0.85}
-                duration={1.96}
-                active={hasInput}
+                duration={isAgent ? 1.5 : 1.96}
+                active={isAgent || hasInput}
               >
               <div className={cn(
                 "rounded-[12px] inline-flex flex-col justify-start items-start w-full overflow-hidden",
@@ -298,7 +307,7 @@ export function HomePage() {
                       "self-stretch flex-1 text-base font-normal leading-5 pointer-events-none",
                       "text-text-placeholder"
                     )} style={{ fontFamily: "'Geist', sans-serif" }}>
-                      Chat with z.ai, or start creating.
+                      {isAgent ? 'Describe a complex task for the agent...' : 'Chat with z.ai, or start creating.'}
                     </div>
                   )}
                   <textarea
