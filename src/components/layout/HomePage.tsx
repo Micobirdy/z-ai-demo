@@ -222,9 +222,9 @@ export function HomePage() {
                   textClassName="bg-bg-page text-text-primary"
                   flipTextClassName="bg-bg-page text-text-primary"
                   rotateDirection="top"
-                  staggerDuration={0.03}
+                  staggerDuration={0.015}
                   staggerFrom="first"
-                  transition={{ type: "spring", damping: 25, stiffness: 160 }}
+                  transition={{ type: "spring", damping: 35, stiffness: 400 }}
                   style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif', fontWeight: 'normal' } as React.CSSProperties}
                 >
                   Create anything you can imagine
