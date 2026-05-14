@@ -26,12 +26,12 @@ export function SettingsSidebar() {
               'self-stretch h-9 p-2 rounded-md inline-flex justify-start items-center gap-2 overflow-hidden transition-colors cursor-pointer',
               isActive ? 'bg-interactive-secondary-selected' : 'hover:bg-bg-hover'
             )}>
-            <div className={clsx('w-5 h-5 relative flex items-center justify-center', !isActive && 'opacity-80')}>
+            <div className={clsx('w-5 h-5 relative flex items-center justify-center', !isActive && 'opacity-60')}>
               <img src={cat.icon} alt="" className="w-4 h-4" style={{ filter: iconFilter }} />
             </div>
             <span className={clsx(
               'flex-1 text-sm font-normal leading-5 text-left',
-              isActive ? 'text-text-primary' : 'text-text-secondary opacity-80'
+              isActive ? 'text-text-primary' : 'text-text-secondary'
             )} style={{ fontFamily: "'Geist', sans-serif" }}>
               {cat.label}
             </span>
