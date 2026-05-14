@@ -269,9 +269,9 @@ export function HomePage() {
               )}>
                 {/* Textarea area */}
                 <div className={cn(
-                  "self-stretch p-3 relative rounded-t-[12px] outline outline-1 flex flex-col justify-start items-start gap-2",
+                  "self-stretch p-3 relative rounded-t-[12px] flex flex-col justify-start items-start gap-2",
                   files.length > 0 ? "min-h-[96px]" : "h-24",
-                  "bg-bg-bg outline-border-default"
+                  "bg-bg-bg"
                 )}>
                   {/* Uploaded files */}
                   {files.length > 0 && (
