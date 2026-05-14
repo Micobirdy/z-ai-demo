@@ -269,12 +269,13 @@ export function HomePage() {
                 theme={dk ? 'dark' : 'light'}
                 borderRadius={12}
                 strength={dk ? 0.7 : 0.85}
-                duration={isAgent ? 1.5 : 1.96}
-                active={isAgent || hasInput}
+                duration={1.96}
+                active={hasInput}
               >
               <div className={cn(
                 "rounded-[12px] inline-flex flex-col justify-start items-start w-full overflow-hidden",
-                "bg-bg-bg"
+                "bg-bg-bg",
+                isAgent && "ring-1 ring-accent-blue-border/30"
               )}>
                 {/* Textarea area */}
                 <div className={cn(
@@ -327,8 +328,8 @@ export function HomePage() {
                 {/* Bottom toolbar */}
                 <div className="self-stretch px-3 py-2.5 inline-flex justify-between items-center overflow-hidden">
                   <div className="flex-1 flex justify-between items-center">
-                    {/* Left — attach */}
-                    <div className="flex justify-start items-center gap-1.5">
+                    {/* Left — attach + mode label */}
+                    <div className="flex justify-start items-center gap-2">
                       <button onClick={openFilePicker} className={cn(
                         "w-[28px] h-[28px] rounded-[999px] flex justify-center items-center transition-opacity opacity-70 hover:opacity-100",
                         dk && "outline outline-1 outline-offset-[-1px] outline-white/[0.12]"
@@ -337,6 +338,12 @@ export function HomePage() {
                           <path d="M14 10V12.66C14 13.4 13.4 14 12.66 14H3.34C2.6 14 2 13.4 2 12.66V10M8 2V10M8 2L4.67 5.33M8 2L11.33 5.33" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
+                      {isAgent && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-accent-blue-subtle text-accent-blue-text text-[11px] font-medium leading-[14px]" style={{ fontFamily: "'Geist', sans-serif" }}>
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1L6.5 3.5H8.5L7 5.5L7.5 8L5 6.5L2.5 8L3 5.5L1.5 3.5H3.5L5 1Z" fill="currentColor" fillOpacity="0.7"/></svg>
+                          Agent
+                        </span>
+                      )}
                     </div>
 
                     {/* Right — mic + send */}
