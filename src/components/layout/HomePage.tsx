@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { ChevronDown, Sun, Moon, MessageSquare, BarChart3, FileText, PenTool, Monitor, X, Plus } from 'lucide-react'
 import { BorderBeam } from 'border-beam'
+import Text3DFlip from '@/components/ui/text-3d-flip'
 import ZHoverEffect from '@/components/home/ZHoverEffect'
 import { useSidebar } from '@/hooks/useSidebar'
 import { useFileUpload, formatFileSize } from '@/hooks/useFileUpload'
@@ -211,15 +212,24 @@ export function HomePage() {
           <div className="flex flex-col gap-[52px] items-center justify-center relative shrink-0">
             {/* Title */}
             <div className={`flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full text-text-primary`}>
-              <motion.p
-                className="leading-none not-italic relative shrink-0 text-[52px] text-balance tracking-[-2.08px]"
-                style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif', fontWeight: 'normal' }}
+              <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={enterTrans}
               >
-                Create anything you can imagine
-              </motion.p>
+                <Text3DFlip
+                  className="leading-none not-italic relative shrink-0 text-[52px] text-balance tracking-[-2.08px] justify-center cursor-default"
+                  textClassName="bg-bg-page text-text-primary"
+                  flipTextClassName="bg-bg-page text-text-primary"
+                  rotateDirection="top"
+                  staggerDuration={0.03}
+                  staggerFrom="first"
+                  transition={{ type: "spring", damping: 25, stiffness: 160 }}
+                  style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif', fontWeight: 'normal' } as React.CSSProperties}
+                >
+                  Create anything you can imagine
+                </Text3DFlip>
+              </motion.div>
               <motion.p
                 className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty ${'text-text-tertiary'}`}
                 style={{ fontFamily: 'Geist, sans-serif' }}
