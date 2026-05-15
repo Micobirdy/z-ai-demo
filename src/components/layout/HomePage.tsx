@@ -145,12 +145,7 @@ export function HomePage() {
         <button className={`pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
           "hover:bg-bg-hover"
         }`}>
-          <span className="text-[16px] font-normal leading-[24px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>GLM-5.1</span>
-          {isAgent && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-[4px] text-[10px] font-semibold leading-[14px] tracking-wide uppercase bg-accent-blue-subtle text-accent-blue-text">
-              Agent
-            </span>
-          )}
+          <span className="text-[16px] font-normal leading-[24px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>{isAgent ? 'GLM-5.1 Agent' : 'GLM-5.1'}</span>
           <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
             <ChevronDown className="size-[12px] text-icon-tertiary" />
           </div>
@@ -233,7 +228,7 @@ export function HomePage() {
                   transition={{ type: "spring", damping: 35, stiffness: 400 }}
                   style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif', fontWeight: 'normal' } as React.CSSProperties}
                 >
-                  Create anything you can imagine
+                  {isAgent ? 'What can I build for you?' : 'Create anything you can imagine'}
                 </Text3DFlip>
               </motion.div>
               <motion.p
@@ -338,12 +333,6 @@ export function HomePage() {
                           <path d="M14 10V12.66C14 13.4 13.4 14 12.66 14H3.34C2.6 14 2 13.4 2 12.66V10M8 2V10M8 2L4.67 5.33M8 2L11.33 5.33" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
-                      {isAgent && (
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-[5px] bg-accent-blue-subtle text-accent-blue-text text-[11px] font-medium leading-[14px]" style={{ fontFamily: "'Geist', sans-serif" }}>
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1L6.5 3.5H8.5L7 5.5L7.5 8L5 6.5L2.5 8L3 5.5L1.5 3.5H3.5L5 1Z" fill="currentColor" fillOpacity="0.7"/></svg>
-                          Agent
-                        </span>
-                      )}
                     </div>
 
                     {/* Right — mic + send */}
