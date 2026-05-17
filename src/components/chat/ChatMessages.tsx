@@ -23,11 +23,6 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone 
       <div className="max-w-[720px] mx-auto px-4 py-6 flex flex-col gap-6">
         {messages.map((msg) => (
           <div key={msg.id} className={cn("flex gap-3", msg.role === 'user' && "justify-end")}>
-            {msg.role === 'assistant' && (
-              <div className="w-[28px] h-[28px] rounded-[8px] bg-[#2d2d2d] border border-white/10 overflow-hidden flex items-center justify-center shrink-0 mt-0.5">
-                <img src="/icons/zai-logo.png" alt="Z" className="w-[18px] h-[18px] object-cover" />
-              </div>
-            )}
             <div className={cn(
               "max-w-[85%]",
               msg.role === 'user' && "rounded-[16px] px-4 py-3 bg-interactive-secondary-selected"

@@ -220,9 +220,6 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
           {isTyping && (
             <div className="px-4 pb-2">
               <div className="max-w-[720px] mx-auto flex items-center gap-3">
-                <div className="w-[28px] h-[28px] rounded-[8px] bg-[#2d2d2d] border border-white/10 flex items-center justify-center shrink-0">
-                  <img src="/icons/zai-logo.png" alt="" className="w-[18px] h-[18px] object-cover" />
-                </div>
                 <div className="flex items-center gap-[3px]">
                   <span className="w-[6px] h-[6px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '0ms' }} />
                   <span className="w-[6px] h-[6px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '200ms' }} />
