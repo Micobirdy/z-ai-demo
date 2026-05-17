@@ -9,26 +9,42 @@ export default function ZHoverEffect() {
 
   return (
     <div
-      className="absolute left-[calc(50%+26px)] top-[97px] py-2 pointer-events-none"
+      className="absolute left-[calc(50%+26px)] top-[80px] py-2 pointer-events-none"
       style={{
         zIndex: 0,
         animation: 'zBackgroundEntrance 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0s both, zBackgroundBreathing 6s ease-in-out 1.4s infinite'
       }}
     >
       <svg
-        width="400"
-        height="320"
-        viewBox="0 0 400 320"
+        width="440"
+        height="360"
+        viewBox="-20 -20 440 360"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="paint0_linear_z" x1="200" y1="31.5" x2="200" y2="320" gradientUnits="userSpaceOnUse">
-            <stop stopColor={dk ? '#333333' : '#DBDBDB'}/>
-            <stop offset="1" stopColor={dk ? '#1e1e1e' : '#F8F8F8'}/>
+          <linearGradient id="paint0_linear_z" x1="200" y1="0" x2="200" y2="320" gradientUnits="userSpaceOnUse">
+            <stop stopColor={dk ? '#444444' : '#C4C4C4'} stopOpacity="0.6"/>
+            <stop offset="0.5" stopColor={dk ? '#2a2a2a' : '#D9D9D9'} stopOpacity="0.3"/>
+            <stop offset="1" stopColor={dk ? '#1a1a1a' : '#F0F0F0'} stopOpacity="0.1"/>
           </linearGradient>
+          <filter id="blur_z" x="-20" y="-20" width="440" height="360">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" />
+          </filter>
         </defs>
 
+        {/* Blurred fill layer */}
+        <motion.path
+          d={pathData}
+          fill="url(#paint0_linear_z)"
+          filter="url(#blur_z)"
+          pathLength="1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: dk ? 0.15 : 0.25 }}
+          transition={{ duration: 2, ease: 'easeOut' }}
+        />
+
+        {/* Stroke layer */}
         <motion.path
           d={pathData}
           stroke="url(#paint0_linear_z)"

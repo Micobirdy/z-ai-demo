@@ -163,13 +163,15 @@ export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
             <button
               key={i}
               onClick={() => onSelectPrompt(p)}
-              className="text-left p-4 rounded-[12px] border border-border-default bg-bg-bg text-[13px] leading-[18px] text-text-secondary transition-all hover:border-border-strong hover:shadow-sm active:scale-[0.98] cursor-pointer"
+              className="text-left p-4 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col transition-all hover:border-border-strong hover:shadow-sm active:scale-[0.98] cursor-pointer"
               style={{ fontFamily: "'Geist', sans-serif" }}
             >
-              <div className="w-[20px] h-[20px] mb-3 text-icon-tertiary">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7 3L13 10L7 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 3L9 10L3 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/></svg>
+              <div className="w-[20px] h-[20px] mb-2.5 text-icon-tertiary shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 14V6M10 6L6 10M10 6L14 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              {p}
+              <span className="text-[13px] leading-[18px] text-text-secondary line-clamp-3">{p}</span>
             </button>
           ))}
         </div>

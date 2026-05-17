@@ -355,23 +355,23 @@ export function HomePage() {
                         </div>
                       )}
 
-                      {/* Mic button — round, dark bg */}
+                      {/* Mic button */}
                       <button
                         onClick={toggleListening}
                         disabled={!SpeechRecognition}
                         className={cn(
-                          "w-[32px] h-[32px] rounded-full flex justify-center items-center transition-all",
+                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center transition-all",
                           !SpeechRecognition && "opacity-30 cursor-not-allowed",
                           isListening
-                            ? dk ? "bg-white ring-2 ring-white/20" : "bg-[#0d0d0d] ring-2 ring-[#0d0d0d]/20"
-                            : dk ? "bg-white" : "bg-[#0d0d0d]"
+                            ? "opacity-100 bg-bg-hover"
+                            : "opacity-60 hover:opacity-100"
                         )}
                         aria-label={isListening ? "Stop voice input" : "Start voice input"}
                       >
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="5.5" y="1.5" width="5" height="7.5" rx="2.5" stroke={dk ? '#0c0a09' : '#fff'} strokeWidth="1.33"/>
-                          <path d="M3.5 7.5C3.5 9.98 5.52 12 8 12C10.48 12 12.5 9.98 12.5 7.5" stroke={dk ? '#0c0a09' : '#fff'} strokeWidth="1.33" strokeLinecap="round"/>
-                          <path d="M8 12V14.5M6 14.5H10" stroke={dk ? '#0c0a09' : '#fff'} strokeWidth="1.33" strokeLinecap="round"/>
+                          <rect x="5.5" y="1.5" width="5" height="7.5" rx="2.5" stroke="currentColor" strokeWidth="1.33"/>
+                          <path d="M3.5 7.5C3.5 9.98 5.52 12 8 12C10.48 12 12.5 9.98 12.5 7.5" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round"/>
+                          <path d="M8 12V14.5M6 14.5H10" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round"/>
                         </svg>
                       </button>
 
