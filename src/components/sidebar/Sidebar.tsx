@@ -35,6 +35,7 @@ export function Sidebar() {
     isCollapsed, toggleCollapse,
     isExpanded, activeNav, setActiveNav, theme,
     openSettings, closeSettings, isSettingsOpen,
+    chatHistory, clearChat,
   } = useSidebar();
   const { user } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -161,7 +162,11 @@ export function Sidebar() {
                 <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fgMuted} transition-colors whitespace-nowrap`}>Zai Web</span>
                 <ChevronDown className="size-[14px] text-icon-tertiary transition-colors" />
               </button>
-              {recentItems.map((item, i) => (
+              {chatHistory.length > 0 ? chatHistory.slice(0, 5).map((item) => (
+                <button key={item.id} type="button" className={`px-[12px] py-[6px] text-left rounded-[6px] ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
+                  <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg} block truncate whitespace-nowrap`}>{item.title}</span>
+                </button>
+              )) : recentItems.map((item, i) => (
                 <button key={i} type="button" className={`px-[12px] py-[6px] text-left rounded-[6px] ${hoverBg} ${activeBgPress} transition-colors cursor-pointer`}>
                   <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg} block truncate whitespace-nowrap`}>{item}</span>
                 </button>

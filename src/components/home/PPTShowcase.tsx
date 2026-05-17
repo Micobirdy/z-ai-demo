@@ -149,7 +149,7 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-      className="w-full max-w-[794px] flex flex-col gap-8 mt-4"
+      className="w-full max-w-[794px] xl:max-w-[860px] 2xl:max-w-[940px] flex flex-col gap-8 mt-4"
       ref={containerRef}
     >
       {/* Prompt suggestions */}

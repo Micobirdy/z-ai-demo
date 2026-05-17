@@ -31,6 +31,8 @@ export interface SidebarContextValue {
   chatAgentKey: string | null;
   startChat: (message: string, agentKey?: string) => void;
   clearChat: () => void;
+  chatHistory: { id: string; title: string; timestamp: number }[];
+  addChatHistory: (title: string) => void;
 
   // Settings panel
   isSettingsOpen: boolean;

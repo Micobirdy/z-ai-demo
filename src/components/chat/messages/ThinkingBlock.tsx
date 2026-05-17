@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronRight } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 interface ThinkingBlockProps {
   content: string;
@@ -10,14 +10,13 @@ interface ThinkingBlockProps {
 
 export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(true);
-  const [lines, setLines] = useState<{ text: string; opacity: number }[]>([]);
+  const [displayedText, setDisplayedText] = useState('');
   const [isStreaming, setIsStreaming] = useState(true);
-  const lineIndexRef = useRef(0);
+  const indexRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const allLines = content.split('\n');
 
   useEffect(() => {
-    if (lineIndexRef.current >= allLines.length) {
+    if (indexRef.current >= content.length) {
       setIsStreaming(false);
       if (autoCollapse) {
         const timer = setTimeout(() => {
@@ -29,31 +28,20 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       return;
     }
 
-    const currentLine = allLines[lineIndexRef.current];
-    const isBlank = currentLine.trim() === '';
-    const delay = isBlank ? 120 : 60 + Math.random() * 80;
-
+    const delay = 35 + Math.random() * 25;
     const timer = setTimeout(() => {
-      setLines(prev => [...prev, { text: currentLine, opacity: 0 }]);
-      lineIndexRef.current++;
+      const chunkSize = Math.floor(Math.random() * 2) + 1;
+      const nextIndex = Math.min(indexRef.current + chunkSize, content.length);
+      setDisplayedText(content.slice(0, nextIndex));
+      indexRef.current = nextIndex;
 
-      // Fade in the new line
-      requestAnimationFrame(() => {
-        setLines(prev => {
-          const updated = [...prev];
-          if (updated.length > 0) updated[updated.length - 1].opacity = 1;
-          return updated;
-        });
-      });
-
-      // Auto-scroll to bottom
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-      });
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [lines.length, allLines, autoCollapse, onCollapseComplete]);
+  }, [displayedText, content, autoCollapse, onCollapseComplete]);
 
   return (
     <div className="my-2">
@@ -64,35 +52,24 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       >
         <span className={cn(
           "w-[16px] h-[16px] rounded-full border flex items-center justify-center text-[10px] transition-colors",
-          isStreaming ? "border-accent-blue animate-pulse text-accent-blue" : "border-border-default text-text-tertiary"
+          isStreaming ? "border-accent-blue text-accent-blue" : "border-border-default text-text-tertiary"
         )}>⊕</span>
         <span>{isStreaming ? '思考中...' : '思考过程'}</span>
-        <ChevronRight className={cn("size-[14px] transition-transform duration-300", expanded && "rotate-90")} />
+        <ChevronDown className={cn("size-[14px] transition-transform duration-300", expanded ? "rotate-0" : "-rotate-90")} />
       </button>
       <div className={cn(
         "overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]",
-        expanded ? "max-h-[180px] opacity-100" : "max-h-0 opacity-0"
+        expanded ? "max-h-[160px] opacity-100" : "max-h-0 opacity-0"
       )}>
         <div
           ref={scrollRef}
-          className="mt-2 pl-[26px] max-h-[160px] overflow-y-auto scrollbar-none"
+          className="mt-1.5 pl-[26px] max-h-[140px] overflow-y-auto"
+          style={{ scrollbarWidth: 'none' }}
         >
-          {lines.map((line, i) => (
-            <div
-              key={i}
-              className="text-[13px] leading-[22px] text-text-tertiary transition-all duration-300"
-              style={{
-                fontFamily: "'Geist', sans-serif",
-                opacity: line.opacity,
-                transform: line.opacity === 1 ? 'translateY(0)' : 'translateY(4px)',
-              }}
-            >
-              {line.text || ' '}
-            </div>
-          ))}
-          {isStreaming && (
-            <span className="inline-block w-[2px] h-[14px] bg-accent-blue ml-0.5 animate-pulse align-middle" />
-          )}
+          <div className="text-[13px] leading-[22px] text-text-tertiary whitespace-pre-wrap" style={{ fontFamily: "'Geist', sans-serif" }}>
+            {displayedText}
+            {isStreaming && <span className="inline-block w-[1.5px] h-[13px] bg-text-tertiary ml-0.5 animate-pulse align-middle" />}
+          </div>
         </div>
       </div>
     </div>

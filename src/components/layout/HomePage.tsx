@@ -249,7 +249,7 @@ export function HomePage() {
 
             {/* Input area — simplified chatbot card */}
             <motion.div
-              className="relative w-[794px] max-w-full origin-top"
+              className="relative w-[794px] xl:w-[860px] 2xl:w-[940px] max-w-full origin-top"
               initial={reduceMotion ? false : { opacity: 0, y: 22, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={scaleTrans}

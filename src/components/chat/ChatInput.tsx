@@ -38,7 +38,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <div className="shrink-0 px-4 pb-4 pt-2">
       <div className={cn(
-        "max-w-[720px] mx-auto rounded-[12px] overflow-hidden",
+        "max-w-[720px] xl:max-w-[800px] 2xl:max-w-[860px] mx-auto rounded-[12px] overflow-hidden",
         dk ? "bg-zinc-800" : "bg-white"
       )} style={{
         boxShadow: '0px 4px 16px 0px rgba(0,0,0,0.05)',

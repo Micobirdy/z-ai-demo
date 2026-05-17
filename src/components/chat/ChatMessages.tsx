@@ -20,7 +20,7 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone 
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-[720px] mx-auto px-4 py-6 flex flex-col gap-6">
+      <div className="max-w-[720px] xl:max-w-[800px] 2xl:max-w-[860px] mx-auto px-4 py-6 flex flex-col gap-6">
         {messages.map((msg) => (
           <div key={msg.id} className={cn("flex gap-3", msg.role === 'user' && "justify-end")}>
             <div className={cn(
