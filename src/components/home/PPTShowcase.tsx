@@ -153,11 +153,7 @@ export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
     >
       {/* Prompt suggestions */}
       <div className="flex flex-col items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] text-text-tertiary italic" style={{ fontFamily: "'Geist', sans-serif" }}>✦</span>
-          <span className="text-[14px] font-medium text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>Prompt</span>
-          <span className="text-[12px] text-text-tertiary italic" style={{ fontFamily: "'Geist', sans-serif" }}>✦</span>
-        </div>
+        <SectionTitle text="Prompt" />
         <div className="grid grid-cols-4 gap-3 w-full">
           {PROMPTS.map((p, i) => (
             <button
@@ -179,11 +175,7 @@ export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
 
       {/* Example templates */}
       <div className="flex flex-col items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] text-text-tertiary italic" style={{ fontFamily: "'Geist', sans-serif" }}>✦</span>
-          <span className="text-[14px] font-medium text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>Example</span>
-          <span className="text-[12px] text-text-tertiary italic" style={{ fontFamily: "'Geist', sans-serif" }}>✦</span>
-        </div>
+        <SectionTitle text="Example" />
 
         {/* Category tabs */}
         <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -221,13 +213,13 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
 
   return (
     <div
-      className="group relative rounded-[12px] border border-border-default overflow-hidden transition-all hover:shadow-md hover:border-border-strong cursor-pointer bg-bg-bg"
+      className="group relative rounded-[10px] border border-border-default overflow-hidden transition-all hover:shadow-md hover:border-border-strong cursor-pointer bg-bg-bg"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Cover */}
+      {/* Cover — 16:9 */}
       <div
-        className="relative h-[180px] p-5 flex flex-col justify-end overflow-hidden"
+        className="relative aspect-[16/9] p-5 flex flex-col justify-end overflow-hidden"
         style={{ backgroundColor: template.coverBg }}
       >
         <div className="absolute top-0 right-0 w-[60%] h-full opacity-10" style={{
@@ -262,6 +254,18 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SectionTitle({ text }: { text: string }) {
+  return (
+    <div className="flex items-center gap-3 w-full max-w-[320px]">
+      <div className="flex-1 h-px bg-border-default" />
+      <span className="text-[13px] font-medium text-text-tertiary tracking-wide" style={{ fontFamily: "'Geist', sans-serif" }}>
+        {text}
+      </span>
+      <div className="flex-1 h-px bg-border-default" />
     </div>
   );
 }

@@ -489,17 +489,16 @@ function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShado
       variants={variants}
       onClick={() => onSelect(agentKey)}
       className={cn(
-        "px-3 py-2 rounded-[99px] flex justify-start items-center gap-1.5 overflow-hidden transition-all cursor-pointer",
+        "px-3 py-1.5 rounded-full flex justify-start items-center gap-1.5 overflow-hidden transition-all cursor-pointer border",
         active
-          ? "bg-interactive-secondary-selected"
-          : "bg-transparent"
+          ? "bg-interactive-secondary-selected border-border-strong"
+          : "bg-transparent border-transparent hover:bg-bg-hover"
       )}
-      style={{ boxShadow: active ? (dk ? triShadowDk : triShadow) : 'none' }}
     >
-      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-50")}>
+      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-40")}>
         {icon}
       </div>
-      <span className={cn("text-xs font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-80" : "opacity-50")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-[12px] font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-80" : "opacity-40")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
@@ -523,17 +522,16 @@ function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label, agentKe
       variants={variants}
       onClick={() => onSelect(agentKey)}
       className={cn(
-        "px-3 py-2 rounded-[8px] flex justify-center items-center gap-2 overflow-hidden transition-all cursor-pointer",
+        "px-3 py-1.5 rounded-[8px] flex justify-center items-center gap-1.5 overflow-hidden transition-all cursor-pointer border",
         active
-          ? "bg-bg-bg"
-          : "bg-bg-surface/90"
+          ? "bg-bg-bg border-border-strong"
+          : "bg-transparent border-border-default hover:bg-bg-hover hover:border-border-strong"
       )}
-      style={{ boxShadow: dk ? triShadowDk : triShadow }}
     >
-      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-90" : "opacity-60")}>
+      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-50")}>
         {icon}
       </div>
-      <span className={cn("text-xs font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-90" : "opacity-60")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-[12px] font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-80" : "opacity-50")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
