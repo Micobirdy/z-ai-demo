@@ -10,44 +10,46 @@ interface ThinkingBlockProps {
 
 export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(true);
+  const [displayedContent, setDisplayedContent] = useState('');
   const [phase, setPhase] = useState<'streaming' | 'done'>('streaming');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
-
-  const streamDuration = Math.min(content.length * 25, 6000);
+  const indexRef = useRef(0);
 
   useEffect(() => {
-    timerRef.current = setTimeout(() => {
+    if (indexRef.current >= content.length) {
       setPhase('done');
       if (autoCollapse) {
-        setTimeout(() => {
+        const t = setTimeout(() => {
           setExpanded(false);
           setTimeout(() => onCollapseComplete?.(), 500);
         }, 1500);
+        return () => clearTimeout(t);
       }
-    }, streamDuration);
-    return () => clearTimeout(timerRef.current);
-  }, [streamDuration, autoCollapse, onCollapseComplete]);
+      return;
+    }
 
-  // Auto-scroll during streaming
-  useEffect(() => {
-    if (phase !== 'streaming' || !scrollRef.current) return;
-    const el = scrollRef.current;
-    const totalScroll = el.scrollHeight - el.clientHeight;
-    if (totalScroll <= 0) return;
+    // Variable speed: fast on normal chars, pause on punctuation/newlines
+    const char = content[indexRef.current];
+    const isPause = char === '\n' || char === '。' || char === '…' || char === '：';
+    const isSlow = char === '、' || char === '，' || char === '；';
+    const delay = isPause ? 180 + Math.random() * 120
+      : isSlow ? 60 + Math.random() * 40
+      : 18 + Math.random() * 22;
 
-    let start: number;
-    let rafId: number;
-    const animate = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / streamDuration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      el.scrollTop = totalScroll * eased;
-      if (progress < 1) rafId = requestAnimationFrame(animate);
-    };
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, [phase, streamDuration]);
+    const chunkSize = isPause ? 1 : isSlow ? 1 : Math.floor(Math.random() * 3) + 2;
+
+    const timer = setTimeout(() => {
+      const end = Math.min(indexRef.current + chunkSize, content.length);
+      indexRef.current = end;
+      setDisplayedContent(content.slice(0, end));
+
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [displayedContent, content, autoCollapse, onCollapseComplete]);
 
   return (
     <div className="my-1">
@@ -76,20 +78,15 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       )}>
         <div
           ref={scrollRef}
-          className="relative h-[172px] overflow-y-auto pl-[28px] pr-2"
+          className="h-[172px] overflow-y-auto pl-[28px] pr-2"
           style={{ scrollbarWidth: 'none' }}
         >
-          <div className="text-[13px] leading-[24px] text-text-tertiary whitespace-pre-wrap" style={{ fontFamily: "'Geist', sans-serif" }}>
-            {content}
+          <div
+            className="text-[13px] leading-[24px] text-text-tertiary whitespace-pre-wrap"
+            style={{ fontFamily: "'Geist', sans-serif" }}
+          >
+            {displayedContent}
           </div>
-
-          {/* Bottom fade mask during streaming */}
-          {phase === 'streaming' && (
-            <div
-              className="sticky bottom-0 left-0 right-0 h-[40px] pointer-events-none"
-              style={{ background: 'linear-gradient(transparent, var(--bg-page))' }}
-            />
-          )}
         </div>
       </div>
     </div>
