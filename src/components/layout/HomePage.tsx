@@ -4,6 +4,7 @@ import { ChevronDown, Sun, Moon, MessageSquare, BarChart3, FileText, PenTool, Mo
 import { BorderBeam } from 'border-beam'
 import Text3DFlip from '@/components/ui/text-3d-flip'
 import ZHoverEffect from '@/components/home/ZHoverEffect'
+import { PPTShowcase } from '@/components/home/PPTShowcase'
 import { useSidebar } from '@/hooks/useSidebar'
 import { useFileUpload, formatFileSize } from '@/hooks/useFileUpload'
 import { cn } from '@/lib/utils'
@@ -460,6 +461,11 @@ export function HomePage() {
               icon={<PenTool className={cn("size-3", "text-text-primary")} strokeWidth={1.33} />}
               label="AI Writing" />
           </motion.div>
+
+          {/* PPT Showcase — visible when AI PPT selected */}
+          {selectedAgent === 'ai-ppt' && (
+            <PPTShowcase onSelectPrompt={(prompt) => setInputValue(prompt)} />
+          )}
         </div>
       </div>
     </div>
