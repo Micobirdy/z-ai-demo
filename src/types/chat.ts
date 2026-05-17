@@ -5,12 +5,23 @@ export interface PreviewFile {
   content: string;
 }
 
+export type MessageType = 'text' | 'thinking' | 'ppt-wizard' | 'generating';
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  type?: MessageType;
   files?: PreviewFile[];
+  meta?: Record<string, unknown>;
+}
+
+export interface PPTPreferences {
+  audience: string;
+  pageCount: string;
+  style: string;
+  notes: string;
 }
 
 export interface ChatSession {

@@ -28,7 +28,8 @@ export interface SidebarContextValue {
 
   // Chat
   chatInitialMessage: string | null;
-  startChat: (message: string) => void;
+  chatAgentKey: string | null;
+  startChat: (message: string, agentKey?: string) => void;
   clearChat: () => void;
 
   // Settings panel

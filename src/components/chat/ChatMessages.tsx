@@ -1,11 +1,16 @@
 import { useRef, useEffect } from 'react';
-import { useSidebar } from '@/hooks/useSidebar';
 import { cn } from '@/lib/utils';
-import type { Message } from '@/types/chat';
+import { ThinkingBlock } from './messages/ThinkingBlock';
+import { PPTWizardCard } from './messages/PPTWizardCard';
+import type { Message, PPTPreferences } from '@/types/chat';
 
-export function ChatMessages({ messages }: { messages: Message[] }) {
-  const { theme } = useSidebar();
-  const dk = theme === 'dark';
+interface ChatMessagesProps {
+  messages: Message[];
+  onPPTSubmit?: (prefs: PPTPreferences) => void;
+  onPPTSkip?: () => void;
+}
+
+export function ChatMessages({ messages, onPPTSubmit, onPPTSkip }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,34 +28,10 @@ export function ChatMessages({ messages }: { messages: Message[] }) {
               </div>
             )}
             <div className={cn(
-              "max-w-[85%] rounded-[16px] px-4 py-3 text-[14px] leading-[22px]",
-              msg.role === 'user'
-                ? dk
-                  ? "bg-white/[0.08] text-white"
-                  : "bg-[#0d0d0d]/[0.05] text-[#0d0d0d]"
-                : dk
-                  ? "text-white/90"
-                  : "text-[#0d0d0d]"
-            )} style={{ fontFamily: "'Geist', sans-serif" }}>
-              <p className="whitespace-pre-wrap">{msg.content}</p>
-              {msg.files && msg.files.length > 0 && (
-                <div className={cn(
-                  "mt-3 flex flex-wrap gap-2"
-                )}>
-                  {msg.files.map((f, i) => (
-                    <span key={i} className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[12px] font-medium",
-                      dk ? "bg-white/[0.06] text-white/60" : "bg-[#0d0d0d]/[0.04] text-[#0d0d0d]/60"
-                    )}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1.5" y="1" width="7" height="9" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-                        <path d="M3.5 1V0.5H9.5C10.05 0.5 10.5 0.95 10.5 1.5V8.5" stroke="currentColor" strokeWidth="1.2"/>
-                      </svg>
-                      {f.name}
-                    </span>
-                  ))}
-                </div>
-              )}
+              "max-w-[85%]",
+              msg.role === 'user' && "rounded-[16px] px-4 py-3 bg-interactive-secondary-selected"
+            )}>
+              {renderMessageContent(msg, onPPTSubmit, onPPTSkip)}
             </div>
           </div>
         ))}
@@ -58,4 +39,59 @@ export function ChatMessages({ messages }: { messages: Message[] }) {
       </div>
     </div>
   );
+}
+
+function renderMessageContent(
+  msg: Message,
+  onPPTSubmit?: (prefs: PPTPreferences) => void,
+  onPPTSkip?: () => void,
+) {
+  switch (msg.type) {
+    case 'thinking':
+      return <ThinkingBlock content={msg.content} />;
+
+    case 'ppt-wizard':
+      return (
+        <PPTWizardCard
+          onSubmit={onPPTSubmit || (() => {})}
+          onSkip={onPPTSkip || (() => {})}
+        />
+      );
+
+    case 'generating':
+      return (
+        <div className="flex items-center gap-2 py-2">
+          <div className="flex items-center gap-[4px]">
+            <span className="w-[5px] h-[5px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '0ms' }} />
+            <span className="w-[5px] h-[5px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '200ms' }} />
+            <span className="w-[5px] h-[5px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '400ms' }} />
+          </div>
+          <span className="text-[14px] leading-[22px] text-text-secondary" style={{ fontFamily: "'Geist', sans-serif" }}>
+            {msg.content}
+          </span>
+        </div>
+      );
+
+    default:
+      return (
+        <>
+          <p className={cn(
+            "text-[14px] leading-[22px] whitespace-pre-wrap",
+            msg.role === 'user' ? "text-text-primary" : "text-text-primary"
+          )} style={{ fontFamily: "'Geist', sans-serif" }}>
+            {msg.content}
+          </p>
+          {msg.files && msg.files.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {msg.files.map((f, i) => (
+                <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[12px] font-medium bg-bg-surface text-text-secondary">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1" width="7" height="9" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M3.5 1V0.5H9.5C10.05 0.5 10.5 0.95 10.5 1.5V8.5" stroke="currentColor" strokeWidth="1.2"/></svg>
+                  {f.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </>
+      );
+  }
 }

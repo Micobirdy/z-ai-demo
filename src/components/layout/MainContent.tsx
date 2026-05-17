@@ -10,12 +10,12 @@ import { DataSettings } from '@/components/sidebar/settings/sections/DataSetting
 import { AboutSettings } from '@/components/sidebar/settings/sections/AboutSettings';
 
 export function MainContent() {
-  const { activeSettingsSection, isSettingsOpen, chatInitialMessage, theme } = useSidebar();
+  const { activeSettingsSection, isSettingsOpen, chatInitialMessage, chatAgentKey, theme } = useSidebar();
   const dk = theme === 'dark';
 
   // Chat page
   if (chatInitialMessage !== null) {
-    return <ChatPage initialMessage={chatInitialMessage} />;
+    return <ChatPage initialMessage={chatInitialMessage} agentKey={chatAgentKey} />;
   }
 
   // Home page

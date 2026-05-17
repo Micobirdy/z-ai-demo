@@ -310,7 +310,7 @@ export function HomePage() {
                     ref={textareaRef}
                     value={inputValue}
                     onChange={handleInputChange}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files'); clearFiles(); } } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); } } }}
                     maxLength={maxChars}
                     className={cn(
                       "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
@@ -376,7 +376,7 @@ export function HomePage() {
 
                       {/* Send button */}
                       <button
-                        onClick={() => { if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files'); clearFiles(); } }}
+                        onClick={() => { if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); } }}
                         className={cn(
                           "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all",
                           (inputValue.trim() || files.length > 0)
