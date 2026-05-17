@@ -10,46 +10,47 @@ interface ThinkingBlockProps {
 
 export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(true);
-  const [visibleLines, setVisibleLines] = useState<string[]>([]);
-  const [isStreaming, setIsStreaming] = useState(true);
-  const lineIndexRef = useRef(0);
+  const [phase, setPhase] = useState<'streaming' | 'done'>('streaming');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const allLines = content.split('\n');
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const streamDuration = Math.min(content.length * 25, 6000);
 
   useEffect(() => {
-    if (lineIndexRef.current >= allLines.length) {
-      setIsStreaming(false);
+    timerRef.current = setTimeout(() => {
+      setPhase('done');
       if (autoCollapse) {
-        const timer = setTimeout(() => {
+        setTimeout(() => {
           setExpanded(false);
           setTimeout(() => onCollapseComplete?.(), 500);
         }, 1500);
-        return () => clearTimeout(timer);
       }
-      return;
-    }
+    }, streamDuration);
+    return () => clearTimeout(timerRef.current);
+  }, [streamDuration, autoCollapse, onCollapseComplete]);
 
-    const currentLine = allLines[lineIndexRef.current];
-    const isBlank = currentLine.trim() === '';
-    const delay = isBlank ? 200 : 80 + Math.random() * 120;
+  // Auto-scroll during streaming
+  useEffect(() => {
+    if (phase !== 'streaming' || !scrollRef.current) return;
+    const el = scrollRef.current;
+    const totalScroll = el.scrollHeight - el.clientHeight;
+    if (totalScroll <= 0) return;
 
-    const timer = setTimeout(() => {
-      setVisibleLines(prev => [...prev, currentLine]);
-      lineIndexRef.current++;
-
-      requestAnimationFrame(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-      });
-    }, delay);
-
-    return () => clearTimeout(timer);
-  }, [visibleLines.length, allLines, autoCollapse, onCollapseComplete]);
+    let start: number;
+    let rafId: number;
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / streamDuration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.scrollTop = totalScroll * eased;
+      if (progress < 1) rafId = requestAnimationFrame(animate);
+    };
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [phase, streamDuration]);
 
   return (
     <div className="my-1">
-      {/* Toggle header */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-1.5 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer py-1"
@@ -57,44 +58,38 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       >
         <span className={cn(
           "w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-colors",
-          isStreaming ? "border-accent-blue text-accent-blue" : "border-border-default text-text-tertiary"
+          phase === 'streaming' ? "border-accent-blue" : "border-border-default"
         )}>
-          {isStreaming ? (
+          {phase === 'streaming' ? (
             <span className="w-[6px] h-[6px] rounded-full bg-accent-blue animate-pulse" />
           ) : (
-            <span className="text-[9px]">⊕</span>
+            <span className="text-[9px] text-text-tertiary">⊕</span>
           )}
         </span>
-        <span className="font-medium">{isStreaming ? '思考过程' : '思考过程'}</span>
+        <span className="font-medium">思考过程</span>
         <ChevronRight className={cn("size-[14px] transition-transform duration-300", expanded && "rotate-90")} />
       </button>
 
-      {/* Content area — fixed 172px height */}
       <div className={cn(
         "overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]",
         expanded ? "max-h-[172px] opacity-100 mt-1" : "max-h-0 opacity-0 mt-0"
       )}>
         <div
           ref={scrollRef}
-          className="h-[172px] overflow-y-auto pl-[28px] pr-2"
+          className="relative h-[172px] overflow-y-auto pl-[28px] pr-2"
           style={{ scrollbarWidth: 'none' }}
         >
-          {visibleLines.map((line, i) => (
+          <div className="text-[13px] leading-[24px] text-text-tertiary whitespace-pre-wrap" style={{ fontFamily: "'Geist', sans-serif" }}>
+            {content}
+          </div>
+
+          {/* Bottom fade mask during streaming */}
+          {phase === 'streaming' && (
             <div
-              key={i}
-              className={cn(
-                "text-[13px] leading-[24px] text-text-tertiary",
-                "animate-in fade-in duration-300"
-              )}
-              style={{
-                fontFamily: "'Geist', sans-serif",
-                animationDelay: '0ms',
-                animationFillMode: 'both',
-              }}
-            >
-              {line || ' '}
-            </div>
-          ))}
+              className="sticky bottom-0 left-0 right-0 h-[40px] pointer-events-none"
+              style={{ background: 'linear-gradient(transparent, var(--bg-page))' }}
+            />
+          )}
         </div>
       </div>
     </div>
