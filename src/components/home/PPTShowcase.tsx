@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 
@@ -129,6 +129,15 @@ interface PPTShowcaseProps {
 
 export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
   const [activeCategory, setActiveCategory] = useState('all');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to Prompt area when mounted
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredTemplates = activeCategory === 'my'
     ? MY_TEMPLATES
@@ -140,6 +149,7 @@ export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
       className="w-full max-w-[794px] flex flex-col gap-8 mt-4"
+      ref={containerRef}
     >
       {/* Prompt suggestions */}
       <div className="flex flex-col items-center gap-4">
@@ -205,14 +215,17 @@ export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
 }
 
 function TemplateCard({ template, onClick }: { template: Template; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <button
-      onClick={onClick}
-      className="group text-left rounded-[12px] border border-border-default overflow-hidden transition-all hover:shadow-md hover:border-border-strong hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer bg-bg-bg"
+    <div
+      className="group relative rounded-[12px] border border-border-default overflow-hidden transition-all hover:shadow-md hover:border-border-strong cursor-pointer bg-bg-bg"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Cover */}
       <div
-        className="relative h-[160px] p-5 flex flex-col justify-end overflow-hidden"
+        className="relative h-[180px] p-5 flex flex-col justify-end overflow-hidden"
         style={{ backgroundColor: template.coverBg }}
       >
         <div className="absolute top-0 right-0 w-[60%] h-full opacity-10" style={{
@@ -232,7 +245,21 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
             {template.subtitle}
           </p>
         )}
+
+        {/* Hover overlay */}
+        <div className={cn(
+          "absolute inset-0 flex items-center justify-center transition-all duration-200 z-20",
+          hovered ? "bg-black/40 opacity-100" : "opacity-0 pointer-events-none"
+        )}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className="px-4 py-2 rounded-[8px] bg-white text-[13px] font-medium text-[#0d0d0d] shadow-lg transition-all hover:bg-white/90 active:scale-[0.96]"
+            style={{ fontFamily: "'Geist', sans-serif" }}
+          >
+            Use template
+          </button>
+        </div>
       </div>
-    </button>
+    </div>
   );
 }
