@@ -5,7 +5,7 @@ import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { PreviewPanel } from './PreviewPanel';
 import type { Message, PreviewFile, PPTPreferences } from '@/types/chat';
-import { ChevronDown, Sun, Moon } from 'lucide-react';
+import { ChevronDown, Share, Monitor } from 'lucide-react';
 
 const MOCK_FILES: PreviewFile[] = [
   {
@@ -32,10 +32,15 @@ interface ChatPageProps {
 }
 
 export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
-  const { theme, toggleTheme } = useSidebar();
+  const { theme, toggleTheme, isCollapsed, toggleCollapse } = useSidebar();
   const dk = theme === 'dark';
   const isPPT = agentKey === 'ai-ppt';
   const initRef = useRef(false);
+
+  // Auto-collapse sidebar when entering chat
+  useEffect(() => {
+    if (!isCollapsed) toggleCollapse();
+  }, []);
 
   const [messages, setMessages] = useState<Message[]>(() => {
     if (!initialMessage) return [];
@@ -164,22 +169,30 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
 
   return (
     <div className="flex flex-col h-full bg-bg-page">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-[12px] py-[8px] shrink-0">
-        <button className="pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] cursor-pointer transition-colors hover:bg-bg-hover">
+      {/* Top bar — matches design */}
+      <div className="flex items-center justify-between px-[16px] py-[8px] shrink-0">
+        {/* Left — model selector */}
+        <button className="flex items-center gap-[4px] cursor-pointer transition-colors hover:opacity-80">
           <span className="text-[16px] font-normal leading-[24px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>
-            {isPPT ? 'GLM-5.1 · AI PPT' : 'GLM-5.1'}
+            GLM 5.1
           </span>
           <ChevronDown className="size-[12px] text-icon-tertiary" />
         </button>
+
+        {/* Right — Background Tasks + Usage + Share */}
         <div className="flex items-center gap-[8px]">
-          <button onClick={toggleTheme} className="pl-[8px] pr-[10px] py-[6px] rounded-[6px] flex items-center gap-[4px] cursor-pointer transition-colors hover:bg-bg-hover">
-            <div className="w-[20px] h-[20px] flex items-center justify-center opacity-80">
-              {dk ? <Sun className="size-[16px] text-text-primary" /> : <Moon className="size-[16px] text-text-primary" />}
-            </div>
-            <span className="opacity-80 text-[14px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>
-              {dk ? 'Light' : 'Dark'}
-            </span>
+          <button className="flex items-center gap-[4px] px-[8px] py-[6px] rounded-[6px] transition-colors hover:bg-bg-hover">
+            <div className="w-[6px] h-[6px] rounded-full bg-green-500" />
+            <span className="text-[14px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>Background Tasks</span>
+            <ChevronDown className="size-[12px] text-icon-tertiary" />
+          </button>
+          <div className="flex items-center gap-[4px] px-[8px] py-[6px] rounded-[6px]">
+            <Monitor className="size-[14px] text-icon-secondary" />
+            <span className="text-[14px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>50%</span>
+          </div>
+          <button className="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[8px] bg-interactive-primary text-text-inverted text-[13px] font-medium transition-all hover:opacity-90 active:scale-[0.97]" style={{ fontFamily: 'Geist, sans-serif' }}>
+            <Share className="size-[14px]" />
+            Share
           </button>
         </div>
       </div>

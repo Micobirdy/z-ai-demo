@@ -21,19 +21,19 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       if (autoCollapse) {
         const timer = setTimeout(() => {
           setExpanded(false);
-          onCollapseComplete?.();
-        }, 800);
+          setTimeout(() => onCollapseComplete?.(), 400);
+        }, 1500);
         return () => clearTimeout(timer);
       }
       return;
     }
 
     const timer = setTimeout(() => {
-      const chunkSize = Math.floor(Math.random() * 3) + 2;
+      const chunkSize = Math.floor(Math.random() * 4) + 3;
       const nextIndex = Math.min(indexRef.current + chunkSize, content.length);
       setDisplayedText(content.slice(0, nextIndex));
       indexRef.current = nextIndex;
-    }, 20);
+    }, 15);
 
     return () => clearTimeout(timer);
   }, [displayedText, content, autoCollapse, onCollapseComplete]);
