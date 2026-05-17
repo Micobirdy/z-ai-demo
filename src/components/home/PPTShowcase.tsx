@@ -125,9 +125,10 @@ const PROMPTS = [
 
 interface PPTShowcaseProps {
   onSelectPrompt: (prompt: string) => void;
+  onSelectTemplate?: (template: { title: string; coverBg: string; coverAccent: string; coverTextColor: string; prompt: string }) => void;
 }
 
-export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
+export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcaseProps) {
   const [activeCategory, setActiveCategory] = useState('all');
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -200,7 +201,13 @@ export function PPTShowcase({ onSelectPrompt }: PPTShowcaseProps) {
         {/* Template grid */}
         <div className="grid grid-cols-3 gap-4 w-full">
           {filteredTemplates.map(template => (
-            <TemplateCard key={template.id} template={template} onClick={() => onSelectPrompt(template.prompt)} />
+            <TemplateCard key={template.id} template={template} onClick={() => {
+              if (onSelectTemplate) {
+                onSelectTemplate({ title: template.title.replace(/\n/g, ' '), coverBg: template.coverBg, coverAccent: template.coverAccent, coverTextColor: template.coverTextColor, prompt: template.prompt });
+              } else {
+                onSelectPrompt(template.prompt);
+              }
+            }} />
           ))}
         </div>
       </div>
@@ -240,14 +247,14 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
           </p>
         )}
 
-        {/* Hover overlay */}
+        {/* Hover overlay — dark */}
         <div className={cn(
           "absolute inset-0 flex items-center justify-center transition-all duration-200 z-20",
-          hovered ? "bg-black/40 opacity-100" : "opacity-0 pointer-events-none"
+          hovered ? "bg-black/50 opacity-100" : "opacity-0 pointer-events-none"
         )}>
           <button
             onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className="px-4 py-2 rounded-[8px] bg-white text-[13px] font-medium text-[#0d0d0d] shadow-lg transition-all hover:bg-white/90 active:scale-[0.96]"
+            className="px-4 py-2 rounded-[8px] bg-white/95 text-[13px] font-medium text-[#0d0d0d] shadow-lg transition-all hover:bg-white active:scale-[0.96] backdrop-blur-sm"
             style={{ fontFamily: "'Geist', sans-serif" }}
           >
             Use template
@@ -260,12 +267,12 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
 
 function SectionTitle({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-3 w-full max-w-[320px]">
-      <div className="flex-1 h-px bg-border-default" />
+    <div className="flex items-center gap-4 w-full max-w-[360px]">
+      <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-default))' }} />
       <span className="text-[13px] font-medium text-text-tertiary tracking-wide" style={{ fontFamily: "'Geist', sans-serif" }}>
         {text}
       </span>
-      <div className="flex-1 h-px bg-border-default" />
+      <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, var(--border-default))' }} />
     </div>
   );
 }

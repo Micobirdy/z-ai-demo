@@ -25,6 +25,7 @@ export function HomePage() {
   const [inputValue, setInputValue] = useState('')
   const [selectedAgent, setSelectedAgent] = useState<AgentKey>('im')
   const [isListening, setIsListening] = useState(false)
+  const [attachedTemplate, setAttachedTemplate] = useState<{ title: string; coverBg: string; prompt: string } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
   const { files, isDragging, removeFile, clearFiles, openFilePicker, dragHandlers, FileInput } = useFileUpload()
@@ -279,6 +280,21 @@ export function HomePage() {
                   files.length > 0 ? "min-h-[96px]" : "h-24",
                   "bg-bg-bg"
                 )}>
+                  {/* Attached template preview */}
+                  {attachedTemplate && (
+                    <div className="flex items-center gap-2.5 w-full relative z-20 mb-1">
+                      <div className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-[8px] border border-border-default bg-bg-bg">
+                        <div className="w-[40px] h-[24px] rounded-[4px] shrink-0 flex items-center justify-center text-[8px] font-bold text-white" style={{ backgroundColor: attachedTemplate.coverBg === '#ffffff' || attachedTemplate.coverBg === '#f0f4f8' || attachedTemplate.coverBg === '#fdf6ec' || attachedTemplate.coverBg === '#f0fdf4' || attachedTemplate.coverBg === '#faf5ff' || attachedTemplate.coverBg === '#f8fafc' || attachedTemplate.coverBg === '#fffbeb' ? '#888' : attachedTemplate.coverBg }}>
+                          PPT
+                        </div>
+                        <span className="text-[12px] text-text-primary truncate max-w-[180px]" style={{ fontFamily: "'Geist', sans-serif" }}>{attachedTemplate.title}</span>
+                        <button onClick={() => { setAttachedTemplate(null); setInputValue(''); }} className="size-[14px] rounded-full flex items-center justify-center shrink-0 opacity-40 hover:opacity-100 transition-opacity">
+                          <X className="size-[10px]" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Uploaded files */}
                   {files.length > 0 && (
                     <div className="flex flex-wrap gap-2 w-full relative z-20 mb-1">
@@ -464,7 +480,10 @@ export function HomePage() {
 
           {/* PPT Showcase — visible when AI PPT selected */}
           {selectedAgent === 'ai-ppt' && (
-            <PPTShowcase onSelectPrompt={(prompt) => { setInputValue(prompt); setTimeout(() => { textareaRef.current?.focus(); textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); }} />
+            <PPTShowcase
+              onSelectPrompt={(prompt) => { setInputValue(prompt); setAttachedTemplate(null); setTimeout(() => { textareaRef.current?.focus(); textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); }}
+              onSelectTemplate={(t) => { setAttachedTemplate({ title: t.title, coverBg: t.coverBg, prompt: t.prompt }); setInputValue(t.prompt); setTimeout(() => { textareaRef.current?.focus(); textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); }}
+            />
           )}
         </div>
       </div>
