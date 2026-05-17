@@ -8,9 +8,10 @@ interface ChatMessagesProps {
   messages: Message[];
   onPPTSubmit?: (prefs: PPTPreferences) => void;
   onPPTSkip?: () => void;
+  onThinkingDone?: () => void;
 }
 
-export function ChatMessages({ messages, onPPTSubmit, onPPTSkip }: ChatMessagesProps) {
+export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip }: ChatMessagesP
               "max-w-[85%]",
               msg.role === 'user' && "rounded-[16px] px-4 py-3 bg-interactive-secondary-selected"
             )}>
-              {renderMessageContent(msg, onPPTSubmit, onPPTSkip)}
+              {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone)}
             </div>
           </div>
         ))}
@@ -45,10 +46,11 @@ function renderMessageContent(
   msg: Message,
   onPPTSubmit?: (prefs: PPTPreferences) => void,
   onPPTSkip?: () => void,
+  onThinkingDone?: () => void,
 ) {
   switch (msg.type) {
     case 'thinking':
-      return <ThinkingBlock content={msg.content} />;
+      return <ThinkingBlock content={msg.content} autoCollapse onCollapseComplete={onThinkingDone} />;
 
     case 'ppt-wizard':
       return (
