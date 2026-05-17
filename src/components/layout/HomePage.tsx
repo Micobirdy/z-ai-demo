@@ -282,8 +282,8 @@ export function HomePage() {
                 )}>
                   {/* Attached template preview */}
                   {attachedTemplate && (
-                    <div className="flex items-center gap-2.5 w-full relative z-20 mb-1">
-                      <div className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-[8px] border border-border-default bg-bg-bg">
+                    <div className="flex items-center gap-2.5 w-full relative z-20 mb-1.5">
+                      <div className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-[6px] border border-border-default bg-bg-bg">
                         <div className="w-[40px] h-[24px] rounded-[4px] shrink-0 flex items-center justify-center text-[8px] font-bold text-white" style={{ backgroundColor: attachedTemplate.coverBg === '#ffffff' || attachedTemplate.coverBg === '#f0f4f8' || attachedTemplate.coverBg === '#fdf6ec' || attachedTemplate.coverBg === '#f0fdf4' || attachedTemplate.coverBg === '#faf5ff' || attachedTemplate.coverBg === '#f8fafc' || attachedTemplate.coverBg === '#fffbeb' ? '#888' : attachedTemplate.coverBg }}>
                           PPT
                         </div>
@@ -292,6 +292,16 @@ export function HomePage() {
                           <X className="size-[10px]" />
                         </button>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Placeholder */}
+                  {!inputValue && !attachedTemplate && files.length === 0 && (
+                    <div className={cn(
+                      "self-stretch flex-1 text-base font-normal leading-5 pointer-events-none",
+                      "text-text-placeholder"
+                    )} style={{ fontFamily: "'Geist', sans-serif" }}>
+                      {isAgent ? 'Describe a complex task for the agent...' : 'Chat with z.ai, or start creating.'}
                     </div>
                   )}
 
@@ -314,15 +324,6 @@ export function HomePage() {
                     </div>
                   )}
 
-                  {/* Placeholder */}
-                  {!inputValue && files.length === 0 && (
-                    <div className={cn(
-                      "self-stretch flex-1 text-base font-normal leading-5 pointer-events-none",
-                      "text-text-placeholder"
-                    )} style={{ fontFamily: "'Geist', sans-serif" }}>
-                      {isAgent ? 'Describe a complex task for the agent...' : 'Chat with z.ai, or start creating.'}
-                    </div>
-                  )}
                   <textarea
                     ref={textareaRef}
                     value={inputValue}
@@ -330,7 +331,9 @@ export function HomePage() {
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); } } }}
                     maxLength={maxChars}
                     className={cn(
-                      "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
+                      (attachedTemplate || files.length > 0)
+                        ? "relative p-0 pt-1 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10 min-h-[24px]"
+                        : "absolute inset-0 p-3 text-base font-normal leading-6 w-full resize-none outline-none bg-transparent z-10",
                       "text-text-primary"
                     )}
                     style={{ fontFamily: "'Geist', sans-serif" }}
