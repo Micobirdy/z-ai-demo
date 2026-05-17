@@ -464,7 +464,7 @@ export function HomePage() {
 
           {/* PPT Showcase — visible when AI PPT selected */}
           {selectedAgent === 'ai-ppt' && (
-            <PPTShowcase onSelectPrompt={(prompt) => setInputValue(prompt)} />
+            <PPTShowcase onSelectPrompt={(prompt) => { setInputValue(prompt); setTimeout(() => { textareaRef.current?.focus(); textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); }} />
           )}
         </div>
       </div>
