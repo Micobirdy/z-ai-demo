@@ -47,7 +47,7 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
   const [pageCount, setPageCount] = useState('1-12');
   const [style, setStyle] = useState('mint-modern');
   const [notes, setNotes] = useState('');
-  const [countdown, setCountdown] = useState(20);
+  const [countdown, setCountdown] = useState(30);
   const [submitted, setSubmitted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -89,17 +89,9 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
             规划幻灯片创建
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={handleSkip} disabled={submitted} className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer disabled:opacity-30" style={{ fontFamily: "'Geist', sans-serif" }}>
-            跳过 »
-          </button>
-          <button onClick={handleSubmit} disabled={submitted} className={cn(
-            "px-4 py-1.5 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer disabled:opacity-30",
-            "border border-border-default text-text-primary hover:bg-bg-hover active:scale-[0.97]"
-          )} style={{ fontFamily: "'Geist', sans-serif" }}>
-            继续 ({countdown})
-          </button>
-        </div>
+        <button onClick={handleSkip} disabled={submitted} className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer disabled:opacity-30" style={{ fontFamily: "'Geist', sans-serif" }}>
+          跳过 »
+        </button>
       </div>
 
       <div className="p-5 flex flex-col gap-6">
@@ -181,6 +173,21 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
             style={{ fontFamily: "'Geist', sans-serif" }}
           />
         </Section>
+
+        {/* Confirm button */}
+        <div className="pt-2 border-t border-border-default">
+          <button
+            onClick={handleSubmit}
+            disabled={submitted}
+            className={cn(
+              "w-full py-2.5 rounded-[10px] text-[14px] font-medium transition-all cursor-pointer disabled:opacity-30 active:scale-[0.98]",
+              "bg-interactive-primary text-text-inverted hover:opacity-90"
+            )}
+            style={{ fontFamily: "'Geist', sans-serif" }}
+          >
+            {submitted ? '已确认' : `确认并生成 (${countdown}s)`}
+          </button>
+        </div>
       </div>
     </div>
   );

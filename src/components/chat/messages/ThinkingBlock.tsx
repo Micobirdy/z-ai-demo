@@ -29,11 +29,11 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
     }
 
     const timer = setTimeout(() => {
-      const chunkSize = Math.floor(Math.random() * 4) + 3;
+      const chunkSize = Math.floor(Math.random() * 2) + 1;
       const nextIndex = Math.min(indexRef.current + chunkSize, content.length);
       setDisplayedText(content.slice(0, nextIndex));
       indexRef.current = nextIndex;
-    }, 15);
+    }, 45);
 
     return () => clearTimeout(timer);
   }, [displayedText, content, autoCollapse, onCollapseComplete]);

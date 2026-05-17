@@ -20,11 +20,25 @@ function generateId() {
   return Math.random().toString(36).substring(2, 10);
 }
 
-const PPT_THINKING_CONTENT = `分析用户输入的 PPT 需求...
-提取关键信息：主题、行业领域、内容方向
-评估最佳呈现方式：页数、配色方案、排版风格
-准备需求确认项：受众场景、视觉偏好、页数范围
-开始收集用户生成偏好。`;
+const PPT_THINKING_CONTENT = `分析用户输入的演示文稿需求...
+
+正在提取关键信息：
+→ 识别主题方向和行业领域
+→ 分析内容深度和专业程度
+→ 评估目标受众的期望
+
+规划最佳呈现策略：
+→ 推荐页数范围和内容密度
+→ 匹配适合的视觉风格
+→ 确定配色方案和排版规则
+
+需要与用户确认以下参数：
+• 目标受众与使用场景
+• 期望的幻灯片页数
+• 视觉风格偏好
+• 其他补充要求
+
+准备进入需求确认阶段...`;
 
 interface ChatPageProps {
   initialMessage?: string;
@@ -103,7 +117,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
       timestamp: Date.now(),
     }]);
 
-    // Generating
+    // Generating — no preview panel
     setTimeout(() => {
       setMessages(prev => [...prev, {
         id: generateId(),
@@ -113,23 +127,20 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
         type: 'generating',
       }]);
 
-      // Done
+      // Done — text only, no preview panel
       setTimeout(() => {
         setMessages(prev => {
           const updated = prev.filter(m => m.type !== 'generating');
           return [...updated, {
             id: generateId(),
             role: 'assistant',
-            content: `幻灯片已生成完毕！共 ${prefs.pageCount.split('-').pop()} 页。\n\n你可以在右侧预览面板中查看和下载。`,
+            content: `幻灯片已生成完毕！共 ${prefs.pageCount.split('-').pop()} 页。\n\n包含以下内容：\n• 封面页\n• 目录导航\n• 核心内容页 × ${Number(prefs.pageCount.split('-').pop()) - 3}\n• 总结页\n\n你可以点击上方「Share」按钮分享或导出。`,
             timestamp: Date.now(),
-            files: MOCK_FILES,
           }];
         });
-        setPreviewFiles(MOCK_FILES);
-        setShowPreview(true);
         setPptPhase('done');
-      }, 3000);
-    }, 500);
+      }, 4000);
+    }, 800);
   }, []);
 
   const handlePPTSkip = useCallback(() => {
