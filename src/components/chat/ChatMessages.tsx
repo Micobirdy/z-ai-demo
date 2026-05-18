@@ -26,7 +26,9 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone 
         {messages.map((msg) => (
           <div key={msg.id} className={cn("flex gap-3", msg.role === 'user' && "justify-end")}>
             <div className={cn(
-              "max-w-[85%]",
+              msg.type === 'ppt-slides' || msg.type === 'ppt-summary' || msg.type === 'ppt-actions' || msg.type === 'tool-call' || msg.type === 'ppt-wizard'
+                ? "w-full"
+                : "max-w-[85%]",
               msg.role === 'user' && "rounded-[16px] px-4 py-3 bg-interactive-secondary-selected"
             )}>
               {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone)}
