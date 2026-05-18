@@ -492,7 +492,8 @@ export function HomePage() {
   )
 }
 
-const TAG_SHADOW = '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px 0px rgba(0,0,0,0.08), inset 0px 0px 0px 1px rgba(255,255,255,1)';
+const TAG_SHADOW_LIGHT = '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px 0px rgba(0,0,0,0.08), inset 0px 0px 0px 1px rgba(255,255,255,1)';
+const TAG_SHADOW_DARK = '0px 0px 0px 1px rgba(255,255,255,0.08), 0px 1px 2px 0px rgba(0,0,0,0.2), inset 0px 0px 0px 1px rgba(255,255,255,0.04)';
 
 function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShadow, triShadowDk, icon, label }: {
   variants: Record<string, unknown>
@@ -514,7 +515,7 @@ function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShado
         "px-3 py-1.5 rounded-md flex justify-start items-center gap-1.5 overflow-hidden transition-colors cursor-pointer outline outline-1 outline-border-default",
         active ? "bg-bg-hover" : "bg-bg-page hover:bg-bg-hover"
       )}
-      style={{ boxShadow: TAG_SHADOW }}
+      style={{ boxShadow: dk ? TAG_SHADOW_DARK : TAG_SHADOW_LIGHT }}
     >
       <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center", active ? "opacity-80" : "opacity-50")}>
         {icon}
@@ -546,7 +547,7 @@ function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label, agentKe
         "px-3 py-1.5 rounded-md flex justify-start items-center gap-1.5 overflow-hidden transition-colors cursor-pointer outline outline-1 outline-border-default",
         active ? "bg-bg-hover" : "bg-bg-page hover:bg-bg-hover"
       )}
-      style={{ boxShadow: TAG_SHADOW }}
+      style={{ boxShadow: dk ? TAG_SHADOW_DARK : TAG_SHADOW_LIGHT }}
     >
       <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center", active ? "opacity-80" : "opacity-50")}>
         {icon}
