@@ -155,12 +155,12 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
       {/* Prompt suggestions */}
       <div className="flex flex-col items-center gap-4">
         <SectionTitle text="Prompt" />
-        <div className="grid grid-cols-4 gap-3 w-full">
+        <div className="grid grid-cols-4 gap-1.5 w-full">
           {PROMPTS.map((p, i) => (
             <button
               key={i}
               onClick={() => onSelectPrompt(p)}
-              className="text-left p-4 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col overflow-hidden transition-all hover:border-border-strong hover:shadow-sm active:scale-[0.98] cursor-pointer"
+              className="text-left p-3 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col overflow-hidden transition-colors hover:bg-bg-hover active:opacity-80 cursor-pointer"
               style={{ fontFamily: "'Geist', sans-serif" }}
             >
               <div className="w-[20px] h-[20px] mb-2.5 text-icon-tertiary shrink-0">

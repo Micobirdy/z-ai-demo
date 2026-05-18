@@ -398,16 +398,14 @@ export function HomePage() {
                       <button
                         onClick={() => { if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); } }}
                         className={cn(
-                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all",
+                          "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all text-text-primary",
                           (inputValue.trim() || files.length > 0)
-                            ? dk ? "bg-white text-black" : "bg-[#0d0d0d] text-white"
-                            : dk
-                              ? "opacity-25 bg-white outline outline-1 outline-offset-[-1px] outline-stone-950/10"
-                              : "bg-neutral-200"
+                            ? "bg-interactive-primary text-text-inverted"
+                            : "bg-bg-subtle/60 opacity-50"
                         )}
                         aria-label="Send"
                       >
-                        <div className={cn("w-4 h-4 relative overflow-hidden", (inputValue.trim() || files.length > 0) ? "" : dk ? "" : "opacity-20")}>
+                        <div className="w-4 h-4 relative overflow-hidden">
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
