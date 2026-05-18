@@ -117,29 +117,83 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
       timestamp: Date.now(),
     }]);
 
-    // Generating — no preview panel
+    // Generating
     setTimeout(() => {
+      // Tool call 1
       setMessages(prev => [...prev, {
-        id: generateId(),
-        role: 'assistant',
-        content: '正在生成幻灯片，预计需要 30 秒...',
-        timestamp: Date.now(),
-        type: 'generating',
+        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { count: 3 },
       }]);
 
-      // Done — text only, no preview panel
       setTimeout(() => {
-        setMessages(prev => {
-          const updated = prev.filter(m => m.type !== 'generating');
-          return [...updated, {
-            id: generateId(),
-            role: 'assistant',
-            content: `幻灯片已生成完毕！共 ${prefs.pageCount.split('-').pop()} 页。\n\n包含以下内容：\n• 封面页\n• 目录导航\n• 核心内容页 × ${Number(prefs.pageCount.split('-').pop()) - 3}\n• 总结页\n\n你可以点击上方「Share」按钮分享或导出。`,
-            timestamp: Date.now(),
-          }];
-        });
-        setPptPhase('done');
-      }, 4000);
+        setMessages(prev => [...prev, {
+          id: generateId(), role: 'assistant',
+          content: '我已经用图像模式用简约风格列出的6张幻灯片。接下来，我将开始生成草稿和幻灯片。',
+          timestamp: Date.now(),
+        }]);
+
+        // Tool call 2
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { count: 3 },
+          }]);
+
+          const totalPages = Number(prefs.pageCount.split('-').pop()) || 6;
+          const slides = Array.from({ length: totalPages }, (_, i) => ({
+            title: ['戦略 2025', '市場分析', '工作议程', '市场营销战略', '市場分析', '竞品调研'][i] || `第 ${i + 1} 页`,
+            pageNumber: i + 1,
+            totalPages,
+            bgColor: ['#f0f4f8', '#ffffff', '#f8fafc', '#f0f4f8', '#ffffff', '#f8fafc'][i % 6],
+            accentColor: ['#2563eb', '#1e3a5f', '#0d9488', '#2563eb', '#1e3a5f', '#0d9488'][i % 6],
+            contentPreview: ['マーケティング\n戦略 2025', '市場分析', 'アジェンダ', 'マーケティング戦略\n概要', '市場分析', '競合分析'][i] || '内容',
+          }));
+
+          // Slide previews
+          setTimeout(() => {
+            setMessages(prev => {
+              const updated = prev.filter(m => m.type !== 'generating');
+              return [...updated, {
+                id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+                type: 'ppt-slides', meta: { slides },
+              }];
+            });
+
+            // Summary text
+            setTimeout(() => {
+              setMessages(prev => [...prev, {
+                id: generateId(), role: 'assistant',
+                content: `我已经用"Etching"图像生成风格完成了您的${totalPages}页团队状态报告演示文稿。`,
+                timestamp: Date.now(),
+              }]);
+
+              // Summary carousel
+              setTimeout(() => {
+                setMessages(prev => [...prev, {
+                  id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+                  type: 'ppt-summary', meta: { slides, title: '产品研究报告 2025' },
+                }]);
+
+                // Checklist
+                setTimeout(() => {
+                  setMessages(prev => [...prev, {
+                    id: generateId(), role: 'assistant',
+                    content: `我已完成建议检查清单，以下几项建议你人工过目确认：\n\n${totalPages}/${totalPages} 页通过 · 3 页经自动修复 · 0 页残留问题\n检测内容：内容溢出 / 文字重叠 / 版面留白\n\n1. **核心数字** — 52.4、8、13、0、185 等关键数据是否与您的最新版本一致\n2. **人名与单位** — 汇报人"马伟航"、"天荒坪电站"等是否准确\n3. **金句措辞** — 各页金句的语气和用词是否符合您的汇报风格\n4. **演讲稿节奏** — 试着按每页备注读一遍，确认 5 分钟内能讲完\n\n需要修改任何一页，直接说页号 + 改什么，例如"P6 的数字改成 53.1"。`,
+                    timestamp: Date.now(),
+                  }]);
+
+                  // Action buttons
+                  setTimeout(() => {
+                    setMessages(prev => [...prev, {
+                      id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+                      type: 'ppt-actions',
+                    }]);
+                    setPptPhase('done');
+                  }, 500);
+                }, 800);
+              }, 600);
+            }, 400);
+          }, 2000);
+        }, 800);
+      }, 600);
     }, 800);
   }, []);
 

@@ -5,7 +5,7 @@ export interface PreviewFile {
   content: string;
 }
 
-export type MessageType = 'text' | 'thinking' | 'ppt-wizard' | 'generating';
+export type MessageType = 'text' | 'thinking' | 'ppt-wizard' | 'generating' | 'ppt-slides' | 'ppt-summary' | 'ppt-actions' | 'tool-call';
 
 export interface Message {
   id: string;

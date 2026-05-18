@@ -2,7 +2,9 @@ import { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ThinkingBlock } from './messages/ThinkingBlock';
 import { PPTWizardCard } from './messages/PPTWizardCard';
+import { PPTSlideCard, PPTSummaryCarousel, ToolCallBlock, PPTActionButtons } from './messages/PPTPreview';
 import type { Message, PPTPreferences } from '@/types/chat';
+import type { PPTSlide } from './messages/PPTPreview';
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -68,6 +70,29 @@ function renderMessageContent(
           </span>
         </div>
       );
+
+    case 'tool-call':
+      return <ToolCallBlock count={msg.meta?.count as number || 3} />;
+
+    case 'ppt-slides':
+      return (
+        <div className="flex flex-col gap-3 w-full">
+          {(msg.meta?.slides as PPTSlide[] || []).map((slide, i) => (
+            <PPTSlideCard key={i} slide={slide} />
+          ))}
+        </div>
+      );
+
+    case 'ppt-summary':
+      return (
+        <PPTSummaryCarousel
+          slides={msg.meta?.slides as PPTSlide[] || []}
+          title={msg.meta?.title as string || '产品研究报告 2025'}
+        />
+      );
+
+    case 'ppt-actions':
+      return <PPTActionButtons onSaveTemplate={() => {}} onEdit={() => {}} />;
 
     default:
       return (
