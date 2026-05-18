@@ -1,105 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronRight, ChevronLeft, FileText } from 'lucide-react';
+import { ChevronRight, ChevronLeft, FileText, Terminal } from 'lucide-react';
 
 export interface PPTSlide {
   title: string;
   pageNumber: number;
   totalPages: number;
-  imageUrl?: string;
   bgColor: string;
   accentColor: string;
   contentPreview: string;
 }
 
-interface PPTSlideCardProps {
-  slide: PPTSlide;
-}
-
-export function PPTSlideCard({ slide }: PPTSlideCardProps) {
-  return (
-    <div className="rounded-[8px] overflow-hidden border border-border-default bg-bg-bg">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
-        <div className="flex items-center gap-1.5">
-          <FileText className="size-[14px] text-icon-tertiary" />
-          <span className="text-[13px] font-medium text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>{slide.title}</span>
-        </div>
-        <span className="text-[12px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>{slide.pageNumber}/{slide.totalPages}</span>
-      </div>
-      {/* Slide preview */}
-      <div className="aspect-[16/9] relative overflow-hidden" style={{ backgroundColor: slide.bgColor }}>
-        <div className="absolute inset-0 p-6 flex flex-col justify-end">
-          <div className="absolute top-0 right-0 w-[50%] h-full opacity-10" style={{
-            background: `linear-gradient(135deg, transparent 30%, ${slide.accentColor} 100%)`
-          }} />
-          <div className="text-[11px] opacity-40 mb-1" style={{ color: slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
-            ■ デジタルマーケティング研究所
-          </div>
-          <div className="text-[18px] font-bold leading-[24px] relative z-10" style={{ color: slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
-            {slide.contentPreview.split('\n')[0]}
-          </div>
-          {slide.contentPreview.split('\n')[1] && (
-            <div className="text-[14px] font-semibold mt-0.5 relative z-10" style={{ color: slide.accentColor === '#ffffff' || slide.accentColor === '#f3f4f6' ? '#e2e8f0' : slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
-              {slide.contentPreview.split('\n')[1]}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface PPTSummaryCarouselProps {
-  slides: PPTSlide[];
-  title: string;
-}
-
-export function PPTSummaryCarousel({ slides, title }: PPTSummaryCarouselProps) {
-  const [scrollPos, setScrollPos] = useState(0);
-  const maxScroll = Math.max(0, slides.length - 3);
-
-  return (
-    <div className="rounded-[8px] border border-border-default bg-bg-bg overflow-hidden">
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-default">
-        <FileText className="size-[14px] text-icon-tertiary" />
-        <span className="text-[13px] font-medium text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>{title}</span>
-      </div>
-      <div className="relative px-2 py-3">
-        <div className="flex gap-2 overflow-hidden">
-          {slides.slice(scrollPos, scrollPos + 3).map((slide, i) => (
-            <div key={i} className="flex-1 min-w-0 aspect-[16/9] rounded-[6px] overflow-hidden relative" style={{ backgroundColor: slide.bgColor }}>
-              <div className="absolute inset-0 p-3 flex flex-col justify-end">
-                <div className="text-[9px] font-bold leading-[12px] relative z-10" style={{ color: slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
-                  {slide.contentPreview.split('\n')[0]}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* Nav arrows */}
-        {scrollPos > 0 && (
-          <button onClick={() => setScrollPos(p => Math.max(0, p - 1))} className="absolute left-1 top-1/2 -translate-y-1/2 w-[24px] h-[24px] rounded-full bg-bg-bg border border-border-default flex items-center justify-center shadow-sm hover:bg-bg-hover transition-colors">
-            <ChevronLeft className="size-[14px] text-icon-secondary" />
-          </button>
-        )}
-        {scrollPos < maxScroll && (
-          <button onClick={() => setScrollPos(p => Math.min(maxScroll, p + 1))} className="absolute right-1 top-1/2 -translate-y-1/2 w-[24px] h-[24px] rounded-full bg-bg-bg border border-border-default flex items-center justify-center shadow-sm hover:bg-bg-hover transition-colors">
-            <ChevronRight className="size-[14px] text-icon-secondary" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
+// Tool call block — commands appear one by one
 interface ToolCallBlockProps {
-  count: number;
-  children?: React.ReactNode;
+  commands: string[];
 }
 
-export function ToolCallBlock({ count }: ToolCallBlockProps) {
-  const [expanded, setExpanded] = useState(false);
+export function ToolCallBlock({ commands }: ToolCallBlockProps) {
+  const [expanded, setExpanded] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (visibleCount >= commands.length) {
+      setDone(true);
+      return;
+    }
+    const timer = setTimeout(() => setVisibleCount(v => v + 1), 600 + Math.random() * 400);
+    return () => clearTimeout(timer);
+  }, [visibleCount, commands.length]);
 
   return (
     <div className="my-1">
@@ -108,20 +37,131 @@ export function ToolCallBlock({ count }: ToolCallBlockProps) {
         className="flex items-center gap-1.5 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer py-1"
         style={{ fontFamily: "'Geist', sans-serif" }}
       >
-        <span className="font-medium">已运行 {count} 条命令</span>
+        {!done && <span className="w-[14px] h-[14px] rounded-full border-2 border-accent-blue border-t-transparent animate-spin" />}
+        {done && <Terminal className="size-[14px]" />}
+        <span className="font-medium">已运行 {done ? commands.length : visibleCount} 条命令</span>
         <ChevronRight className={cn("size-[14px] transition-transform duration-200", expanded && "rotate-90")} />
       </button>
       {expanded && (
-        <div className="pl-4 mt-1 flex flex-col gap-1 text-[12px] text-text-tertiary" style={{ fontFamily: "'Geist Mono', monospace" }}>
-          <div className="py-0.5">{'→ ppt-maker.initialize(template: "etching")'}</div>
-          <div className="py-0.5">{'→ ppt-maker.insert(slides: 6)'}</div>
-          <div className="py-0.5">{'→ ppt-maker.update(format: "16:9")'}</div>
+        <div className="pl-[22px] mt-1 flex flex-col gap-0.5">
+          {commands.slice(0, visibleCount).map((cmd, i) => (
+            <div
+              key={i}
+              className="py-1 text-[12px] text-text-tertiary animate-in fade-in duration-300"
+              style={{ fontFamily: "'Geist Mono', 'SF Mono', monospace" }}
+            >
+              <span className="text-icon-tertiary mr-1">→</span> {cmd}
+            </div>
+          ))}
+          {!done && (
+            <div className="py-1 flex items-center gap-1.5">
+              <span className="w-[4px] h-[4px] rounded-full bg-accent-blue animate-pulse" />
+              <span className="text-[12px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>执行中...</span>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
+// Single slide card
+interface PPTSlideCardProps {
+  slide: PPTSlide;
+}
+
+export function PPTSlideCard({ slide }: PPTSlideCardProps) {
+  return (
+    <div className="rounded-[8px] overflow-hidden border border-border-default bg-bg-bg">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
+        <div className="flex items-center gap-1.5">
+          <FileText className="size-[14px] text-icon-tertiary" />
+          <span className="text-[13px] font-medium text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>{slide.title}</span>
+        </div>
+        <span className="text-[12px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>{slide.pageNumber}/{slide.totalPages}</span>
+      </div>
+      <div className="aspect-[16/9] relative overflow-hidden" style={{ backgroundColor: slide.bgColor }}>
+        <div className="absolute inset-0 p-5 flex flex-col justify-end">
+          <div className="absolute top-0 right-0 w-[50%] h-full opacity-8" style={{
+            background: `linear-gradient(135deg, transparent 30%, ${slide.accentColor} 100%)`
+          }} />
+          <div className="text-[10px] opacity-30 mb-1" style={{ color: slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
+            ■ デジタルマーケティング研究所
+          </div>
+          <div className="text-[16px] font-bold leading-[22px] whitespace-pre-line relative z-10" style={{ color: slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
+            {slide.contentPreview}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Summary carousel — wide, with scroll
+interface PPTSummaryCarouselProps {
+  slides: PPTSlide[];
+  title: string;
+}
+
+export function PPTSummaryCarousel({ slides, title }: PPTSummaryCarouselProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  const scroll = (dir: number) => {
+    scrollRef.current?.scrollBy({ left: dir * 240, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    checkScroll();
+  }, []);
+
+  return (
+    <div className="rounded-[8px] border border-border-default bg-bg-bg overflow-hidden">
+      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-default">
+        <FileText className="size-[14px] text-icon-tertiary" />
+        <span className="text-[13px] font-medium text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>{title}</span>
+      </div>
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex gap-2 px-3 py-3 overflow-x-auto"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {slides.map((slide, i) => (
+            <div key={i} className="w-[200px] shrink-0 aspect-[16/9] rounded-[6px] overflow-hidden relative cursor-pointer hover:ring-2 hover:ring-accent-blue/30 transition-all" style={{ backgroundColor: slide.bgColor }}>
+              <div className="absolute inset-0 p-3 flex flex-col justify-end">
+                <div className="text-[8px] font-bold leading-[11px] whitespace-pre-line relative z-10" style={{ color: slide.accentColor, fontFamily: "'Geist', sans-serif" }}>
+                  {slide.contentPreview}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {canScrollLeft && (
+          <button onClick={() => scroll(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 w-[28px] h-[28px] rounded-full bg-bg-bg/90 border border-border-default flex items-center justify-center shadow-md hover:bg-bg-hover transition-colors z-10">
+            <ChevronLeft className="size-[16px] text-icon-secondary" />
+          </button>
+        )}
+        {canScrollRight && (
+          <button onClick={() => scroll(1)} className="absolute right-2 top-1/2 -translate-y-1/2 w-[28px] h-[28px] rounded-full bg-bg-bg/90 border border-border-default flex items-center justify-center shadow-md hover:bg-bg-hover transition-colors z-10">
+            <ChevronRight className="size-[16px] text-icon-secondary" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Action buttons
 interface PPTActionButtonsProps {
   onSaveTemplate: () => void;
   onEdit: () => void;

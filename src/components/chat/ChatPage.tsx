@@ -121,7 +121,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
     setTimeout(() => {
       // Tool call 1
       setMessages(prev => [...prev, {
-        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { count: 3 },
+        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: ['ppt-maker.initialize(template: "etching")', 'ppt-maker.insert(slides: 6)', 'ppt-maker.update(format: "16:9")'] },
       }]);
 
       setTimeout(() => {
@@ -134,7 +134,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
         // Tool call 2
         setTimeout(() => {
           setMessages(prev => [...prev, {
-            id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { count: 3 },
+            id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: ['ppt-maker.initialize(template: "etching")', 'ppt-maker.insert(slides: 6)', 'ppt-maker.update(format: "16:9")'] },
           }]);
 
           const totalPages = Number(prefs.pageCount.split('-').pop()) || 6;

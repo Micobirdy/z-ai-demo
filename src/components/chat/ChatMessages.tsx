@@ -72,7 +72,7 @@ function renderMessageContent(
       );
 
     case 'tool-call':
-      return <ToolCallBlock count={msg.meta?.count as number || 3} />;
+      return <ToolCallBlock commands={msg.meta?.commands as string[] || []} />;
 
     case 'ppt-slides':
       return (

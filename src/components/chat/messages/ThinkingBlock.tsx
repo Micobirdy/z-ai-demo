@@ -10,46 +10,43 @@ interface ThinkingBlockProps {
 
 export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(true);
-  const [displayedContent, setDisplayedContent] = useState('');
-  const [phase, setPhase] = useState<'streaming' | 'done'>('streaming');
+  const [phase, setPhase] = useState<'reveal' | 'done'>('reveal');
+  const [revealProgress, setRevealProgress] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const indexRef = useRef(0);
+  const rafRef = useRef<number>();
+  const startRef = useRef<number>();
+
+  const revealDuration = 4000;
 
   useEffect(() => {
-    if (indexRef.current >= content.length) {
-      setPhase('done');
-      if (autoCollapse) {
-        const t = setTimeout(() => {
-          setExpanded(false);
-          setTimeout(() => onCollapseComplete?.(), 500);
-        }, 1500);
-        return () => clearTimeout(t);
-      }
-      return;
-    }
-
-    // Variable speed: fast on normal chars, pause on punctuation/newlines
-    const char = content[indexRef.current];
-    const isPause = char === '\n' || char === '。' || char === '…' || char === '：';
-    const isSlow = char === '、' || char === '，' || char === '；';
-    const delay = isPause ? 180 + Math.random() * 120
-      : isSlow ? 60 + Math.random() * 40
-      : 18 + Math.random() * 22;
-
-    const chunkSize = isPause ? 1 : isSlow ? 1 : Math.floor(Math.random() * 3) + 2;
-
-    const timer = setTimeout(() => {
-      const end = Math.min(indexRef.current + chunkSize, content.length);
-      indexRef.current = end;
-      setDisplayedContent(content.slice(0, end));
+    const animate = (timestamp: number) => {
+      if (!startRef.current) startRef.current = timestamp;
+      const elapsed = timestamp - startRef.current;
+      const progress = Math.min(elapsed / revealDuration, 1);
+      setRevealProgress(progress);
 
       if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        const maxScroll = scrollRef.current.scrollHeight - scrollRef.current.clientHeight;
+        if (maxScroll > 0) {
+          scrollRef.current.scrollTop = maxScroll * progress;
+        }
       }
-    }, delay);
 
-    return () => clearTimeout(timer);
-  }, [displayedContent, content, autoCollapse, onCollapseComplete]);
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      } else {
+        setPhase('done');
+        if (autoCollapse) {
+          setTimeout(() => {
+            setExpanded(false);
+            setTimeout(() => onCollapseComplete?.(), 500);
+          }, 1500);
+        }
+      }
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [revealDuration, autoCollapse, onCollapseComplete]);
 
   return (
     <div className="my-1">
@@ -60,9 +57,9 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       >
         <span className={cn(
           "w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-colors",
-          phase === 'streaming' ? "border-accent-blue" : "border-border-default"
+          phase === 'reveal' ? "border-accent-blue" : "border-border-default"
         )}>
-          {phase === 'streaming' ? (
+          {phase === 'reveal' ? (
             <span className="w-[6px] h-[6px] rounded-full bg-accent-blue animate-pulse" />
           ) : (
             <span className="text-[9px] text-text-tertiary">⊕</span>
@@ -78,14 +75,22 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       )}>
         <div
           ref={scrollRef}
-          className="h-[172px] overflow-y-auto pl-[28px] pr-2"
+          className="h-[172px] overflow-y-auto pl-[28px] pr-2 relative"
           style={{ scrollbarWidth: 'none' }}
         >
           <div
             className="text-[13px] leading-[24px] text-text-tertiary whitespace-pre-wrap"
-            style={{ fontFamily: "'Geist', sans-serif" }}
+            style={{
+              fontFamily: "'Geist', sans-serif",
+              maskImage: phase === 'reveal'
+                ? `linear-gradient(to bottom, black ${revealProgress * 100}%, transparent ${revealProgress * 100 + 8}%)`
+                : 'none',
+              WebkitMaskImage: phase === 'reveal'
+                ? `linear-gradient(to bottom, black ${revealProgress * 100}%, transparent ${revealProgress * 100 + 8}%)`
+                : 'none',
+            }}
           >
-            {displayedContent}
+            {content}
           </div>
         </div>
       </div>
