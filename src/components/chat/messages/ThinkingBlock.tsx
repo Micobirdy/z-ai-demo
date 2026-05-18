@@ -22,17 +22,25 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
     const animate = (timestamp: number) => {
       if (!startRef.current) startRef.current = timestamp;
       const elapsed = timestamp - startRef.current;
-      const progress = Math.min(elapsed / revealDuration, 1);
-      setRevealProgress(progress);
+      const linear = Math.min(elapsed / revealDuration, 1);
+
+      // Non-linear: slow start → fast middle → slow end
+      const eased = linear < 0.3
+        ? 0.5 * Math.pow(linear / 0.3, 2) * 0.3
+        : linear < 0.7
+          ? 0.15 + (linear - 0.3) * 1.75
+          : 0.85 + 0.5 * (1 - Math.pow(1 - (linear - 0.7) / 0.3, 2)) * 0.15;
+
+      setRevealProgress(Math.min(eased, 1));
 
       if (scrollRef.current) {
         const maxScroll = scrollRef.current.scrollHeight - scrollRef.current.clientHeight;
         if (maxScroll > 0) {
-          scrollRef.current.scrollTop = maxScroll * progress;
+          scrollRef.current.scrollTop = maxScroll * Math.min(eased, 1);
         }
       }
 
-      if (progress < 1) {
+      if (linear < 1) {
         rafRef.current = requestAnimationFrame(animate);
       } else {
         setPhase('done');
