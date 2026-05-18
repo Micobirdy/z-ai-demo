@@ -11,10 +11,10 @@ const AUDIENCES = [
 ];
 
 const STYLES = [
-  { key: 'cool-blue', label: '浅灰背景，深蓝标题与橙色点缀，商务清爽' },
-  { key: 'mint-modern', label: '白色背景，青绿高光与柔和灰文本，简洁现代' },
-  { key: 'warm-gold', label: '暖沙背景，金色标题与棕色点缀，稳重温暖' },
-  { key: 'dark-tech', label: '深灰背景，明亮青柠标题与炭黑细节，科技感强' },
+  { key: 'cool-blue', label: '商务清爽', colors: ['#f0f4f8', '#1a365d', '#e07b00', '#e2e8f0'] },
+  { key: 'mint-modern', label: '简洁现代', colors: ['#ffffff', '#00d9c0', '#888888', '#f0f0f0'] },
+  { key: 'warm-gold', label: '稳重温暖', colors: ['#fdf6ec', '#c49a2a', '#8b6914', '#f5ead0'] },
+  { key: 'dark-tech', label: '科技感强', colors: ['#1a1a2e', '#00ff88', '#2d2d44', '#0d0d1a'] },
 ];
 
 interface PPTWizardCardProps {
@@ -29,6 +29,7 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
   const [notes, setNotes] = useState('');
   const [countdown, setCountdown] = useState(30);
   const [submitted, setSubmitted] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
     if (submitted) return;
     setSubmitted(true);
     clearInterval(timerRef.current);
+    setTimeout(() => setCollapsed(true), 800);
     onSubmit({ audience, pageCount, style, notes });
   }, [submitted, audience, pageCount, style, notes, onSubmit]);
 
@@ -56,8 +58,19 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
     if (submitted) return;
     setSubmitted(true);
     clearInterval(timerRef.current);
+    setTimeout(() => setCollapsed(true), 800);
+    clearInterval(timerRef.current);
     onSkip();
   }, [submitted, onSkip]);
+
+  if (collapsed) {
+    return (
+      <div className="rounded-[6px] border border-border-default bg-bg-bg px-4 py-2.5 flex items-center gap-2 text-[13px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>
+        <span>☘</span>
+        <span>需求已确认</span>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[6px] border border-border-default bg-bg-bg overflow-hidden w-full">
@@ -119,9 +132,31 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
         <div className="py-6">
           <h4 className="text-[15px] font-semibold text-text-primary mb-1" style={{ fontFamily: "'Geist', sans-serif" }}>视觉风格</h4>
           <p className="text-[13px] text-text-tertiary mb-4" style={{ fontFamily: "'Geist', sans-serif" }}>主题为AI与科技，优先提供科技与商务场景适配方案</p>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="grid grid-cols-4 gap-2">
             {STYLES.map(s => (
-              <Chip key={s.key} label={s.label} selected={style === s.key} onClick={() => !submitted && setStyle(s.key)} disabled={submitted} />
+              <button
+                key={s.key}
+                onClick={() => !submitted && setStyle(s.key)}
+                disabled={submitted}
+                className={cn(
+                  "rounded-[6px] border overflow-hidden transition-all cursor-pointer disabled:opacity-40 text-left",
+                  style === s.key
+                    ? "border-interactive-primary ring-1 ring-interactive-primary/30"
+                    : "border-border-default hover:border-border-strong"
+                )}
+              >
+                <div className="flex h-[28px]">
+                  {s.colors.map((c, i) => (
+                    <div key={i} className="flex-1" style={{ backgroundColor: c }} />
+                  ))}
+                </div>
+                <div className="px-2 py-1.5">
+                  <span className={cn(
+                    "text-[12px] font-medium",
+                    style === s.key ? "text-text-primary" : "text-text-secondary"
+                  )} style={{ fontFamily: "'Geist', sans-serif" }}>{s.label}</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>

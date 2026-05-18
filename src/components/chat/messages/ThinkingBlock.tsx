@@ -32,7 +32,7 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
 
     const i = chunkIndexRef.current;
     const ratio = i / chunks.length;
-    const baseDelay = ratio < 0.15 ? 900 : ratio > 0.85 ? 700 : 300 + Math.random() * 250;
+    const baseDelay = i === 0 ? 50 : ratio < 0.15 ? 800 : ratio > 0.85 ? 700 : 300 + Math.random() * 250;
 
     const timer = setTimeout(() => {
       setVisibleChunks(prev => [...prev, chunks[chunkIndexRef.current]]);

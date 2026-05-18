@@ -24,7 +24,8 @@ export function ToolCallBlock({ commands }: ToolCallBlockProps) {
   useEffect(() => {
     if (visibleCount >= commands.length) {
       setDone(true);
-      return;
+      const t = setTimeout(() => setExpanded(false), 1000);
+      return () => clearTimeout(t);
     }
     const timer = setTimeout(() => setVisibleCount(v => v + 1), 600 + Math.random() * 400);
     return () => clearTimeout(timer);
@@ -43,7 +44,7 @@ export function ToolCallBlock({ commands }: ToolCallBlockProps) {
         <ChevronRight className={cn("size-[14px] transition-transform duration-200", expanded && "rotate-90")} />
       </button>
       {expanded && (
-        <div className="pl-[22px] mt-1 flex flex-col gap-0.5">
+        <div className="pl-[22px] mt-1 flex flex-col gap-0.5 animate-in fade-in duration-200">
           {commands.slice(0, visibleCount).map((cmd, i) => (
             <div
               key={i}
