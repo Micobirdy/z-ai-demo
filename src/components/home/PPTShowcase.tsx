@@ -168,7 +168,7 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
                   <path d="M10 14V6M10 6L6 10M10 6L14 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-[13px] leading-[18px] text-text-secondary line-clamp-3">{p}</span>
+              <span className="text-[13px] leading-[18px] text-text-secondary overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{p}</span>
             </button>
           ))}
         </div>
@@ -254,7 +254,7 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
         )}>
           <button
             onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className="px-4 py-2 rounded-[8px] bg-white/95 text-[13px] font-medium text-[#0d0d0d] shadow-lg transition-all hover:bg-white active:scale-[0.96] backdrop-blur-sm"
+            className="px-4 py-2 rounded-[8px] bg-[#0d0d0d] text-[13px] font-medium text-white shadow-lg transition-all hover:bg-[#333] active:scale-[0.96]"
             style={{ fontFamily: "'Geist', sans-serif" }}
           >
             Use template
