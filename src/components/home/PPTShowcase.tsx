@@ -180,21 +180,23 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
 
         {/* Category tabs */}
         <div className="flex items-center gap-2 flex-wrap justify-center">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveCategory(cat.key)}
-              className={cn(
-                "px-3 py-1.5 rounded-[8px] text-[13px] border transition-all cursor-pointer active:scale-[0.97]",
-                activeCategory === cat.key
-                  ? "bg-interactive-primary text-text-inverted border-transparent"
-                  : "border-border-default text-text-secondary hover:border-border-strong hover:bg-bg-hover",
-                cat.key === 'my' && activeCategory !== 'my' && "border-dashed"
-              )}
-              style={{ fontFamily: "'Geist', sans-serif" }}
-            >
-              {cat.label}
-            </button>
+          {CATEGORIES.map((cat, i) => (
+            <div key={cat.key} className="flex items-center gap-2">
+              {i === 1 && <div className="w-px h-[20px] bg-border-default" />}
+              <button
+                onClick={() => setActiveCategory(cat.key)}
+                className={cn(
+                  "px-3 py-1.5 rounded-[8px] text-[13px] border transition-all cursor-pointer active:scale-[0.97]",
+                  activeCategory === cat.key
+                    ? "bg-interactive-primary text-text-inverted border-transparent"
+                    : "border-border-default text-text-secondary hover:border-border-strong hover:bg-bg-hover",
+                  cat.key === 'my' && activeCategory !== 'my' && "border-dashed"
+                )}
+                style={{ fontFamily: "'Geist', sans-serif" }}
+              >
+                {cat.label}
+              </button>
+            </div>
           ))}
         </div>
 
@@ -247,14 +249,14 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
           </p>
         )}
 
-        {/* Hover overlay — dark */}
+        {/* Hover overlay */}
         <div className={cn(
           "absolute inset-0 flex items-center justify-center transition-all duration-200 z-20",
-          hovered ? "bg-black/50 opacity-100" : "opacity-0 pointer-events-none"
+          hovered ? "bg-black/60 opacity-100 backdrop-blur-[2px]" : "opacity-0 pointer-events-none"
         )}>
           <button
             onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className="px-4 py-2 rounded-[8px] bg-[#0d0d0d] text-[13px] font-medium text-white shadow-lg transition-all hover:bg-[#333] active:scale-[0.96]"
+            className="px-5 py-2 rounded-[8px] bg-white text-[13px] font-medium text-[#0d0d0d] shadow-xl transition-all hover:bg-gray-100 active:scale-[0.96]"
             style={{ fontFamily: "'Geist', sans-serif" }}
           >
             Use template
