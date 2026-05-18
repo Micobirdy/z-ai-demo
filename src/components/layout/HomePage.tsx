@@ -440,8 +440,8 @@ export function HomePage() {
             />
 
             {/* Separator — no stagger animation */}
-            <div className="px-2 flex justify-start items-center">
-              <div className={cn("w-px h-4 opacity-20", "bg-text-primary")} />
+            <div className="px-2 flex justify-start items-center gap-2.5">
+              <div className="w-0 h-4 outline outline-1 outline-offset-[-0.5px] outline-border-default" />
             </div>
 
             {/* AI PPT */}
@@ -492,6 +492,8 @@ export function HomePage() {
   )
 }
 
+const TAG_SHADOW = '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px 0px rgba(0,0,0,0.08), inset 0px 0px 0px 1px rgba(255,255,255,1)';
+
 function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShadow, triShadowDk, icon, label }: {
   variants: Record<string, unknown>
   dk: boolean
@@ -509,16 +511,15 @@ function FeaturePill({ variants, dk, agentKey, selectedAgent, onSelect, triShado
       variants={variants}
       onClick={() => onSelect(agentKey)}
       className={cn(
-        "px-3 py-1.5 rounded-full flex justify-start items-center gap-1.5 overflow-hidden transition-all cursor-pointer border",
-        active
-          ? "bg-interactive-secondary-selected border-border-strong"
-          : "bg-transparent border-transparent hover:bg-bg-hover"
+        "px-3 py-1.5 rounded-md flex justify-start items-center gap-1.5 overflow-hidden transition-colors cursor-pointer outline outline-1 outline-border-default",
+        active ? "bg-bg-hover" : "bg-bg-page hover:bg-bg-hover"
       )}
+      style={{ boxShadow: TAG_SHADOW }}
     >
-      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-40")}>
+      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center", active ? "opacity-80" : "opacity-50")}>
         {icon}
       </div>
-      <span className={cn("text-[12px] font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-80" : "opacity-40")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-[12px] font-medium leading-4", active ? "opacity-80 text-text-primary" : "text-text-tertiary")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
@@ -542,16 +543,15 @@ function FeatureBtn({ variants, dk, triShadow, triShadowDk, icon, label, agentKe
       variants={variants}
       onClick={() => onSelect(agentKey)}
       className={cn(
-        "px-3 py-1.5 rounded-[8px] flex justify-center items-center gap-1.5 overflow-hidden transition-all cursor-pointer border",
-        active
-          ? "bg-bg-bg border-border-strong"
-          : "bg-transparent border-border-default hover:bg-bg-hover hover:border-border-strong"
+        "px-3 py-1.5 rounded-md flex justify-start items-center gap-1.5 overflow-hidden transition-colors cursor-pointer outline outline-1 outline-border-default",
+        active ? "bg-bg-hover" : "bg-bg-page hover:bg-bg-hover"
       )}
+      style={{ boxShadow: TAG_SHADOW }}
     >
-      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center transition-opacity", active ? "opacity-80" : "opacity-50")}>
+      <div className={cn("w-4 h-4 relative overflow-hidden flex items-center justify-center", active ? "opacity-80" : "opacity-50")}>
         {icon}
       </div>
-      <span className={cn("text-[12px] font-medium leading-4 transition-opacity", "text-text-primary", active ? "opacity-80" : "opacity-50")} style={{ fontFamily: "'Geist', sans-serif" }}>
+      <span className={cn("text-[12px] font-medium leading-4", active ? "opacity-80 text-text-primary" : "text-text-tertiary")} style={{ fontFamily: "'Geist', sans-serif" }}>
         {label}
       </span>
     </motion.button>
