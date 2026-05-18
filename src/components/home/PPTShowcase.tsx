@@ -160,7 +160,7 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
             <button
               key={i}
               onClick={() => onSelectPrompt(p)}
-              className="text-left p-4 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col transition-all hover:border-border-strong hover:shadow-sm active:scale-[0.98] cursor-pointer"
+              className="text-left p-4 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col overflow-hidden transition-all hover:border-border-strong hover:shadow-sm active:scale-[0.98] cursor-pointer"
               style={{ fontFamily: "'Geist', sans-serif" }}
             >
               <div className="w-[20px] h-[20px] mb-2.5 text-icon-tertiary shrink-0">
@@ -168,7 +168,7 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
                   <path d="M10 14V6M10 6L6 10M10 6L14 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-[13px] leading-[18px] text-text-secondary overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{p}</span>
+              <p className="text-[13px] leading-[18px] text-text-secondary flex-1 min-h-0 overflow-hidden text-ellipsis" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>{p}</p>
             </button>
           ))}
         </div>
