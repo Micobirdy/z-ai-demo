@@ -65,10 +65,15 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
 
   if (collapsed) {
     return (
-      <div className="rounded-[6px] border border-border-default bg-bg-bg px-4 py-2.5 flex items-center gap-2 text-[13px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>
+      <button
+        onClick={() => setCollapsed(false)}
+        className="rounded-[6px] border border-border-default bg-bg-bg px-4 py-2.5 flex items-center gap-2 text-[13px] text-text-tertiary cursor-pointer hover:bg-bg-hover transition-colors w-full text-left"
+        style={{ fontFamily: "'Geist', sans-serif" }}
+      >
         <span>☘</span>
-        <span>需求已确认</span>
-      </div>
+        <span className="flex-1">需求已确认</span>
+        <ChevronRight className="size-[14px] text-icon-tertiary" />
+      </button>
     );
   }
 
@@ -83,15 +88,23 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={handleSkip} disabled={submitted} className="text-[14px] text-text-secondary hover:text-text-primary transition-colors cursor-pointer disabled:opacity-30" style={{ fontFamily: "'Geist', sans-serif" }}>
-            跳过 »
-          </button>
-          <button onClick={handleSubmit} disabled={submitted} className={cn(
-            "px-4 py-2 rounded-[6px] text-[14px] font-medium transition-all cursor-pointer disabled:opacity-30",
-            "border border-border-default text-text-primary hover:bg-bg-hover active:opacity-80"
-          )} style={{ fontFamily: "'Geist', sans-serif" }}>
-            继续 ({countdown})
-          </button>
+          {submitted ? (
+            <button onClick={() => setCollapsed(true)} className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer" style={{ fontFamily: "'Geist', sans-serif" }}>
+              收起
+            </button>
+          ) : (
+            <>
+              <button onClick={handleSkip} className="text-[14px] text-text-secondary hover:text-text-primary transition-colors cursor-pointer" style={{ fontFamily: "'Geist', sans-serif" }}>
+                跳过 »
+              </button>
+              <button onClick={handleSubmit} className={cn(
+                "px-4 py-2 rounded-[6px] text-[14px] font-medium transition-all cursor-pointer",
+                "border border-border-default text-text-primary hover:bg-bg-hover active:opacity-80"
+              )} style={{ fontFamily: "'Geist', sans-serif" }}>
+                继续 ({countdown})
+              </button>
+            </>
+          )}
         </div>
       </div>
 
