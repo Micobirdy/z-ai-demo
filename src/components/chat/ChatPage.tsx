@@ -63,9 +63,13 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
   const isPPT = agentKey === 'ai-ppt';
   const initRef = useRef(false);
 
-  // Auto-collapse sidebar when entering chat
+  // Auto-collapse sidebar when entering chat (once only)
+  const collapseRef = useRef(false);
   useEffect(() => {
-    if (!isCollapsed) toggleCollapse();
+    if (!collapseRef.current && !isCollapsed) {
+      collapseRef.current = true;
+      toggleCollapse();
+    }
   }, []);
 
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -115,7 +119,8 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
   }, [pptPhase]);
 
   const handlePPTSubmit = useCallback((prefs: PPTPreferences) => {
-    setPptPhase('generating');
+    try {
+      setPptPhase('generating');
     const labels: Record<string, Record<string, string>> = {
       audience: { business: '泛商务/同事分享', executive: '管理层/投资人', tech: '技术团队/工程师', education: '高校/学生科普' },
       style: { 'cool-blue': '商务清爽', 'mint-modern': '简洁现代', 'warm-gold': '稳重温暖', 'dark-tech': '科技感强' },
