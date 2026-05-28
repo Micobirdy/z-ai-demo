@@ -1,4 +1,4 @@
-export type NavItemId = 'chat' | 'agent' | 'new-task' | 'expert' | 'folder';
+export type NavItemId = 'chat' | 'agent' | 'folder' | 'ai-ppt' | 'full-stack' | 'expert';
 
 export type SettingsSection =
   | 'general'
@@ -40,6 +40,8 @@ export interface SidebarContextValue {
   closeSettings: () => void;
   activeSettingsSection: SettingsSection;
   setActiveSettingsSection: (section: SettingsSection) => void;
+  settingsFromTasks: boolean;
+  openSettingsFromTasks: () => void;
 
   // Theme
   theme: Theme;
@@ -47,4 +49,8 @@ export interface SidebarContextValue {
 
   // Responsive
   isMobile: boolean;
+
+  // Template save tip
+  showTemplateTip: boolean;
+  setShowTemplateTip: (v: boolean) => void;
 }

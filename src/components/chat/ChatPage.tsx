@@ -1,11 +1,16 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useSidebar } from '@/hooks/useSidebar';
 import { cn } from '@/lib/utils';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { PreviewPanel } from './PreviewPanel';
+import { PPTActionButtons } from './messages/PPTPreview';
+import { PPTEditorOverlay } from './PPTEditorOverlay';
 import type { Message, PreviewFile, PPTPreferences } from '@/types/chat';
+import type { PPTSlide } from './messages/PPTPreview';
 import { ChevronDown, Share, Monitor } from 'lucide-react';
+import { BackgroundTasksDropdown } from '@/components/ui/BackgroundTasksDropdown';
 
 const MOCK_FILES: PreviewFile[] = [
   {
@@ -22,33 +27,25 @@ function generateId() {
 
 const PPT_THINKING_CONTENT = `分析用户输入的演示文稿需求...
 
-正在提取关键信息：
-→ 识别主题方向和行业领域
-→ 分析内容深度和专业程度
-→ 评估目标受众的期望
+正在提取关键信息，识别主题方向和行业领域，分析内容深度和专业程度，评估目标受众的期望。
 
-正在检索相关模板库：
-→ 匹配行业关键词与模板标签
-→ 评估模板使用频率和评分
-→ 筛选出 Top 5 候选模板
+正在检索相关模板库，匹配行业关键词与模板标签，评估模板使用频率和评分，筛选出最佳候选模板。
 
-规划最佳呈现策略：
-→ 推荐页数范围和内容密度
-→ 匹配适合的视觉风格
-→ 确定配色方案和排版规则
-→ 计算内容与页面的最优分配比
+对比候选模板的视觉结构与信息密度，排除不适合当前主题的布局方案，锁定 3 套高匹配度模板进入下一轮评估。
 
-生成内容大纲：
-→ 封面页：标题、副标题、演讲者信息
-→ 目录页：章节导航和页码索引
-→ 核心内容页：数据图表、要点列表、案例展示
-→ 总结页：核心结论与下一步行动
+规划最佳呈现策略，推荐页数范围和内容密度，匹配适合的视觉风格，确定配色方案和排版规则，计算内容与页面的最优分配比。
 
-需要与用户确认以下参数：
-• 目标受众与使用场景
-• 期望的幻灯片页数
-• 视觉风格偏好
-• 其他补充要求
+根据主题复杂度与演讲时长预估，确定每页信息承载量上限，避免单页内容过载导致观众注意力分散。
+
+生成内容大纲，包括封面页的标题和演讲者信息，目录页的章节导航，核心内容页的数据图表与案例展示，以及总结页的核心结论与下一步行动。
+
+为数据展示页匹配最佳图表类型，柱状图用于趋势对比，环形图用于占比分析，时间轴用于里程碑呈现。
+
+评估配色方案的可访问性，确保文字与背景对比度符合 WCAG 标准，同时保持品牌视觉一致性。
+
+检查字体兼容性，确认中英文混排场景下的行高与字间距表现，选择最优的字体组合方案。
+
+需要与用户确认目标受众与使用场景、期望的幻灯片页数、视觉风格偏好等参数。
 
 准备进入需求确认阶段...`;
 
@@ -58,51 +55,55 @@ interface ChatPageProps {
 }
 
 export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
-  const { theme, toggleTheme, isCollapsed, toggleCollapse } = useSidebar();
+  const { theme, toggleTheme, setShowTemplateTip } = useSidebar();
   const dk = theme === 'dark';
   const isPPT = agentKey === 'ai-ppt';
   const initRef = useRef(false);
 
-  // Auto-collapse sidebar when entering chat (once only)
-  const collapseRef = useRef(false);
-  useEffect(() => {
-    if (!collapseRef.current && !isCollapsed) {
-      collapseRef.current = true;
-      toggleCollapse();
-    }
-  }, []);
-
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (!initialMessage) return [];
-    return [{
-      id: generateId(),
-      role: 'user',
-      content: initialMessage,
-      timestamp: Date.now(),
-    }];
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
   const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [pptPhase, setPptPhase] = useState<'thinking' | 'wizard' | 'generating' | 'done' | null>(isPPT ? 'thinking' : null);
+  const [showActions, setShowActions] = useState(false);
+  const [scrollTrigger, setScrollTrigger] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [pptVersion, setPptVersion] = useState(0);
 
-  // Init: trigger first AI response once
+  const [showContent, setShowContent] = useState(false);
+
+  // Sequence: top bar slides in (synced with sidebar collapse) → content area appears → query flies in → AI responds
   useEffect(() => {
     if (initRef.current || !initialMessage) return;
     initRef.current = true;
 
-    if (isPPT) {
-      // PPT mode: show thinking block immediately
-      setMessages(prev => [...prev, {
-        id: generateId(),
-        role: 'assistant',
-        content: PPT_THINKING_CONTENT,
-        timestamp: Date.now(),
-        type: 'thinking',
-      }]);
-    } else {
-      genericReply(initialMessage);
-    }
+    // After sidebar collapse + top bar animation settle, show content area and send query
+    setTimeout(() => {
+      setShowContent(true);
+
+      setTimeout(() => {
+        setMessages([{
+          id: generateId(),
+          role: 'user',
+          content: initialMessage,
+          timestamp: Date.now(),
+        }]);
+
+        setTimeout(() => {
+          if (isPPT) {
+            setMessages(prev => [...prev, {
+              id: generateId(),
+              role: 'assistant',
+              content: PPT_THINKING_CONTENT,
+              timestamp: Date.now(),
+              type: 'thinking',
+            }]);
+          } else {
+            genericReply(initialMessage);
+          }
+        }, 650);
+      }, 150);
+    }, 400);
   }, []);
 
   // When thinking auto-collapses, show wizard
@@ -119,100 +120,161 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
   }, [pptPhase]);
 
   const handlePPTSubmit = useCallback((prefs: PPTPreferences) => {
-    try {
-      setPptPhase('generating');
+    setPptPhase('generating');
     const labels: Record<string, Record<string, string>> = {
       audience: { business: '泛商务/同事分享', executive: '管理层/投资人', tech: '技术团队/工程师', education: '高校/学生科普' },
-      style: { 'cool-blue': '商务清爽', 'mint-modern': '简洁现代', 'warm-gold': '稳重温暖', 'dark-tech': '科技感强' },
+      style: { 'warm-bold': '浅灰背景/深蓝橙色', 'mint-modern': '白色背景/青绿灰文本', 'sand-gold': '暖沙背景/金色棕色', 'candy-pop': '浅灰背景/紫橙点缀' },
     };
 
-    // User confirmation
-    setMessages(prev => [...prev, {
-      id: generateId(),
-      role: 'user',
-      content: `受众: ${labels.audience[prefs.audience] || prefs.audience}\n页数: ${prefs.pageCount}\n风格: ${labels.style[prefs.style] || prefs.style}${prefs.notes ? `\n备注: ${prefs.notes}` : ''}`,
-      timestamp: Date.now(),
-    }]);
+    const totalPages = Number(prefs.pageCount.split('-').pop()) || 6;
+    const slideDescriptions = [
+      '2025年度营销战略总览，涵盖核心目标、关键指标与执行路径',
+      '行业趋势与竞争格局分析，数据驱动的市场洞察',
+      '季度工作计划与里程碑节点，团队分工与时间线',
+      '品牌定位与渠道策略，线上线下整合营销方案',
+      '用户画像与需求分析，目标市场细分与增长机会',
+      '主要竞品功能对比与差异化优势，SWOT 分析',
+    ];
+    const slides = Array.from({ length: totalPages }, (_, i) => ({
+      title: ['戦略 2025', '市場分析', '工作议程', '市场营销战略', '市場分析', '竞品调研'][i] || `第 ${i + 1} 页`,
+      description: slideDescriptions[i] || `第 ${i + 1} 页内容概述`,
+      pageNumber: i + 1,
+      totalPages,
+      bgColor: ['#f0f4f8', '#ffffff', '#f8fafc', '#f0f4f8', '#ffffff', '#f8fafc'][i % 6],
+      accentColor: ['#2563eb', '#1e3a5f', '#0d9488', '#2563eb', '#1e3a5f', '#0d9488'][i % 6],
+      contentPreview: ['マーケティング\n戦略 2025', '市場分析', 'アジェンダ', 'マーケティング戦略\n概要', '市場分析', '競合分析'][i] || '内容',
+    }));
 
-    // Generating
-    setTimeout(() => {
-      // Tool call 1
-      setMessages(prev => [...prev, {
-        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: ['ppt-maker.initialize(template: "etching")', 'ppt-maker.insert(slides: 6)', 'ppt-maker.update(format: "16:9")'] },
-      }]);
+    // Build the generation steps — each step is { delay, message }
+    // Steps with streaming/tool-call wait for their animation to finish before advancing
+    const toolCallCommands1 = [
+      'Read("src/templates/index.ts")',
+      'Read("src/templates/etching/config.json")',
+      'Read("src/templates/etching/slides.tsx")',
+      'Read("src/themes/colors.ts")',
+      'Grep("slideLayout", "src/templates/**/*.tsx")',
+      'ppt-maker.initialize(template: "etching")',
+      'ppt-maker.configure(theme: "minimal", ratio: "16:9")',
+      'ppt-maker.loadFonts(["Geist", "Noto Sans SC"])',
+      'ppt-maker.insert(slides: 6, layout: "auto")',
+      'ppt-maker.applyTheme(palette: "cool-blue")',
+      'ppt-maker.update(format: "16:9", exportDPI: 144)',
+    ];
+    const toolCallCommands2 = [
+      'Read("src/content/outline.md")',
+      'Read("src/assets/charts/market-data.json")',
+      'ppt-maker.generateContent(slide: 1, type: "cover")',
+      'ppt-maker.generateContent(slide: 2, type: "analysis")',
+      'ppt-maker.generateContent(slide: 3, type: "agenda")',
+      'ppt-maker.generateContent(slide: 4, type: "strategy")',
+      'ppt-maker.generateContent(slide: 5, type: "analysis")',
+      'ppt-maker.generateContent(slide: 6, type: "comparison")',
+      'ppt-maker.renderCharts(slides: [2, 5], engine: "d3")',
+      'ppt-maker.validateLayout(all: true)',
+      'ppt-maker.exportDraft(format: "preview")',
+    ];
 
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          id: generateId(), role: 'assistant',
-          content: '我已经用图像模式用简约风格列出的6张幻灯片。接下来，我将开始生成草稿和幻灯片。',
-          timestamp: Date.now(),
-        }]);
+    const toolCallCommands3 = [
+      'ppt-maker.validateLayout(slide: 1, check: "overflow")',
+      'ppt-maker.validateLayout(slide: 2, check: "overflow")',
+      'ppt-maker.validateLayout(slide: 3, check: "overlap")',
+      'ppt-maker.autoFix(slide: 3, issue: "text-overflow")',
+      'ppt-maker.validateLayout(slide: 4, check: "whitespace")',
+      'ppt-maker.autoFix(slide: 4, issue: "spacing")',
+      'ppt-maker.validateLayout(slide: 5, check: "overflow")',
+      'ppt-maker.validateLayout(slide: 6, check: "overlap")',
+      'ppt-maker.autoFix(slide: 6, issue: "font-size")',
+      'ppt-maker.optimizeAssets(compress: true, quality: 92)',
+      'ppt-maker.exportFinal(format: "pptx", dpi: 144)',
+    ];
 
-        // Tool call 2
-        setTimeout(() => {
-          setMessages(prev => [...prev, {
-            id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: ['ppt-maker.initialize(template: "etching")', 'ppt-maker.insert(slides: 6)', 'ppt-maker.update(format: "16:9")'] },
-          }]);
+    type Step = { delay: number; message: Message; waitForAnimation?: boolean };
+    const steps: Step[] = [
+      // 0: User confirmation (instant)
+      { delay: 0, message: { id: generateId(), role: 'user', content: `受众: ${labels.audience[prefs.audience] || prefs.audience}\n页数: ${prefs.pageCount}\n风格: ${prefs.style.split(',').map(s => labels.style[s] || s).join('、')}${prefs.notes ? `\n备注: ${prefs.notes}` : ''}`, timestamp: Date.now() } },
+      // 1: Tool call 1 — initialize
+      { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands1 } }, waitForAnimation: true },
+      // 2: Context text
+      { delay: 600, message: { id: generateId(), role: 'assistant', content: '模板已加载，主题配色和字体已配置完成。接下来开始生成各页内容和数据图表。', timestamp: Date.now(), streaming: true }, waitForAnimation: true },
+      // 3: Tool call 2 — content generation
+      { delay: 1000, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands2 } }, waitForAnimation: true },
+      // 4: Slides preview
+      { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'ppt-slides', meta: { slides } } },
+      // 5: Post-slide text
+      { delay: 1000, message: { id: generateId(), role: 'assistant', content: `${totalPages}页幻灯片草稿已生成，正在进行版面校验和自动修复...`, timestamp: Date.now(), streaming: true }, waitForAnimation: true },
+      // 6: Tool call 3 — validation & export
+      { delay: 800, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands3 } }, waitForAnimation: true },
+      // 7: Final summary text
+      { delay: 600, message: { id: generateId(), role: 'assistant', content: `已完成全部${totalPages}页演示文稿的生成与校验。\n\n${totalPages}/${totalPages} 页通过 · 3 页经自动修复 · 0 页残留问题\n\n以下几项建议人工确认：\n1. **核心数字** — 52.4、8、13 等关键数据是否与最新版本一致\n2. **人名与单位** — 汇报人和组织名称是否准确\n3. **金句措辞** — 各页金句的语气是否符合汇报风格\n4. **演讲节奏** — 按每页备注试读，确认 5 分钟内能讲完\n\n需要修改任何一页，直接说页号 + 改什么，例如"P6 的数字改成 53.1"。`, timestamp: Date.now(), streaming: true }, waitForAnimation: true },
+    ];
 
-          const totalPages = Number(prefs.pageCount.split('-').pop()) || 6;
-          const slides = Array.from({ length: totalPages }, (_, i) => ({
-            title: ['戦略 2025', '市場分析', '工作议程', '市场营销战略', '市場分析', '竞品调研'][i] || `第 ${i + 1} 页`,
-            pageNumber: i + 1,
-            totalPages,
-            bgColor: ['#f0f4f8', '#ffffff', '#f8fafc', '#f0f4f8', '#ffffff', '#f8fafc'][i % 6],
-            accentColor: ['#2563eb', '#1e3a5f', '#0d9488', '#2563eb', '#1e3a5f', '#0d9488'][i % 6],
-            contentPreview: ['マーケティング\n戦略 2025', '市場分析', 'アジェンダ', 'マーケティング戦略\n概要', '市場分析', '競合分析'][i] || '内容',
-          }));
-
-          // Slide previews
-          setTimeout(() => {
-            setMessages(prev => {
-              const updated = prev.filter(m => m.type !== 'generating');
-              return [...updated, {
-                id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
-                type: 'ppt-slides', meta: { slides },
-              }];
-            });
-
-            // Summary text
-            setTimeout(() => {
-              setMessages(prev => [...prev, {
-                id: generateId(), role: 'assistant',
-                content: `我已经用"Etching"图像生成风格完成了您的${totalPages}页团队状态报告演示文稿。`,
-                timestamp: Date.now(),
-              }]);
-
-              // Summary carousel
-              setTimeout(() => {
-                setMessages(prev => [...prev, {
-                  id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
-                  type: 'ppt-summary', meta: { slides, title: '产品研究报告 2025' },
-                }]);
-
-                // Checklist
-                setTimeout(() => {
-                  setMessages(prev => [...prev, {
-                    id: generateId(), role: 'assistant',
-                    content: `我已完成建议检查清单，以下几项建议你人工过目确认：\n\n${totalPages}/${totalPages} 页通过 · 3 页经自动修复 · 0 页残留问题\n检测内容：内容溢出 / 文字重叠 / 版面留白\n\n1. **核心数字** — 52.4、8、13、0、185 等关键数据是否与您的最新版本一致\n2. **人名与单位** — 汇报人"马伟航"、"天荒坪电站"等是否准确\n3. **金句措辞** — 各页金句的语气和用词是否符合您的汇报风格\n4. **演讲稿节奏** — 试着按每页备注读一遍，确认 5 分钟内能讲完\n\n需要修改任何一页，直接说页号 + 改什么，例如"P6 的数字改成 53.1"。`,
-                    timestamp: Date.now(),
-                  }]);
-
-                  // Action buttons
-                  setTimeout(() => {
-                    setMessages(prev => [...prev, {
-                      id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
-                      type: 'ppt-actions',
-                    }]);
-                    setPptPhase('done');
-                  }, 500);
-                }, 800);
-              }, 600);
-            }, 400);
-          }, 2000);
-        }, 800);
-      }, 600);
-    }, 800);
+    stepIndexRef.current = 0;
+    stepsRef.current = steps;
+    advanceStep();
   }, []);
+
+  const stepIndexRef = useRef(0);
+  const stepsRef = useRef<{ delay: number; message: Message; waitForAnimation?: boolean }[]>([]);
+  const waitingForAnimationRef = useRef<string | null>(null);
+
+  const advanceStep = useCallback(() => {
+    const steps = stepsRef.current;
+    const idx = stepIndexRef.current;
+
+    if (idx >= steps.length) {
+      setPptPhase('done');
+      setPptVersion(1);
+      setScrollTrigger(v => v + 1);
+      setTimeout(() => {
+        setShowActions(true);
+        setScrollTrigger(v => v + 1);
+      }, 1500);
+      return;
+    }
+
+    const step = steps[idx];
+    stepIndexRef.current = idx + 1;
+
+    setTimeout(() => {
+      setMessages(prev => {
+        const updated = prev.filter(m => m.type !== 'generating');
+        return [...updated, step.message];
+      });
+
+      if (step.waitForAnimation) {
+        waitingForAnimationRef.current = step.message.id;
+      } else {
+        advanceStep();
+      }
+    }, step.delay);
+  }, []);
+
+  const handleStreamingDone = useCallback((messageId: string) => {
+    setMessages(prev => {
+      const updated = prev.map(m => m.id === messageId ? { ...m, streaming: false } : m);
+      // Check if all streaming is done — show actions after last stream completes
+      const hasAnyStreaming = updated.some(m => m.streaming);
+      if (!hasAnyStreaming && pptPhase === 'done' && !showActions) {
+        setTimeout(() => {
+          setShowActions(true);
+          setScrollTrigger(v => v + 1);
+        }, 1500);
+      }
+      return updated;
+    });
+    setScrollTrigger(v => v + 1);
+    if (waitingForAnimationRef.current === messageId) {
+      waitingForAnimationRef.current = null;
+      advanceStep();
+    }
+  }, [advanceStep, pptPhase, showActions]);
+
+  const handleToolCallDone = useCallback((messageId: string) => {
+    if (waitingForAnimationRef.current === messageId) {
+      waitingForAnimationRef.current = null;
+      advanceStep();
+    }
+  }, [advanceStep]);
 
   const handlePPTSkip = useCallback(() => {
     handlePPTSubmit({ audience: 'business', pageCount: '1-12', style: 'mint-modern', notes: '' });
@@ -236,23 +298,97 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
         setShowPreview(true);
       }
       setIsTyping(false);
+      if (pptPhase === 'done') setShowActions(true);
     }, 1200);
   }
 
   const handleSend = useCallback((text: string) => {
+    setShowActions(false);
     setMessages(prev => [...prev, {
       id: generateId(),
       role: 'user',
       content: text,
       timestamp: Date.now(),
     }]);
-    genericReply(text);
-  }, []);
+
+    if (pptPhase === 'done') {
+      pptModifyReply(text);
+    } else {
+      genericReply(text);
+    }
+  }, [pptPhase]);
+
+  function pptModifyReply(userMsg: string) {
+    setIsTyping(true);
+    const modifyCommands = [
+      `Read("slides/current-state.json")`,
+      `ppt-maker.parseIntent("${userMsg.slice(0, 30)}...")`,
+      `ppt-maker.modifySlide(target: "auto", action: "update")`,
+      `ppt-maker.validateLayout(all: true)`,
+      `ppt-maker.exportDraft(format: "preview")`,
+    ];
+
+    // Get existing slides from messages
+    const existingSlides = messages.find(m => m.type === 'ppt-slides')?.meta?.slides as PPTSlide[] || [];
+
+    setTimeout(() => {
+      setIsTyping(false);
+      // Tool call
+      setMessages(prev => [...prev, {
+        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+        type: 'tool-call', meta: { commands: modifyCommands },
+      }]);
+    }, 600);
+
+    setTimeout(() => {
+      // Context text
+      setMessages(prev => [...prev, {
+        id: generateId(), role: 'assistant',
+        content: '已根据你的要求修改了演示文稿，正在重新生成预览...',
+        timestamp: Date.now(), streaming: true,
+      }]);
+      setScrollTrigger(v => v + 1);
+    }, 4000);
+
+    setTimeout(() => {
+      // Re-emit updated slides
+      setMessages(prev => [...prev, {
+        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+        type: 'ppt-slides', meta: { slides: existingSlides },
+      }]);
+      setScrollTrigger(v => v + 1);
+    }, 6000);
+
+    setTimeout(() => {
+      // Final summary
+      setMessages(prev => [...prev, {
+        id: generateId(), role: 'assistant',
+        content: `修改完成。主要变更：\n\n• 已更新相关页面的内容和排版\n• 版面校验通过，无溢出问题\n\n如需继续调整，请直接描述修改内容。`,
+        timestamp: Date.now(), streaming: true,
+      }]);
+      setScrollTrigger(v => v + 1);
+    }, 8000);
+
+    setTimeout(() => {
+      setPptVersion(v => v + 1);
+      setMessages(prev => [...prev, {
+        id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+        type: 'ppt-versions', meta: { version: pptVersion + 1 },
+      }]);
+      setShowActions(true);
+      setScrollTrigger(v => v + 1);
+    }, 10000);
+  }
 
   return (
     <div className="flex flex-col h-full bg-bg-page">
-      {/* Top bar — matches design */}
-      <div className="flex items-center justify-between px-[16px] py-[8px] shrink-0">
+      {/* Top bar — slides down in sync with sidebar collapse */}
+      <motion.div
+        className="flex items-center justify-between px-[16px] h-[52px] shrink-0"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.42, ease: [0.4, 0, 0, 1] }}
+      >
         {/* Left — model selector */}
         <button className="flex items-center gap-[4px] cursor-pointer transition-colors hover:opacity-80">
           <span className="text-[16px] font-normal leading-[24px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>
@@ -263,11 +399,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
 
         {/* Right — Background Tasks + Usage + Share */}
         <div className="flex items-center gap-[8px]">
-          <button className="flex items-center gap-[4px] px-[8px] py-[6px] rounded-[6px] transition-colors hover:bg-bg-hover">
-            <div className="w-[6px] h-[6px] rounded-full bg-green-500" />
-            <span className="text-[14px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>Background Tasks</span>
-            <ChevronDown className="size-[12px] text-icon-tertiary" />
-          </button>
+          <BackgroundTasksDropdown />
           <div className="flex items-center gap-[4px] px-[8px] py-[6px] rounded-[6px]">
             <Monitor className="size-[14px] text-icon-secondary" />
             <span className="text-[14px] text-text-primary" style={{ fontFamily: 'Geist, sans-serif' }}>50%</span>
@@ -277,29 +409,58 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
             Share
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Main area */}
-      <div className="flex-1 flex min-h-0">
+      {/* Main area — appears after sidebar collapse + top bar settle */}
+      <motion.div
+        className="flex-1 flex min-h-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showContent ? 1 : 0 }}
+        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+      >
         <div className={cn("flex flex-col min-h-0", showPreview ? "w-[60%]" : "w-full")}>
           <ChatMessages
             messages={messages}
             onPPTSubmit={handlePPTSubmit}
             onPPTSkip={handlePPTSkip}
             onThinkingDone={handleThinkingDone}
+            onStreamingDone={handleStreamingDone}
+            onToolCallDone={handleToolCallDone}
+            scrollTrigger={scrollTrigger}
           />
           {isTyping && (
-            <div className="px-4 pb-2">
-              <div className="max-w-[720px] mx-auto flex items-center gap-3">
-                <div className="flex items-center gap-[3px]">
-                  <span className="w-[6px] h-[6px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '0ms' }} />
-                  <span className="w-[6px] h-[6px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '200ms' }} />
-                  <span className="w-[6px] h-[6px] rounded-full bg-text-secondary" style={{ animation: 'pulse 1.2s ease-in-out infinite', animationDelay: '400ms' }} />
-                </div>
+            <div className="px-4 pb-3">
+              <div className="max-w-[768px] 2xl:max-w-[860px] min-[1920px]:max-w-[960px] mx-auto flex items-center gap-1 py-2">
+                <span className="w-[7px] h-[7px] rounded-full bg-text-primary" style={{ animation: 'dotBounce 1.4s ease-in-out infinite', animationDelay: '0ms' }} />
+                <span className="w-[7px] h-[7px] rounded-full bg-text-primary" style={{ animation: 'dotBounce 1.4s ease-in-out infinite', animationDelay: '160ms' }} />
+                <span className="w-[7px] h-[7px] rounded-full bg-text-primary" style={{ animation: 'dotBounce 1.4s ease-in-out infinite', animationDelay: '320ms' }} />
               </div>
             </div>
           )}
-          <ChatInput onSend={handleSend} disabled={isTyping || pptPhase === 'wizard' || pptPhase === 'thinking'} />
+          <div className="relative z-30">
+            {/* Action buttons — slides up from behind ChatInput */}
+            <AnimatePresence>
+              {showActions && (
+                <motion.div
+                  initial={{ y: 50 }}
+                  animate={{ y: 0 }}
+                  exit={{ y: 40 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute bottom-full left-0 right-0 flex justify-center pb-2 pointer-events-none z-30"
+                >
+                  <div className="pointer-events-auto bg-bg-page rounded-[12px]">
+                    <PPTActionButtons onSaveTemplate={() => setShowTemplateTip(true)} onEdit={() => setIsEditing(true)} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <ChatInput
+            onSend={handleSend}
+            disabled={isTyping || pptPhase === 'wizard' || pptPhase === 'thinking'}
+            placeholder={showActions ? '添加详细信息或澄清...' : undefined}
+            agentLabel={isPPT ? 'AI PPT' : undefined}
+          />
+          </div>
         </div>
 
         {showPreview && previewFiles.length > 0 && (
@@ -307,7 +468,17 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
             <PreviewPanel files={previewFiles} onClose={() => setShowPreview(false)} />
           </div>
         )}
-      </div>
+      </motion.div>
+
+      {/* PPT Editor Overlay */}
+      <AnimatePresence>
+        {isEditing && (
+          <PPTEditorOverlay
+            slides={messages.find(m => m.type === 'ppt-slides')?.meta?.slides as PPTSlide[] || []}
+            onClose={() => setIsEditing(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

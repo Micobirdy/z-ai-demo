@@ -19,9 +19,6 @@ export function AccountSettings() {
 
   return (
     <div className="flex flex-col">
-      <h1 className={`text-[24px] font-bold leading-[32px] tracking-[-0.18px] mb-[4px] ${fg}`} style={{ fontFamily: "'Iowan Old Style BT', 'Georgia', serif" }}>Account</h1>
-      <div className={`h-px mt-[16px] mb-[24px] ${border}`} />
-
       {/* Name */}
       <div className="flex items-center justify-between py-[16px]">
         <span className={`text-[14px] leading-[20px] tracking-[-0.18px] ${fg}`}>Name</span>

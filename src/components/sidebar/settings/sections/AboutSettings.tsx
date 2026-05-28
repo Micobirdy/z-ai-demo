@@ -12,9 +12,6 @@ export function AboutSettings() {
 
   return (
     <div className="flex flex-col">
-      <h1 className={`text-[24px] font-bold leading-[32px] tracking-[-0.18px] mb-[4px] ${fg}`} style={{ fontFamily: "'Iowan Old Style BT', 'Georgia', serif" }}>About</h1>
-      <div className={`h-px mt-[16px] mb-[24px] ${border}`} />
-
       {/* Logo + social */}
       <div className="flex items-center justify-between mb-[24px]">
         <div className="flex items-center gap-[10px]">

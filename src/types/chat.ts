@@ -15,6 +15,7 @@ export interface Message {
   type?: MessageType;
   files?: PreviewFile[];
   meta?: Record<string, unknown>;
+  streaming?: boolean;
 }
 
 export interface PPTPreferences {

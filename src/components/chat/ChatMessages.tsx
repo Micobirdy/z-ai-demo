@@ -1,8 +1,10 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { ThinkingBlock } from './messages/ThinkingBlock';
 import { PPTWizardCard } from './messages/PPTWizardCard';
-import { PPTSlideCard, PPTSummaryCarousel, ToolCallBlock, PPTActionButtons } from './messages/PPTPreview';
+import { StreamingText } from './messages/StreamingText';
+import { PPTSlideCard, PPTSlidesBlock, PPTSummaryCarousel, ToolCallBlock, PPTActionButtons, PPTVersionsBlock } from './messages/PPTPreview';
 import type { Message, PPTPreferences } from '@/types/chat';
 import type { PPTSlide } from './messages/PPTPreview';
 
@@ -11,30 +13,60 @@ interface ChatMessagesProps {
   onPPTSubmit?: (prefs: PPTPreferences) => void;
   onPPTSkip?: () => void;
   onThinkingDone?: () => void;
+  onStreamingDone?: (messageId: string) => void;
+  onToolCallDone?: (messageId: string) => void;
+  scrollTrigger?: number;
 }
 
-export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone }: ChatMessagesProps) {
+export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, scrollTrigger }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const wizardRef = useRef<HTMLDivElement>(null);
+  const [expandedToolCallId, setExpandedToolCallId] = useState<string | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
+  }, [messages.length, scrollTrigger]);
+
+  // When wizard card appears, scroll its top into view (not the bottom)
+  const lastMsg = messages[messages.length - 1];
+  useEffect(() => {
+    if (lastMsg?.type === 'ppt-wizard') {
+      setTimeout(() => {
+        wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+  }, [lastMsg?.type]);
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <div className="max-w-[720px] xl:max-w-[800px] 2xl:max-w-[860px] mx-auto px-4 py-6 flex flex-col gap-6">
-        {messages.map((msg) => (
-          <div key={msg.id} className={cn("flex gap-3", msg.role === 'user' && "justify-end")}>
+    <div ref={scrollContainerRef} className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(128,128,128,0.2) transparent' }}>
+      <div className="max-w-[768px] 2xl:max-w-[860px] min-[1920px]:max-w-[960px] mx-auto px-4 py-6 flex flex-col gap-4">
+        {messages.map((msg, index) => {
+          const isFirstUser = index === 0 && msg.role === 'user';
+          const isWizard = msg.type === 'ppt-wizard';
+          return (
+          <motion.div
+            key={msg.id}
+            ref={isWizard ? wizardRef : undefined}
+            initial={isFirstUser ? { opacity: 0, y: 36, scale: 0.92 } : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={isFirstUser
+              ? { duration: 0.45, ease: [0.22, 1.2, 0.36, 1] }
+              : { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
+            }
+            className={cn("flex gap-3", msg.role === 'user' && "justify-end")}
+          >
             <div className={cn(
-              msg.type === 'ppt-slides' || msg.type === 'ppt-summary' || msg.type === 'ppt-actions' || msg.type === 'tool-call' || msg.type === 'ppt-wizard'
+              msg.type === 'ppt-slides' || msg.type === 'ppt-summary' || msg.type === 'ppt-actions' || msg.type === 'ppt-versions' || msg.type === 'tool-call' || msg.type === 'ppt-wizard' || msg.type === 'thinking'
                 ? "w-full"
                 : "max-w-[85%]",
-              msg.role === 'user' && "rounded-[16px] px-4 py-3 bg-interactive-secondary-selected"
+              msg.role === 'user' && "rounded-[12px] px-4 py-3 bg-interactive-secondary-selected"
             )}>
-              {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone)}
+              {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, expandedToolCallId, setExpandedToolCallId)}
             </div>
-          </div>
-        ))}
+          </motion.div>
+          );
+        })}
         <div ref={bottomRef} />
       </div>
     </div>
@@ -46,6 +78,10 @@ function renderMessageContent(
   onPPTSubmit?: (prefs: PPTPreferences) => void,
   onPPTSkip?: () => void,
   onThinkingDone?: () => void,
+  onStreamingDone?: (messageId: string) => void,
+  onToolCallDone?: (messageId: string) => void,
+  expandedToolCallId?: string | null,
+  setExpandedToolCallId?: (id: string | null) => void,
 ) {
   switch (msg.type) {
     case 'thinking':
@@ -74,35 +110,44 @@ function renderMessageContent(
       );
 
     case 'tool-call':
-      return <ToolCallBlock commands={msg.meta?.commands as string[] || []} />;
-
-    case 'ppt-slides':
       return (
-        <div className="flex flex-col gap-3 w-full">
-          {(msg.meta?.slides as PPTSlide[] || []).map((slide, i) => (
-            <PPTSlideCard key={i} slide={slide} />
-          ))}
-        </div>
-      );
-
-    case 'ppt-summary':
-      return (
-        <PPTSummaryCarousel
-          slides={msg.meta?.slides as PPTSlide[] || []}
-          title={msg.meta?.title as string || '产品研究报告 2025'}
+        <ToolCallBlock
+          commands={msg.meta?.commands as string[] || []}
+          onDone={() => onToolCallDone?.(msg.id)}
+          isExpanded={expandedToolCallId === msg.id}
+          onToggleExpand={() => setExpandedToolCallId?.(expandedToolCallId === msg.id ? null : msg.id)}
         />
       );
+
+    case 'ppt-slides':
+      return <PPTSlidesBlock slides={msg.meta?.slides as PPTSlide[] || []} />;
+
+    case 'ppt-summary':
+      return null;
+
+    case 'ppt-versions':
+      return <PPTVersionsBlock version={msg.meta?.version as number || 1} />;
 
     case 'ppt-actions':
       return <PPTActionButtons onSaveTemplate={() => {}} onEdit={() => {}} />;
 
     default:
+      if (msg.streaming && msg.role === 'assistant') {
+        return (
+          <StreamingText
+            content={msg.content}
+            onComplete={() => onStreamingDone?.(msg.id)}
+            className="text-[14px] leading-[22px] tracking-[-0.01em] whitespace-pre-wrap text-text-primary"
+            style={{ fontFamily: "'Geist', sans-serif" }}
+          />
+        );
+      }
       return (
         <>
           <p className={cn(
-            "text-[14px] leading-[22px] whitespace-pre-wrap",
-            msg.role === 'user' ? "text-text-primary" : "text-text-primary"
-          )} style={{ fontFamily: "'Geist', sans-serif" }}>
+            "text-[14px] leading-[22px] tracking-[-0.01em] whitespace-pre-wrap text-text-primary",
+            msg.role === 'user' && "font-normal"
+          )} style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>
             {msg.content}
           </p>
           {msg.files && msg.files.length > 0 && (

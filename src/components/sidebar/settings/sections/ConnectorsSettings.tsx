@@ -19,9 +19,6 @@ export function ConnectorsSettings() {
 
   return (
     <div className="flex flex-col">
-      <h1 className={`text-[24px] font-bold leading-[32px] tracking-[-0.18px] mb-[4px] ${fg}`} style={{ fontFamily: "'Iowan Old Style BT', 'Georgia', serif" }}>Connectors</h1>
-      <div className={`h-px mt-[16px] ${border}`} />
-
       {/* Tabs */}
       <div className="flex items-center gap-[24px] mt-[4px]">
         <button

@@ -9,14 +9,6 @@ export function DashboardContent() {
 
   return (
     <div className="flex flex-col gap-[32px]">
-      {/* Title */}
-      <div>
-        <h1 className="text-[24px] font-medium leading-[32px] tracking-[-0.18px] text-text-primary"
-          style={{ fontFamily: '"Iowan Old Style BT", "Iowan Old Style", serif' }}>
-          Dashboard
-        </h1>
-      </div>
-
         {/* Pro alert */}
         <div className={`rounded-[12px] border border-border-default overflow-hidden ${dk ? 'bg-bg-overlay' : 'bg-bg-bg'}`}>
           <div className="px-[16px]">
@@ -167,60 +159,66 @@ function CronGroup({ platform, platformIcon, tasks: initialTasks, dk }: {
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-[8px] py-[6px]">
+      <div className="flex items-center gap-[6px] py-[4px]">
         {PLATFORM_ICONS[platformIcon] || <div className="size-[20px] rounded-full bg-text-tertiary" />}
-        <span className="text-[14px] leading-[20px] tracking-[-0.18px] font-medium text-text-primary">{platform}</span>
+        <span className="text-[14px] leading-[20px] tracking-[-0.18px] font-medium text-text-primary opacity-60">{platform}</span>
       </div>
-      {tasks.map((task) => {
-        const isHovered = hoveredId === task.id;
-        const isRunning = task.status === 'running';
-        const isPaused = task.status === 'paused';
-        return (
-          <div
-            key={task.id}
-            onMouseEnter={() => setHoveredId(task.id)}
-            onMouseLeave={() => setHoveredId(null)}
-            className={`flex items-center gap-[8px] py-[10px] px-[8px] -mx-[8px] rounded-[10px] transition-colors ${
-              isRunning && !isPaused
-                ? dk ? 'bg-accent-blue-subtle/40' : 'bg-bg-surface'
-                : isHovered
-                  ? dk ? 'bg-bg-subtle/50' : 'bg-bg-surface'
-                  : ''
-            } ${isPaused ? 'opacity-50' : ''}`}
-          >
-            <div className="size-[16px] flex items-center justify-center shrink-0">
-              {isRunning && !isPaused ? (
-                <div className="size-[8px] rounded-full bg-accent-green animate-pulse" />
-              ) : (
-                <div className="size-[12px] rounded-full border-[1.5px] border-border-default" />
-              )}
-            </div>
-            <span className={`flex-1 text-[14px] leading-[20px] tracking-[-0.18px] ${isPaused ? 'line-through' : ''} text-text-secondary`}>{task.text}</span>
+      <div className="flex flex-col gap-[4px] mt-[8px]">
+        {tasks.map((task) => {
+          const isHovered = hoveredId === task.id;
+          const isRunning = task.status === 'running';
+          const isPaused = task.status === 'paused';
+          return (
+            <div
+              key={task.id}
+              onMouseEnter={() => setHoveredId(task.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              className={`flex items-center gap-[4px] h-[40px] px-[8px] rounded-[6px] transition-colors ${
+                isRunning && !isPaused
+                  ? dk ? 'bg-accent-blue-subtle/40' : 'bg-interactive-secondary-selected'
+                  : isHovered
+                    ? 'bg-bg-hover'
+                    : ''
+              } ${isPaused ? 'opacity-50' : ''}`}
+            >
+              {/* Circle indicator — fixed 24px */}
+              <div className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                {isRunning && !isPaused ? (
+                  <div className="size-[8px] rounded-full bg-accent-green" />
+                ) : (
+                  <div className="w-[12px] h-[12px] rounded-full border-[1.33px] border-text-primary/12" />
+                )}
+              </div>
+              <span className={`flex-1 text-[14px] font-medium leading-[24px] tracking-[-0.18px] truncate ${isPaused ? 'line-through' : ''} text-text-primary opacity-80`}>{task.text}</span>
 
-            {/* Right side — fixed width, swap content on hover */}
-            <div className="w-[140px] flex items-center justify-end shrink-0">
-              {isHovered ? (
-                <div className="flex items-center gap-[2px]">
-                  <button className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title="Details">
-                    <ClipboardList className="size-[14px]" />
-                  </button>
-                  <button onClick={() => togglePause(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-icon-primary hover:bg-bg-hover" title={isPaused ? 'Resume' : 'Pause'}>
-                    {isPaused ? <PlayCircle className="size-[14px]" /> : <PauseCircle className="size-[14px]" />}
-                  </button>
-                  <button onClick={() => deleteTask(task.id)} className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors text-icon-tertiary hover:text-accent-red hover:bg-accent-red-subtle" title="Delete">
-                    <Trash2 className="size-[14px]" />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-[4px]">
-                  <RefreshCw className="size-[14px] text-accent-green" />
-                  <span className="text-[12px] leading-[20px] text-accent-green tracking-[-0.18px] whitespace-nowrap">{task.interval}</span>
-                </div>
-              )}
+              {/* Right side — fixed height container */}
+              <div className="h-[24px] flex items-center justify-end shrink-0">
+                {isHovered ? (
+                  <div className="flex items-center gap-[0px]">
+                    <button className="w-[24px] h-[24px] rounded-[4px] flex items-center justify-center transition-colors text-icon-primary opacity-80 hover:bg-bg-surface" title="Details">
+                      <ClipboardList className="size-[14px]" />
+                    </button>
+                    <button onClick={() => togglePause(task.id)} className="w-[24px] h-[24px] rounded-[4px] flex items-center justify-center transition-colors text-icon-primary opacity-80 hover:bg-bg-surface" title={isPaused ? 'Resume' : 'Pause'}>
+                      {isPaused ? <PlayCircle className="size-[14px]" /> : <PauseCircle className="size-[14px]" />}
+                    </button>
+                    <button onClick={() => deleteTask(task.id)} className="w-[24px] h-[24px] rounded-[4px] flex items-center justify-center transition-colors text-icon-primary opacity-80 hover:text-accent-red hover:bg-accent-red-subtle" title="Delete">
+                      <Trash2 className="size-[14px]" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-[4px] px-[4px] py-[2px] rounded-[4px]" style={{ backgroundColor: '#F4EBFF' }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-60 shrink-0">
+                      <path d="M7 3.5v3.5l2.5 1.5" stroke="#7F56D9" strokeWidth="1.17" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="7" cy="7" r="5" stroke="#7F56D9" strokeWidth="1.17"/>
+                    </svg>
+                    <span className="text-[12px] font-medium leading-[16px] whitespace-nowrap" style={{ color: '#7F56D9', fontFamily: "'Geist', sans-serif" }}>{task.interval}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

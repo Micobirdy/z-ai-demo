@@ -14,9 +14,6 @@ export function DataSettings() {
 
   return (
     <div className="flex flex-col">
-      <h1 className={`text-[24px] font-bold leading-[32px] tracking-[-0.18px] mb-[4px] ${fg}`} style={{ fontFamily: "'Iowan Old Style BT', 'Georgia', serif" }}>Data & Privacy</h1>
-      <div className={`h-px mt-[16px] mb-[24px] ${border}`} />
-
       {/* Improve Model */}
       <div className="flex items-start justify-between py-[16px] gap-[40px]">
         <div className="flex-1">

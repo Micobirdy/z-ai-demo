@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import { useSidebar } from '@/hooks/useSidebar';
+import { TemplateDetailModal } from './TemplateDetailModal';
 
 const CATEGORIES = [
   { key: 'my', label: 'My template' },
@@ -130,7 +132,17 @@ interface PPTShowcaseProps {
 
 export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcaseProps) {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [detailTemplate, setDetailTemplate] = useState<Template | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { showTemplateTip, setShowTemplateTip } = useSidebar();
+
+  // Auto-dismiss template tip
+  useEffect(() => {
+    if (!showTemplateTip) return;
+    setActiveCategory('my');
+    const t = setTimeout(() => setShowTemplateTip(false), 4000);
+    return () => clearTimeout(t);
+  }, [showTemplateTip, setShowTemplateTip]);
 
   // Auto-scroll to Prompt area when mounted
   useEffect(() => {
@@ -149,18 +161,18 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-      className="w-full max-w-[794px] xl:max-w-[860px] 2xl:max-w-[940px] flex flex-col gap-8 mt-4"
+      className="w-[900px] max-w-full xl:w-[960px] 2xl:w-[1080px] min-[1920px]:w-[1240px] flex flex-col gap-8 mt-4"
       ref={containerRef}
     >
       {/* Prompt suggestions */}
       <div className="flex flex-col items-center gap-4">
         <SectionTitle text="Prompt" />
-        <div className="grid grid-cols-4 gap-1.5 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 w-full">
           {PROMPTS.map((p, i) => (
             <button
               key={i}
               onClick={() => onSelectPrompt(p)}
-              className="text-left p-3 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col overflow-hidden transition-colors hover:bg-bg-hover active:opacity-80 cursor-pointer"
+              className="text-left p-3 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col overflow-hidden transition-colors hover:bg-bg-surface active:opacity-80 cursor-pointer"
               style={{ fontFamily: "'Geist', sans-serif" }}
             >
               <div className="w-[20px] h-[20px] mb-2.5 text-icon-tertiary shrink-0">
@@ -183,36 +195,59 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
           {CATEGORIES.map((cat, i) => (
             <div key={cat.key} className="flex items-center gap-2">
               {i === 1 && <div className="w-px h-[20px] bg-border-default" />}
-              <button
-                onClick={() => setActiveCategory(cat.key)}
+              <div className="relative">
+                {/* Tooltip for My template */}
+                {cat.key === 'my' && showTemplateTip && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex flex-col items-center z-50" style={{ animation: 'toolBlurIn 0.4s ease-out forwards' }}>
+                    <div className="px-4 py-2 bg-[#1a1a1a] rounded-[8px] shadow-lg whitespace-nowrap" style={{ boxShadow: '0 4px 6px -2px rgba(16,24,40,0.03), 0 12px 16px -4px rgba(16,24,40,0.08)' }}>
+                      <span className="text-[12px] text-white font-medium leading-4 tracking-tight" style={{ fontFamily: "'Geist', sans-serif" }}>
+                        你保存的模版可在首页选择使用
+                      </span>
+                    </div>
+                    <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-[#1a1a1a]" />
+                  </div>
+                )}
+                <button
+                  onClick={() => { setActiveCategory(cat.key); if (cat.key === 'my') setShowTemplateTip(false); }}
                 className={cn(
                   "px-3 py-1.5 rounded-[8px] text-[13px] border transition-all cursor-pointer active:scale-[0.97]",
                   activeCategory === cat.key
                     ? "bg-interactive-primary text-text-inverted border-transparent"
-                    : "border-border-default text-text-secondary hover:border-border-strong hover:bg-bg-hover",
+                    : "border-border-default text-text-secondary hover:border-border-strong hover:bg-bg-surface",
                   cat.key === 'my' && activeCategory !== 'my' && "border-dashed"
                 )}
                 style={{ fontFamily: "'Geist', sans-serif" }}
               >
                 {cat.label}
               </button>
+              </div>
             </div>
           ))}
         </div>
 
         {/* Template grid */}
-        <div className="grid grid-cols-3 gap-4 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
           {filteredTemplates.map(template => (
-            <TemplateCard key={template.id} template={template} onClick={() => {
-              if (onSelectTemplate) {
-                onSelectTemplate({ title: template.title.replace(/\n/g, ' '), coverBg: template.coverBg, coverAccent: template.coverAccent, coverTextColor: template.coverTextColor, prompt: template.prompt });
-              } else {
-                onSelectPrompt(template.prompt);
-              }
-            }} />
+            <TemplateCard key={template.id} template={template} onClick={() => setDetailTemplate(template)} />
           ))}
         </div>
       </div>
+
+      {/* Template detail modal */}
+      {detailTemplate && (
+        <TemplateDetailModal
+          template={detailTemplate}
+          onClose={() => setDetailTemplate(null)}
+          onUse={() => {
+            setDetailTemplate(null);
+            if (onSelectTemplate) {
+              onSelectTemplate({ title: detailTemplate.title.replace(/\n/g, ' '), coverBg: detailTemplate.coverBg, coverAccent: detailTemplate.coverAccent, coverTextColor: detailTemplate.coverTextColor, prompt: detailTemplate.prompt });
+            } else {
+              onSelectPrompt(detailTemplate.prompt);
+            }
+          }}
+        />
+      )}
     </motion.div>
   );
 }
