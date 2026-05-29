@@ -3,20 +3,21 @@ import { cn } from '@/lib/utils';
 interface AnimatedShinyTextProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function AnimatedShinyText({ children, className }: AnimatedShinyTextProps) {
+export function AnimatedShinyText({ children, className, style }: AnimatedShinyTextProps) {
   return (
     <span
-      className={cn(
-        'bg-clip-text bg-no-repeat bg-gradient-to-r from-text-tertiary/60 via-text-primary/80 via-50% to-text-tertiary/60',
-        className
-      )}
+      className={cn('inline-block', className)}
       style={{
-        backgroundSize: '200px 100%',
+        backgroundImage: 'linear-gradient(90deg, var(--text-tertiary) 0%, var(--text-tertiary) 35%, var(--text-primary) 50%, var(--text-tertiary) 65%, var(--text-tertiary) 100%)',
+        backgroundSize: '300% 100%',
+        backgroundClip: 'text',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
-        animation: 'shiny-text 3s ease-in-out infinite',
+        animation: 'shiny-text 4s linear infinite',
+        ...style,
       }}
     >
       {children}

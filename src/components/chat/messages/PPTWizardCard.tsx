@@ -117,7 +117,7 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
       >
         <div className="flex items-center gap-2.5">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M9.39434 4.48156H13.3635C13.6783 4.48156 13.8356 4.48156 13.9277 4.54774C14.008 4.60548 14.0603 4.69436 14.0718 4.7926C14.0849 4.90519 14.0085 5.04277 13.8556 5.31792L12.9084 7.02298C12.8529 7.12277 12.8252 7.17266 12.8143 7.2255C12.8047 7.27226 12.8047 7.32049 12.8143 7.36726C12.8252 7.4201 12.8529 7.46999 12.9084 7.56978L13.8556 9.27483C14.0085 9.54998 14.0849 9.68756 14.0718 9.80016C14.0603 9.8984 14.008 9.98727 13.9277 10.045C13.8356 10.1112 13.6783 10.1112 13.3635 10.1112H8.40915C8.01504 10.1112 7.81799 10.1112 7.66746 10.0345C7.53505 9.96703 7.42739 9.85937 7.35993 9.72696C7.28323 9.57643 7.28323 9.37938 7.28323 8.98527V7.29638M4.82026 14.3334L2.00545 3.07416M3.06104 7.29638H8.26841C8.66252 7.29638 8.85958 7.29638 9.01011 7.21968C9.14252 7.15221 9.25017 7.04456 9.31764 6.91215C9.39434 6.76162 9.39434 6.56456 9.39434 6.17045V2.79267C9.39434 2.39856 9.39434 2.20151 9.31764 2.05098C9.25017 1.91857 9.14252 1.81091 9.01011 1.74345C8.85958 1.66675 8.66252 1.66675 8.26841 1.66675H3.09565C2.60409 1.66675 2.35832 1.66675 2.19021 1.7686C2.04288 1.85787 1.93341 1.99808 1.88254 2.16266C1.8245 2.35045 1.88412 2.58889 2.00334 3.06576L3.06104 7.29638Z" stroke="var(--icon-secondary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9.39434 4.48156H13.3635C13.6783 4.48156 13.8356 4.48156 13.9277 4.54774C14.008 4.60548 14.0603 4.69436 14.0718 4.7926C14.0849 4.90519 14.0085 5.04277 13.8556 5.31792L12.9084 7.02298C12.8529 7.12277 12.8252 7.17266 12.8143 7.2255C12.8047 7.27226 12.8047 7.32049 12.8143 7.36726C12.8252 7.4201 12.8529 7.46999 12.9084 7.56978L13.8556 9.27483C14.0085 9.54998 14.0849 9.68756 14.0718 9.80016C14.0603 9.8984 14.008 9.98727 13.9277 10.045C13.8356 10.1112 13.6783 10.1112 13.3635 10.1112H8.40915C8.01504 10.1112 7.81799 10.1112 7.66746 10.0345C7.53505 9.96703 7.42739 9.85937 7.35993 9.72696C7.28323 9.57643 7.28323 9.37938 7.28323 8.98527V7.29638M4.82026 14.3334L2.00545 3.07416M3.06104 7.29638H8.26841C8.66252 7.29638 8.85958 7.29638 9.01011 7.21968C9.14252 7.15221 9.25017 7.04456 9.31764 6.91215C9.39434 6.76162 9.39434 6.56456 9.39434 6.17045V2.79267C9.39434 2.39856 9.39434 2.20151 9.31764 2.05098C9.25017 1.91857 9.14252 1.81091 9.01011 1.74345C8.85958 1.66675 8.66252 1.66675 8.26841 1.66675H3.09565C2.60409 1.66675 2.35832 1.66675 2.19021 1.7686C2.04288 1.85787 1.93341 1.99808 1.88254 2.16266C1.8245 2.35045 1.88412 2.58889 2.00334 3.06576L3.06104 7.29638Z" stroke="var(--text-primary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <span className="text-[15px] font-medium text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>
             规划幻灯片创建
@@ -132,8 +132,8 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
               <button onClick={(e) => { e.stopPropagation(); handleSkip(); }} className="text-[14px] text-text-tertiary hover:text-text-primary transition-colors cursor-pointer" style={{ fontFamily: "'Geist', sans-serif" }}>
                 跳过 »
               </button>
-              <button onClick={(e) => { e.stopPropagation(); handleSubmit(); }} className="px-4 py-1.5 rounded-[6px] text-[14px] text-text-secondary border border-border-default hover:bg-bg-surface transition-colors cursor-pointer active:opacity-80" style={{ fontFamily: "'Geist', sans-serif" }}>
-                继续（{countdown}）
+              <button onClick={(e) => { e.stopPropagation(); handleSubmit(); }} className="px-4 py-1.5 rounded-[6px] text-[14px] text-text-primary border border-border-default hover:bg-bg-surface transition-colors cursor-pointer active:opacity-80" style={{ fontFamily: "'Geist', sans-serif" }}>
+                继续 <span className="text-text-tertiary ml-[2px] tabular-nums">{countdown}s</span>
               </button>
             </>
           ) : (
@@ -147,7 +147,7 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
 
       {/* Body — GPU-accelerated collapse */}
       <div
-        className="origin-top transition-[transform,opacity] duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden"
+        className="origin-top transition-[transform,opacity] duration-[500ms] ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden"
         style={{
           transform: expanded ? 'scaleY(1)' : 'scaleY(0)',
           opacity: expanded ? 1 : 0,

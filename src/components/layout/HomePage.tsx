@@ -7,6 +7,7 @@ import ZHoverEffect from '@/components/home/ZHoverEffect'
 import { PPTShowcase } from '@/components/home/PPTShowcase'
 import { RippleDotPattern } from '@/components/ui/animated-dots'
 import { BackgroundTasksDropdown } from '@/components/ui/BackgroundTasksDropdown'
+import { FileAttachment } from '@/components/ui/file-attachment'
 import { useSidebar } from '@/hooks/useSidebar'
 import { useFileUpload, formatFileSize } from '@/hooks/useFileUpload'
 import { cn } from '@/lib/utils'
@@ -279,8 +280,14 @@ export function HomePage() {
                   {isAgent ? 'What can I build for you?' : 'Create anything you can imagine'}
                 </Text3DFlip>
               </motion.div>
-              <motion.p
-                className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty ${'text-text-tertiary'}`}
+              {/* Decorative chevrons flanking the title */}
+              <div className="flex items-center justify-center gap-[12px] mt-[-4px]">
+                <svg width="7" height="9" viewBox="0 0 7 9" fill="none" className="opacity-60">
+                  <path d="M3.46826 0.175568L0.468262 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
+                  <path d="M6.46826 0.175568L3.46826 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
+                </svg>
+                <motion.p
+                  className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty text-text-tertiary`}
                 style={{ fontFamily: 'Geist, sans-serif' }}
                 initial={reduceMotion ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -291,6 +298,11 @@ export function HomePage() {
                   : 'Interact with z.ai and explore the boundless creative world'
                 }
               </motion.p>
+                <svg width="7" height="9" viewBox="0 0 7 9" fill="none" className="opacity-60">
+                  <path d="M3.46826 0.175568L6.46826 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
+                  <path d="M0.468262 0.175568L3.46826 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
+                </svg>
+              </div>
             </div>
 
             {/* Input area — simplified chatbot card */}
@@ -354,31 +366,15 @@ export function HomePage() {
                       {files.map((f, i) => {
                         const ext = f.name.split('.').pop()?.toLowerCase() || '';
                         const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext);
-                        const fileName = f.name.replace(/\.[^/.]+$/, '');
-                        const ft = getFileTypeStyle(ext);
                         return (
-                          <div key={i} className="group/file max-w-72 pl-1.5 pr-2.5 py-1.5 relative bg-bg-surface rounded-[8px] inline-flex justify-start items-center gap-2">
-                            <div className="w-10 h-10 relative rounded-[5px] outline outline-1 outline-offset-[-1px] outline-border-default overflow-hidden shrink-0">
-                              {isImage && f instanceof File ? (
-                                <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center" style={{ backgroundColor: ft.bg }}>
-                                  <div dangerouslySetInnerHTML={{ __html: ft.icon }} />
-                                  <span className="text-[7px] font-bold mt-0.5 uppercase tracking-wide" style={{ color: ft.label }}>{ext}</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="inline-flex flex-col justify-center items-start">
-                              <div className="text-text-secondary text-[14px] font-normal leading-5 line-clamp-1" style={{ fontFamily: "'Geist', sans-serif" }}>{fileName}</div>
-                              <div className="text-text-tertiary text-[12px] font-normal leading-4" style={{ fontFamily: "'Geist', sans-serif" }}>{ext.toUpperCase()} · {formatFileSize(f.size)}</div>
-                            </div>
-                            <div
-                              onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                              className="w-4 h-4 absolute -top-1 -right-1 bg-bg-bg rounded-full outline outline-[0.58px] outline-offset-[-0.58px] outline-border-default flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-opacity cursor-pointer"
-                            >
-                              <X className="size-[6px] text-icon-tertiary" />
-                            </div>
-                          </div>
+                          <FileAttachment
+                            key={i}
+                            filename={f.name}
+                            size={f.size}
+                            isImage={isImage}
+                            url={isImage && f instanceof File ? URL.createObjectURL(f) : undefined}
+                            onRemove={() => removeFile(i)}
+                          />
                         );
                       })}
                     </div>

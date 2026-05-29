@@ -229,7 +229,7 @@ export function Sidebar() {
                     : 'opacity-80 hover:opacity-100 hover:bg-bg-hover'
                 )}>
                 <div className="w-[20px] h-[20px] shrink-0 flex items-center justify-center">
-                  <img src="/icons/graduation-hat.svg" alt="" className="w-[18px] h-[18px]" style={{ filter: iconFilter, opacity: 0.7 }} />
+                  <img src="/icons/graduation-hat.svg" alt="" className="w-[18px] h-[18px]" style={{ filter: iconFilter }} />
                 </div>
                 <span className={clsx(
                   'text-[14px] leading-[20px] whitespace-nowrap transition-opacity duration-200',
@@ -279,13 +279,13 @@ export function Sidebar() {
         </div>
 
         {/* Upgrade */}
-        <div className="flex items-center justify-center py-[8px] shrink-0 overflow-hidden">
+        <div className="flex items-center justify-center py-[8px] mb-[8px] shrink-0">
           <button className={clsx(
-            'flex items-center gap-[4px] rounded-full py-[4px] transition-all duration-[320ms] cursor-pointer',
-            dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#daeeff] hover:bg-[#c3dcf9]',
-            showExpanded ? 'pl-[6px] pr-[12px]' : 'px-[8px]'
+            'flex items-center justify-center gap-[4px] rounded-full py-[4px] transition-all duration-[320ms] cursor-pointer min-w-[28px]',
+            dk ? 'bg-[#0068e0]/20 hover:bg-[#0068e0]/30' : 'bg-[#dbeafe] hover:bg-[#bfdbfe]',
+            showExpanded ? 'pl-[8px] pr-[12px]' : 'p-[6px]'
           )}>
-            <ArrowUpCircle className="size-[16px] text-[#0068e0] shrink-0" />
+            <ArrowUpCircle className="size-[16px] text-[#0068e0] shrink-0 flex-none" />
             <span className={clsx(
               'text-[13px] leading-[20px] text-[#0068e0] whitespace-nowrap overflow-hidden transition-all duration-200',
               showExpanded ? 'opacity-100 max-w-[80px]' : 'opacity-0 max-w-0'

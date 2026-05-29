@@ -23,12 +23,21 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [settingsFromTasks, setSettingsFromTasks] = useState(false);
   const [activeSettingsSection, setActiveSettingsSection] =
     useState<SettingsSection>('general');
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('z-theme') as Theme) || 'dark';
+    }
+    return 'dark';
+  });
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [showTemplateTip, setShowTemplateTip] = useState(false);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('z-theme', next);
+      return next;
+    });
   }, []);
 
   useEffect(() => {

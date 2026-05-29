@@ -53,9 +53,9 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="pb-2 flex items-center gap-1 cursor-pointer"
+        className="pb-2 flex items-center gap-[6px] cursor-pointer"
       >
-        <div className="w-5 h-5 flex items-center justify-center shrink-0">
+        <div className="w-[16px] h-[20px] flex items-center justify-center shrink-0 ml-[1px]">
           {!done ? (
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="animate-pulse" style={{ animationDuration: '2s' }}>
               <path d="M8 12V3.33337" stroke="var(--icon-tertiary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
@@ -105,9 +105,9 @@ export function ThinkingBlock({ content, autoCollapse, onCollapseComplete }: Thi
           style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(128,128,128,0.2) transparent' }}
         >
           <div className="flex">
-            {/* Timeline — stretches with content only */}
-            <div className="px-2 shrink-0">
-              <div className="w-[1px] h-full bg-border-default" />
+            {/* Timeline — aligned with header icon center */}
+            <div className="pl-[8px] pr-[8px] shrink-0">
+              <div className="w-[1.33px] h-full bg-border-default" />
             </div>
             {/* Text */}
             <div className="flex-1 min-w-0 flex flex-col gap-2.5 pb-2 pr-1">

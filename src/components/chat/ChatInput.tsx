@@ -8,9 +8,10 @@ interface ChatInputProps {
   disabled?: boolean;
   placeholder?: string;
   agentLabel?: string;
+  embedded?: boolean;
 }
 
-export function ChatInput({ onSend, disabled, placeholder, agentLabel }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, placeholder, agentLabel, embedded }: ChatInputProps) {
   const { theme } = useSidebar();
   const dk = theme === 'dark';
   const [value, setValue] = useState('');
@@ -39,12 +40,12 @@ export function ChatInput({ onSend, disabled, placeholder, agentLabel }: ChatInp
   };
 
   return (
-    <div className="shrink-0 px-4 pb-4 pt-2">
+    <div className={embedded ? "" : "shrink-0 px-4 pb-4 pt-2"}>
       <div className={cn(
-        "max-w-[768px] 2xl:max-w-[860px] min-[1920px]:max-w-[960px] mx-auto rounded-[12px] overflow-hidden",
+        embedded ? "rounded-[12px] overflow-hidden" : "max-w-[768px] 2xl:max-w-[860px] min-[1920px]:max-w-[960px] mx-auto rounded-[12px] overflow-hidden",
         dk ? "bg-zinc-800" : "bg-white"
       )} style={{
-        boxShadow: '0px 4px 16px 0px rgba(0,0,0,0.05)',
+        boxShadow: embedded ? 'none' : '0px 4px 16px 0px rgba(0,0,0,0.05)',
         outline: dk ? '1px solid rgba(64,64,64,0.8)' : '1px solid #d4d4d8',
         outlineOffset: '-1px',
       }}>
@@ -91,19 +92,17 @@ export function ChatInput({ onSend, disabled, placeholder, agentLabel }: ChatInp
             onClick={handleSubmit}
             disabled={!value.trim() || disabled}
             className={cn(
-              "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all",
+              "p-[4px] rounded-[6px] flex justify-center items-center overflow-hidden transition-all",
               value.trim()
                 ? dk
-                  ? "bg-white text-black"
-                  : "bg-[#0d0d0d] text-white"
-                : dk
-                  ? "opacity-25 bg-white"
-                  : "bg-neutral-200"
+                  ? "bg-white text-black shadow-[0px_1px_2px_rgba(10,13,20,0.03)] outline outline-1 outline-offset-[-1px] outline-white/20"
+                  : "bg-interactive-primary text-text-inverted shadow-[0px_1px_2px_rgba(10,13,20,0.03)]"
+                : "bg-bg-bg shadow-[0px_1px_2px_rgba(10,13,20,0.03)] outline outline-1 outline-offset-[-1px] outline-border-default"
             )}
             aria-label="Send"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke="currentColor" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 12.6667V3.33333M8 3.33333L3.33333 8M8 3.33333L12.6667 8" stroke={value.trim() ? (dk ? '#0d0d0d' : 'white') : 'var(--icon-tertiary)'} strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>

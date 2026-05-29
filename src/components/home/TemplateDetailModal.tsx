@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ChevronRight } from 'lucide-react';
-import { AnimatedDotPattern } from '@/components/ui/animated-dots';
+import { PixelLoading } from '@/components/ui/pixel-loading';
 import { cn } from '@/lib/utils';
 
 interface TemplateDetailModalProps {
@@ -106,7 +106,7 @@ export function TemplateDetailModal({ template, onClose, onUse }: TemplateDetail
               <InnerSlide index={selectedSlide} template={template} />
             ) : (
               <div className="absolute inset-0 bg-bg-bg">
-                <AnimatedDotPattern className="absolute inset-0 size-full" width={8} height={8} cr={1} maxOpacity={0.5} flickerChance={0.06} />
+                <PixelLoading colors={['#cccccc', '#aaaaaa', '#999999']} duration={8000} />
               </div>
             )}
           </div>
@@ -127,24 +127,42 @@ export function TemplateDetailModal({ template, onClose, onUse }: TemplateDetail
                 >
                   {i === 0 ? (
                     <div className="w-full h-full" style={{ backgroundColor: template.coverBg }}>
-                      <div className="absolute inset-0 p-1.5 flex flex-col justify-end">
-                        <div className="text-[5px] font-bold leading-[7px] whitespace-pre-line" style={{ color: template.coverTextColor, fontFamily: "'Geist', sans-serif" }}>
-                          {template.title}
+                      <div className="absolute inset-0 p-1.5 flex flex-col justify-between">
+                        <div className="flex items-center gap-[2px]">
+                          <div className="w-[6px] h-[6px] rounded-[1px] bg-accent-blue flex items-center justify-center">
+                            <div className="w-[3px] h-[0.5px] bg-white" />
+                          </div>
+                          <span className="text-[3px] text-text-tertiary">デジタルマーケティング</span>
                         </div>
+                        <div>
+                          <div className="text-[5px] font-bold leading-[7px] whitespace-pre-line text-accent-blue" style={{ fontFamily: "'Geist', sans-serif" }}>
+                            {template.title}
+                          </div>
+                          <div className="h-[4px] w-[60%] rounded-[1px] bg-accent-blue mt-[2px] flex items-center px-[2px]">
+                            <span className="text-[2px] text-white">プレゼンテーション</span>
+                          </div>
+                        </div>
+                        <span className="text-[2.5px] text-text-placeholder">佐藤 健太</span>
                       </div>
                     </div>
                   ) : loadedSlides.has(i) ? (
-                    <div className="w-full h-full bg-bg-bg p-1.5 flex flex-col justify-start">
-                      <span className="text-[4px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>{SLIDE_TITLES[i] || `P${i + 1}`}</span>
-                      <span className="text-[6px] font-bold text-text-primary mt-0.5" style={{ fontFamily: "'Geist', sans-serif" }}>{SLIDE_TITLES[i] || `Page ${i + 1}`}</span>
-                      <div className="mt-1 flex flex-col gap-[1.5px]">
-                        <div className="h-[1.5px] bg-border-default w-[80%] rounded-[0.5px]" />
-                        <div className="h-[1.5px] bg-border-default w-[60%] rounded-[0.5px]" />
+                    <div className="w-full h-full bg-bg-bg p-1.5 flex flex-col justify-between">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-[2px]">
+                          <div className="w-[5px] h-[5px] rounded-[1px] bg-accent-blue" />
+                          <span className="text-[2.5px] text-text-tertiary">デジタルマーケティング</span>
+                        </div>
+                        <span className="text-[3px] text-text-placeholder tabular-nums">{String(i+1).padStart(2,'0')}</span>
                       </div>
+                      <div>
+                        <span className="text-[5px] font-bold text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>{SLIDE_TITLES[i] || `Page ${i + 1}`}</span>
+                        <div className="h-[1.5px] w-[30%] bg-accent-blue rounded-full mt-[2px]" />
+                      </div>
+                      <span className="text-[2.5px] text-text-placeholder">マーケティング戦略 2025</span>
                     </div>
                   ) : (
                     <div className="w-full h-full overflow-hidden relative bg-bg-bg">
-                      <AnimatedDotPattern className="absolute inset-0 size-full" width={5} height={5} cr={0.7} maxOpacity={0.55} flickerChance={0.08} />
+                      <PixelLoading colors={['#cccccc', '#aaaaaa', '#999999']} duration={8000} />
                     </div>
                   )}
                 </button>

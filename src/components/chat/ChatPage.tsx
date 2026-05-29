@@ -127,22 +127,49 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
     };
 
     const totalPages = Number(prefs.pageCount.split('-').pop()) || 6;
-    const slideDescriptions = [
-      '2025年度营销战略总览，涵盖核心目标、关键指标与执行路径',
-      '行业趋势与竞争格局分析，数据驱动的市场洞察',
-      '季度工作计划与里程碑节点，团队分工与时间线',
-      '品牌定位与渠道策略，线上线下整合营销方案',
-      '用户画像与需求分析，目标市场细分与增长机会',
-      '主要竞品功能对比与差异化优势，SWOT 分析',
-    ];
-    const slides = Array.from({ length: totalPages }, (_, i) => ({
-      title: ['戦略 2025', '市場分析', '工作议程', '市场营销战略', '市場分析', '竞品调研'][i] || `第 ${i + 1} 页`,
-      description: slideDescriptions[i] || `第 ${i + 1} 页内容概述`,
+    const slides = [
+      {
+        title: 'マーケティング戦略 2025',
+        description: '2025年度の包括的なデジタルマーケティング戦略と実行ロードマップ',
+        contentPreview: 'マーケティング\n戦略 2025',
+        slideType: 'cover' as const,
+      },
+      {
+        title: '市場分析',
+        description: '2025年度の市場分析によると、デジタルマーケティング分野は年間15.8%の成長率で拡大しています。特にSNSマーケティングとコンテンツマーケティングの需要が高まっています。',
+        contentPreview: '市場分析',
+        slideType: 'chart' as const,
+      },
+      {
+        title: 'アジェンダ',
+        description: 'ブランド紹介、市場分析、競合分析、マーケティング戦略、デジタルマーケティング、KPI・測定指標、実行計画・ロードマップ',
+        contentPreview: 'アジェンダ',
+        slideType: 'agenda' as const,
+      },
+      {
+        title: 'マーケティング戦略概要',
+        description: 'ターゲット市場の特定とポジショニング戦略、チャネル別の予算配分と期待ROI',
+        contentPreview: 'マーケティング戦略\n概要',
+        slideType: 'strategy' as const,
+      },
+      {
+        title: 'データ分析',
+        description: '購買層の世代別分布、マーケティング手法別成長率、モバイルファーストの消費者行動が68%に上昇',
+        contentPreview: 'データ分析',
+        slideType: 'data' as const,
+      },
+      {
+        title: '競合分析',
+        description: '主要競合3社の機能比較、市場シェア推移、差別化ポイントとSWOT分析',
+        contentPreview: '競合分析',
+        slideType: 'comparison' as const,
+      },
+    ].slice(0, totalPages).map((s, i) => ({
+      ...s,
       pageNumber: i + 1,
       totalPages,
-      bgColor: ['#f0f4f8', '#ffffff', '#f8fafc', '#f0f4f8', '#ffffff', '#f8fafc'][i % 6],
-      accentColor: ['#2563eb', '#1e3a5f', '#0d9488', '#2563eb', '#1e3a5f', '#0d9488'][i % 6],
-      contentPreview: ['マーケティング\n戦略 2025', '市場分析', 'アジェンダ', 'マーケティング戦略\n概要', '市場分析', '競合分析'][i] || '内容',
+      bgColor: '#ffffff',
+      accentColor: '#2563eb',
     }));
 
     // Build the generation steps — each step is { delay, message }
@@ -166,12 +193,16 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
       'ppt-maker.generateContent(slide: 1, type: "cover")',
       'ppt-maker.generateContent(slide: 2, type: "analysis")',
       'ppt-maker.generateContent(slide: 3, type: "agenda")',
+      'ppt-maker.renderCharts(slides: [2], engine: "d3")',
+      'ppt-maker.validateLayout(slides: [1,2,3])',
+    ];
+
+    const toolCallCommands2b = [
       'ppt-maker.generateContent(slide: 4, type: "strategy")',
       'ppt-maker.generateContent(slide: 5, type: "analysis")',
       'ppt-maker.generateContent(slide: 6, type: "comparison")',
-      'ppt-maker.renderCharts(slides: [2, 5], engine: "d3")',
-      'ppt-maker.validateLayout(all: true)',
-      'ppt-maker.exportDraft(format: "preview")',
+      'ppt-maker.renderCharts(slides: [5], engine: "d3")',
+      'ppt-maker.validateLayout(slides: [4,5,6])',
     ];
 
     const toolCallCommands3 = [
@@ -188,23 +219,32 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
       'ppt-maker.exportFinal(format: "pptx", dpi: 144)',
     ];
 
+    const actualSlideCount = slides.length;
+    const halfPoint = Math.ceil(actualSlideCount / 2);
+    const slidesFirstHalf = slides.slice(0, halfPoint);
+    const slidesSecondHalf = slides.slice(halfPoint);
+
     type Step = { delay: number; message: Message; waitForAnimation?: boolean };
     const steps: Step[] = [
-      // 0: User confirmation (instant)
+      // 0: User confirmation
       { delay: 0, message: { id: generateId(), role: 'user', content: `受众: ${labels.audience[prefs.audience] || prefs.audience}\n页数: ${prefs.pageCount}\n风格: ${prefs.style.split(',').map(s => labels.style[s] || s).join('、')}${prefs.notes ? `\n备注: ${prefs.notes}` : ''}`, timestamp: Date.now() } },
       // 1: Tool call 1 — initialize
       { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands1 } }, waitForAnimation: true },
       // 2: Context text
       { delay: 600, message: { id: generateId(), role: 'assistant', content: '模板已加载，主题配色和字体已配置完成。接下来开始生成各页内容和数据图表。', timestamp: Date.now(), streaming: true }, waitForAnimation: true },
-      // 3: Tool call 2 — content generation
-      { delay: 1000, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands2 } }, waitForAnimation: true },
-      // 4: Slides preview
-      { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'ppt-slides', meta: { slides } } },
-      // 5: Post-slide text
+      // 3: Tool call 2 — first batch
+      { delay: 1000, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands2, slideRange: `1-${halfPoint}` } }, waitForAnimation: true },
+      // 4: First batch slides
+      { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'ppt-slides', meta: { slides: slidesFirstHalf } } },
+      // 5: Tool call 2b — second batch
+      { delay: 800, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands2b, slideRange: `${halfPoint + 1}-${actualSlideCount}` } }, waitForAnimation: true },
+      // 6: Second batch slides
+      { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'ppt-slides', meta: { slides: slidesSecondHalf } } },
+      // 7: Post-slide text
       { delay: 1000, message: { id: generateId(), role: 'assistant', content: `${totalPages}页幻灯片草稿已生成，正在进行版面校验和自动修复...`, timestamp: Date.now(), streaming: true }, waitForAnimation: true },
-      // 6: Tool call 3 — validation & export
+      // 8: Tool call 3 — validation & export
       { delay: 800, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands3 } }, waitForAnimation: true },
-      // 7: Final summary text
+      // 9: Final summary
       { delay: 600, message: { id: generateId(), role: 'assistant', content: `已完成全部${totalPages}页演示文稿的生成与校验。\n\n${totalPages}/${totalPages} 页通过 · 3 页经自动修复 · 0 页残留问题\n\n以下几项建议人工确认：\n1. **核心数字** — 52.4、8、13 等关键数据是否与最新版本一致\n2. **人名与单位** — 汇报人和组织名称是否准确\n3. **金句措辞** — 各页金句的语气是否符合汇报风格\n4. **演讲节奏** — 按每页备注试读，确认 5 分钟内能讲完\n\n需要修改任何一页，直接说页号 + 改什么，例如"P6 的数字改成 53.1"。`, timestamp: Date.now(), streaming: true }, waitForAnimation: true },
     ];
 
@@ -225,10 +265,19 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
       setPptPhase('done');
       setPptVersion(1);
       setScrollTrigger(v => v + 1);
+      // Show action bar after 1.5s
       setTimeout(() => {
         setShowActions(true);
         setScrollTrigger(v => v + 1);
       }, 1500);
+      // Show version panel after all PPT slides finish rendering (~15s)
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+          type: 'ppt-versions', meta: { version: 1 },
+        }]);
+        setScrollTrigger(v => v + 1);
+      }, 15000);
       return;
     }
 
@@ -373,7 +422,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
       setPptVersion(v => v + 1);
       setMessages(prev => [...prev, {
         id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
-        type: 'ppt-versions', meta: { version: pptVersion + 1 },
+        type: 'ppt-versions', meta: { version: pptVersion + 1, isNew: true },
       }]);
       setShowActions(true);
       setScrollTrigger(v => v + 1);
@@ -426,6 +475,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
             onThinkingDone={handleThinkingDone}
             onStreamingDone={handleStreamingDone}
             onToolCallDone={handleToolCallDone}
+            onEditPPT={() => setIsEditing(true)}
             scrollTrigger={scrollTrigger}
           />
           {isTyping && (
@@ -438,28 +488,38 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
             </div>
           )}
           <div className="relative z-30">
-            {/* Action buttons — slides up from behind ChatInput */}
-            <AnimatePresence>
-              {showActions && (
-                <motion.div
-                  initial={{ y: 50 }}
-                  animate={{ y: 0 }}
-                  exit={{ y: 40 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute bottom-full left-0 right-0 flex justify-center pb-2 pointer-events-none z-30"
-                >
-                  <div className="pointer-events-auto bg-bg-page rounded-[12px]">
-                    <PPTActionButtons onSaveTemplate={() => setShowTemplateTip(true)} onEdit={() => setIsEditing(true)} />
+            {showActions ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: [0.25, 1, 0.5, 1] }}
+                className="px-4 pb-2"
+              >
+                <div className="max-w-[768px] 2xl:max-w-[860px] min-[1920px]:max-w-[960px] mx-auto bg-bg-page rounded-[13px] outline outline-1 outline-offset-[-1px] outline-border-default overflow-hidden">
+                  {/* Action bar — 44px */}
+                  <div className="h-[44px] px-[12px] flex items-center">
+                    <PPTActionButtons onSaveTemplate={() => setShowTemplateTip(true)} onEdit={() => setIsEditing(true)} inline />
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <ChatInput
-            onSend={handleSend}
-            disabled={isTyping || pptPhase === 'wizard' || pptPhase === 'thinking'}
-            placeholder={showActions ? '添加详细信息或澄清...' : undefined}
-            agentLabel={isPPT ? 'AI PPT' : undefined}
-          />
+                  {/* Chat input — embedded inside the container */}
+                  <div className="mx-[2px] mb-[2px]">
+                    <ChatInput
+                      onSend={handleSend}
+                      disabled={isTyping || pptPhase === 'wizard' || pptPhase === 'thinking'}
+                      placeholder="添加详细信息或澄清..."
+                      agentLabel={isPPT ? 'AI PPT' : undefined}
+                      embedded
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <ChatInput
+                onSend={handleSend}
+                disabled={isTyping || pptPhase === 'wizard' || pptPhase === 'thinking'}
+                placeholder={showActions ? '添加详细信息或澄清...' : undefined}
+                agentLabel={isPPT ? 'AI PPT' : undefined}
+              />
+            )}
           </div>
         </div>
 
@@ -475,7 +535,18 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
         {isEditing && (
           <PPTEditorOverlay
             slides={messages.find(m => m.type === 'ppt-slides')?.meta?.slides as PPTSlide[] || []}
-            onClose={() => setIsEditing(false)}
+            onClose={() => {
+              setIsEditing(false);
+              setPptVersion(v => {
+                const newV = v + 1;
+                setMessages(prev => [...prev, {
+                  id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
+                  type: 'ppt-versions', meta: { version: newV, isNew: true },
+                }]);
+                return newV;
+              });
+              setScrollTrigger(v => v + 1);
+            }}
           />
         )}
       </AnimatePresence>

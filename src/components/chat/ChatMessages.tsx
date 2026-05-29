@@ -15,10 +15,11 @@ interface ChatMessagesProps {
   onThinkingDone?: () => void;
   onStreamingDone?: (messageId: string) => void;
   onToolCallDone?: (messageId: string) => void;
+  onEditPPT?: () => void;
   scrollTrigger?: number;
 }
 
-export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, scrollTrigger }: ChatMessagesProps) {
+export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, onEditPPT, scrollTrigger }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const wizardRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,7 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone,
     if (lastMsg?.type === 'ppt-wizard') {
       setTimeout(() => {
         wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 150);
+      }, 400);
     }
   }, [lastMsg?.type]);
 
@@ -48,11 +49,13 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone,
           <motion.div
             key={msg.id}
             ref={isWizard ? wizardRef : undefined}
-            initial={isFirstUser ? { opacity: 0, y: 36, scale: 0.92 } : { opacity: 0, y: 6 }}
+            initial={isFirstUser ? { opacity: 0, y: 36, scale: 0.92 } : isWizard ? { opacity: 0, y: 16 } : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={isFirstUser
               ? { duration: 0.45, ease: [0.22, 1.2, 0.36, 1] }
-              : { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
+              : isWizard
+                ? { duration: 0.5, ease: [0.25, 1, 0.5, 1] }
+                : { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
             }
             className={cn("flex gap-3", msg.role === 'user' && "justify-end")}
           >
@@ -62,7 +65,7 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone,
                 : "max-w-[85%]",
               msg.role === 'user' && "rounded-[12px] px-4 py-3 bg-interactive-secondary-selected"
             )}>
-              {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, expandedToolCallId, setExpandedToolCallId)}
+              {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, onEditPPT, expandedToolCallId, setExpandedToolCallId)}
             </div>
           </motion.div>
           );
@@ -80,6 +83,7 @@ function renderMessageContent(
   onThinkingDone?: () => void,
   onStreamingDone?: (messageId: string) => void,
   onToolCallDone?: (messageId: string) => void,
+  onEditPPT?: () => void,
   expandedToolCallId?: string | null,
   setExpandedToolCallId?: (id: string | null) => void,
 ) {
@@ -116,6 +120,7 @@ function renderMessageContent(
           onDone={() => onToolCallDone?.(msg.id)}
           isExpanded={expandedToolCallId === msg.id}
           onToggleExpand={() => setExpandedToolCallId?.(expandedToolCallId === msg.id ? null : msg.id)}
+          slideRange={msg.meta?.slideRange as string | undefined}
         />
       );
 
@@ -126,7 +131,7 @@ function renderMessageContent(
       return null;
 
     case 'ppt-versions':
-      return <PPTVersionsBlock version={msg.meta?.version as number || 1} />;
+      return <PPTVersionsBlock version={msg.meta?.version as number || 1} isNew={msg.meta?.isNew as boolean | undefined} onEdit={onEditPPT} />;
 
     case 'ppt-actions':
       return <PPTActionButtons onSaveTemplate={() => {}} onEdit={() => {}} />;
