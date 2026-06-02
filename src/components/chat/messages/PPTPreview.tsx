@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { ChevronRight, ChevronLeft, FileText, Terminal } from 'lucide-react';
 import { AnimatedDotPattern } from '@/components/ui/animated-dots';
@@ -125,13 +126,18 @@ export function ToolCallBlock({ commands, onDone, isExpanded, onToggleExpand, sl
                   <div className="w-[16px] h-[26px] flex items-center justify-center shrink-0 opacity-90">
                     <div className="w-[6px] h-[6px] rounded-full bg-icon-tertiary" />
                   </div>
-                  <div
-                    key={visibleCount}
-                    className="flex items-center gap-[4px] px-[4px]"
-                    style={{ animation: 'toolBlurIn 0.4s ease-out forwards' }}
-                  >
-                    <ToolItemContent cmd={commands[visibleCount - 1]} />
-                  </div>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={visibleCount}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.1 }}
+                      className="flex items-center gap-[4px] px-[4px]"
+                    >
+                      <ToolItemContent cmd={commands[visibleCount - 1]} />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </div>
             )
@@ -214,13 +220,32 @@ export function PPTSlideCard({ slide, loadingDuration = 0, allSlides }: PPTSlide
 
   useEffect(() => {
     if (!zoomed) return;
+    let accumulated = 0;
+    let lockTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') setZoomIndex(i => Math.max(0, i - 1));
       else if (e.key === 'ArrowRight') setZoomIndex(i => Math.min(slidesForZoom.length - 1, i + 1));
       else if (e.key === 'Escape') setZoomed(false);
     };
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      accumulated += e.deltaX;
+      if (Math.abs(accumulated) >= 50) {
+        if (accumulated > 0) setZoomIndex(i => Math.min(slidesForZoom.length - 1, i + 1));
+        else setZoomIndex(i => Math.max(0, i - 1));
+        accumulated = 0;
+        if (lockTimeout) clearTimeout(lockTimeout);
+        lockTimeout = setTimeout(() => { accumulated = 0; }, 300);
+      }
+    };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('wheel', handleWheel);
+      if (lockTimeout) clearTimeout(lockTimeout);
+    };
   }, [zoomed, slidesForZoom.length]);
 
   useEffect(() => {
@@ -432,7 +457,7 @@ export function PPTSlideCard({ slide, loadingDuration = 0, allSlides }: PPTSlide
         </div>
       </div>
 
-      {/* Zoom modal with keyboard navigation */}
+      {/* Zoom modal with keyboard + swipe navigation */}
       {zoomed && (() => {
         const zSlide = slidesForZoom[zoomIndex] || slide;
         return (
@@ -603,12 +628,13 @@ export function PPTSummaryCarousel({ slides, title }: PPTSummaryCarouselProps) {
 
 // Action buttons
 interface PPTActionButtonsProps {
-  onSaveTemplate: () => void;
+  onSaveTemplate: (name: string) => void;
   onEdit: () => void;
+  onGoHome?: () => void;
   inline?: boolean;
 }
 
-export function PPTActionButtons({ onSaveTemplate, onEdit, inline }: PPTActionButtonsProps) {
+export function PPTActionButtons({ onSaveTemplate, onEdit, onGoHome, inline }: PPTActionButtonsProps) {
   const [saveState, setSaveState] = useState<'idle' | 'naming' | 'saving' | 'saved'>('idle');
   const [templateName, setTemplateName] = useState('');
   const [savedName, setSavedName] = useState('');
@@ -631,7 +657,7 @@ export function PPTActionButtons({ onSaveTemplate, onEdit, inline }: PPTActionBu
     if (!templateName.trim()) return;
     setSavedName(templateName.trim());
     setSaveState('saving');
-    onSaveTemplate();
+    onSaveTemplate(templateName.trim());
     setTimeout(() => {
       setSaveState('saved');
     }, 2500);
@@ -701,10 +727,13 @@ export function PPTActionButtons({ onSaveTemplate, onEdit, inline }: PPTActionBu
         </div>
         <div className="flex items-center gap-[8px]">
           {saveState === 'saved' ? (
-            <div className="h-[30px] px-[12px] rounded-[6px] border border-border-default flex items-center gap-[4px] text-[13px] text-text-tertiary" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L5 9L2 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              已保存
-            </div>
+            <button
+              onClick={() => onGoHome?.()}
+              className="h-[30px] px-[12px] rounded-[6px] border border-border-default flex items-center gap-[4px] text-[13px] text-text-primary hover:bg-bg-surface transition-colors cursor-pointer"
+              style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}
+            >
+              去首页查看
+            </button>
           ) : (
             <button
               onClick={() => setSaveState('naming')}
@@ -747,10 +776,13 @@ export function PPTActionButtons({ onSaveTemplate, onEdit, inline }: PPTActionBu
         </p>
         <div className="flex items-center gap-2">
           {saveState === 'saved' ? (
-            <div className="h-[30px] px-3 rounded-[6px] border border-border-default flex items-center gap-1.5 text-[12px] font-medium text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L5 9L2 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              已保存
-            </div>
+            <button
+              onClick={() => onGoHome?.()}
+              className="h-[30px] px-3 rounded-[6px] border border-border-default flex items-center gap-1.5 text-[12px] font-medium text-text-primary hover:bg-bg-surface transition-colors cursor-pointer"
+              style={{ fontFamily: "'Geist', sans-serif" }}
+            >
+              去首页查看
+            </button>
           ) : saveState === 'naming' ? (
             <div className="flex items-center gap-1.5">
               <input
@@ -803,6 +835,18 @@ export function PPTActionButtons({ onSaveTemplate, onEdit, inline }: PPTActionBu
 export function PPTVersionsBlock({ version, isNew, onEdit }: { version: number; isNew?: boolean; onEdit?: () => void }) {
   const [downloadingIdx, setDownloadingIdx] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [animatingVersion, setAnimatingVersion] = useState<number | null>(null);
+  const prevVersionRef = useRef(version);
+
+  useEffect(() => {
+    if (version > prevVersionRef.current) {
+      setAnimatingVersion(version);
+      const timer = setTimeout(() => setAnimatingVersion(null), 3000);
+      prevVersionRef.current = version;
+      return () => clearTimeout(timer);
+    }
+    prevVersionRef.current = version;
+  }, [version]);
 
   const handleDownload = (idx: number, label: string) => {
     setDownloadingIdx(idx);
@@ -832,7 +876,20 @@ export function PPTVersionsBlock({ version, isNew, onEdit }: { version: number; 
           <span className="text-[13px] text-text-primary" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>{toast}</span>
         </div>
       )}
-    <div className="w-[330px] bg-bg-bg rounded-[8px] overflow-hidden" style={{ boxShadow: '0px 0px 0px 6px var(--bg-surface)', outline: '1px var(--border-default) solid', animation: isNew ? 'slideUpFade 0.4s ease-out' : undefined }}>
+    <div
+      className="w-[330px] rounded-[8px] overflow-hidden"
+      style={animatingVersion ? {
+        border: '1.5px solid transparent',
+        backgroundImage: `linear-gradient(var(--bg-bg), var(--bg-bg)), conic-gradient(from var(--gradient-angle, 0deg), var(--border-default) 0%, var(--accent-blue) 25%, var(--border-default) 50%, var(--accent-blue) 75%, var(--border-default) 100%)`,
+        backgroundClip: 'padding-box, border-box',
+        backgroundOrigin: 'padding-box, border-box',
+        animation: 'borderRotate 3s linear infinite',
+        boxShadow: '0px 0px 0px 5px var(--bg-surface)',
+      } : {
+        boxShadow: '0px 0px 0px 6px var(--bg-surface)',
+        outline: '1px var(--border-default) solid',
+      }}
+    >
       <div className="px-[8px] py-[8px] pr-[12px] bg-bg-surface rounded-t-[8px] flex items-center gap-[12px]">
         <div className="flex items-center gap-[4px] opacity-80">
           <div className="w-[20px] h-[20px] flex items-center justify-center">
@@ -845,7 +902,10 @@ export function PPTVersionsBlock({ version, isNew, onEdit }: { version: number; 
             任务中的所有版本
           </span>
         </div>
-        <div className="w-[18px] h-[18px] bg-bg-subtle rounded-[2px] flex items-center justify-center">
+        <div
+          className="w-[18px] h-[18px] bg-bg-subtle rounded-[2px] flex items-center justify-center"
+          key={version}
+        >
           <span className="text-[12px] text-text-primary opacity-80 leading-[16px] tabular-nums" style={{ fontFamily: "'Geist', sans-serif" }}>{version}</span>
         </div>
       </div>
@@ -857,6 +917,11 @@ export function PPTVersionsBlock({ version, isNew, onEdit }: { version: number; 
               "flex items-center gap-[4px] px-[6px] py-[4px] rounded-[4px]",
               v.isLatest ? "bg-bg-page" : "hover:bg-bg-hover transition-colors cursor-pointer"
             )}
+            style={
+              animatingVersion && v.isLatest
+                ? { animation: 'versionItemIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards' }
+                : undefined
+            }
           >
             <span className={cn(
               "flex-1 text-[14px] leading-[20px] truncate",

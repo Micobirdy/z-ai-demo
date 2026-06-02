@@ -16,7 +16,7 @@ export function AnimatedShinyText({ children, className, style }: AnimatedShinyT
         backgroundClip: 'text',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
-        animation: 'shiny-text 4s linear infinite',
+        animation: 'shiny-text 6s linear infinite',
         ...style,
       }}
     >

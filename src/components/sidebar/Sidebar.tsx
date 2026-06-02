@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   PanelLeftClose, PanelLeftOpen, ArrowUpCircle, ChevronDown, Settings,
+  Archive, BookOpen, Mail, MessageCircle, LogOut, Pencil, Share2, ArrowDownLeft, Trash2, MoreHorizontal,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useSidebar } from '@/hooks/useSidebar';
@@ -36,6 +38,12 @@ export function Sidebar() {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [logoHovered, setLogoHovered] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ 'Zai Web': true });
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [chatMenuIndex, setChatMenuIndex] = useState<string | null>(null);
+  const [chatMenuPos, setChatMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [hoveredChat, setHoveredChat] = useState<string | null>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const chatMenuRef = useRef<HTMLDivElement>(null);
   const dk = theme === 'dark';
   const effectiveNav = isSettingsOpen ? null : activeNav;
 
@@ -52,6 +60,16 @@ export function Sidebar() {
   const toggleGroup = (group: string) => {
     setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
   };
+
+  useEffect(() => {
+    if (!showUserMenu && !chatMenuIndex) return;
+    const handler = (e: MouseEvent) => {
+      if (showUserMenu && userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setShowUserMenu(false);
+      if (chatMenuIndex && chatMenuRef.current && !chatMenuRef.current.contains(e.target as Node)) setChatMenuIndex(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showUserMenu, chatMenuIndex]);
 
   return (
     <div className={clsx(
@@ -112,7 +130,7 @@ export function Sidebar() {
             <div className="flex flex-col gap-[4px]">
               {/* New Chat */}
               <button type="button"
-                onClick={() => { setActiveNav('chat'); closeSettings(); clearChat(); }}
+                onClick={() => { setActiveNav('agent'); closeSettings(); clearChat(); }}
                 className={clsx(
                   'flex items-center gap-[8px] px-[10px] py-[8px] rounded-[6px] w-full text-left cursor-pointer transition-all duration-200',
                   effectiveNav ==='chat' ? 'opacity-100' : 'opacity-80 hover:opacity-100'
@@ -262,14 +280,59 @@ export function Sidebar() {
                       'flex flex-col overflow-hidden transition-all duration-200',
                       isOpen ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'
                     )}>
-                      {(chatHistory.length > 0 ? chatHistory.slice(0, 2).map(h => h.title) : section.items).map((item, i) => (
-                        <button
+                      {(section.group === 'Zai Web' && chatHistory.length > 0
+                        ? chatHistory.slice(0, 5).map(h => h.title)
+                        : section.items
+                      ).map((item, i) => {
+                        const itemKey = `${section.group}-${i}`;
+                        return (
+                        <div
                           key={i}
-                          className="px-[16px] py-[8px] text-left rounded-[6px] hover:bg-bg-hover transition-colors cursor-pointer overflow-hidden"
+                          className="relative"
+                          onMouseEnter={() => setHoveredChat(itemKey)}
+                          onMouseLeave={() => { if (chatMenuIndex !== itemKey) setHoveredChat(null); }}
                         >
-                          <span className="text-[14px] leading-[20px] text-text-primary opacity-80 block truncate" style={{ fontFamily: "'Geist', sans-serif" }}>{item}</span>
-                        </button>
-                      ))}
+                          <button
+                            className={clsx(
+                              "w-full px-[16px] py-[8px] text-left rounded-[6px] transition-colors cursor-pointer overflow-hidden flex items-center gap-[4px]",
+                              chatMenuIndex === itemKey ? "bg-bg-hover" : "hover:bg-bg-hover"
+                            )}
+                          >
+                            <span className="text-[14px] leading-[20px] text-text-primary opacity-80 flex-1 truncate" style={{ fontFamily: "'Geist', sans-serif" }}>{item}</span>
+                            {(hoveredChat === itemKey || chatMenuIndex === itemKey) && (
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                  setChatMenuPos({ top: rect.bottom + 4, left: rect.left - 12 });
+                                  setChatMenuIndex(chatMenuIndex === itemKey ? null : itemKey);
+                                }}
+                                className="w-[24px] h-[24px] shrink-0 rounded-[4px] flex items-center justify-center hover:bg-bg-surface transition-colors cursor-pointer my-[-2px]"
+                              >
+                                <MoreHorizontal className="size-[16px] text-icon-secondary" />
+                              </div>
+                            )}
+                          </button>
+                          {chatMenuIndex === itemKey && createPortal(
+                            <div ref={chatMenuRef} className="fixed z-[200] w-[180px] py-[4px] bg-bg-bg rounded-[6px] border border-border-default overflow-hidden" style={{ top: chatMenuPos.top, left: chatMenuPos.left, boxShadow: '0px 4px 8px rgba(0,0,0,0.08), 0px 1px 2px rgba(16,24,40,0.05)' }}>
+                              {[
+                                { icon: Pencil, label: 'Rename', danger: false },
+                                { icon: Archive, label: 'Archive', danger: false },
+                                { icon: Share2, label: 'Share', danger: false },
+                                { icon: ArrowDownLeft, label: 'Transfer session', danger: false },
+                                { icon: Trash2, label: 'Delete', danger: true },
+                              ].map(({ icon: Icon, label, danger }) => (
+                                <button key={label} onClick={() => setChatMenuIndex(null)} className={clsx("w-full px-[12px] py-[8px] flex items-center gap-[8px] hover:bg-bg-hover transition-colors cursor-pointer text-left", danger && "hover:bg-accent-red-subtle")}>
+                                  <Icon className={clsx("size-[16px] opacity-80", danger ? "text-accent-red" : "text-icon-primary")} />
+                                  <span className={clsx("text-[14px] leading-[20px] opacity-80", danger ? "text-accent-red" : "text-text-primary")} style={{ fontFamily: "'Geist', sans-serif" }}>{label}</span>
+                                </button>
+                              ))}
+                            </div>,
+                            document.body
+                          )}
+                        </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -294,7 +357,29 @@ export function Sidebar() {
         </div>
 
         {/* Footer */}
-        <div className={`border-t p-[8px] shrink-0 ${borderColor}`}>
+        <div className={`border-t p-[8px] shrink-0 ${borderColor} relative`}>
+          {/* User menu popup */}
+          {showUserMenu && (
+            <div ref={userMenuRef} className="absolute bottom-full left-[8px] right-[8px] mb-[4px] z-50 py-[4px] bg-bg-bg rounded-[6px] border border-border-default overflow-hidden" style={{ boxShadow: '0px 4px 8px rgba(0,0,0,0.08), 0px 1px 2px rgba(16,24,40,0.05)' }}>
+              {[
+                { icon: Settings, label: 'Settings', action: () => { openSettings(); setShowUserMenu(false); } },
+                { icon: Archive, label: 'Archived Chats', action: () => setShowUserMenu(false) },
+                { icon: BookOpen, label: 'GLM-5.1 Tech Blog', action: () => setShowUserMenu(false) },
+                { icon: Mail, label: 'Contact Us', action: () => setShowUserMenu(false) },
+                { icon: MessageCircle, label: 'Join Discord', action: () => setShowUserMenu(false) },
+              ].map(({ icon: Icon, label, action }) => (
+                <button key={label} onClick={action} className="w-full px-[12px] py-[8px] flex items-center gap-[8px] hover:bg-bg-hover transition-colors cursor-pointer text-left">
+                  <Icon className="size-[16px] text-icon-primary opacity-80" />
+                  <span className="text-[14px] leading-[20px] text-text-primary opacity-80" style={{ fontFamily: "'Geist', sans-serif" }}>{label}</span>
+                </button>
+              ))}
+              <div className="mx-[8px] my-[4px] h-px bg-border-default" />
+              <button onClick={() => setShowUserMenu(false)} className="w-full px-[12px] py-[8px] flex items-center gap-[8px] hover:bg-bg-hover transition-colors cursor-pointer text-left">
+                <LogOut className="size-[16px] text-icon-primary opacity-80" />
+                <span className="text-[14px] leading-[20px] text-text-primary opacity-80" style={{ fontFamily: "'Geist', sans-serif" }}>Sign Out</span>
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-[6px] p-[6px] min-w-0 rounded-[6px] overflow-hidden">
             <div className="size-[24px] shrink-0 rounded-full overflow-hidden bg-[#ccc]">
               <img src="/icons/avatar.png" alt="" className="size-full object-cover" />
@@ -307,10 +392,10 @@ export function Sidebar() {
                 <span className={`text-[14px] leading-[20px] truncate whitespace-nowrap ${fg}`} style={{ fontFamily: "'Geist', sans-serif" }}>{user?.name || 'User'}</span>
                 <span className="text-[12px] leading-[16px] truncate whitespace-nowrap text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>{user?.plan ? `${user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} Plan` : ''}</span>
               </div>
-              <button type="button" onClick={(e) => { e.stopPropagation(); openSettings(); }} aria-label="Settings"
+              <button type="button" onClick={(e) => { e.stopPropagation(); setShowUserMenu(v => !v); }} aria-label="Settings"
                 className={clsx(
                   'size-[24px] shrink-0 rounded-[6px] flex items-center justify-center transition-colors cursor-pointer',
-                  isSettingsOpen
+                  showUserMenu
                     ? 'bg-interactive-secondary-selected text-icon-primary'
                     : 'text-icon-tertiary hover:text-icon-secondary hover:bg-bg-hover'
                 )}>

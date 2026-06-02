@@ -7,7 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import type { NavItemId, SettingsSection, SidebarContextValue, Theme } from '@/types/sidebar';
+import type { NavItemId, SettingsSection, SidebarContextValue, SavedTemplate, Theme } from '@/types/sidebar';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export const SidebarContext = createContext<SidebarContextValue | null>(null);
@@ -18,19 +18,24 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [activeNav, setActiveNav] = useState<NavItemId>('agent');
   const [chatInitialMessage, setChatInitialMessage] = useState<string | null>(null);
   const [chatAgentKey, setChatAgentKey] = useState<string | null>(null);
-  const [chatHistory, setChatHistory] = useState<{ id: string; title: string; timestamp: number }[]>([]);
+  const [chatHistory, setChatHistory] = useState<{ id: string; title: string; timestamp: number }[]>(() => {
+    try { return JSON.parse(localStorage.getItem('z-chat-history') || '[]'); } catch { return []; }
+  });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsFromTasks, setSettingsFromTasks] = useState(false);
   const [activeSettingsSection, setActiveSettingsSection] =
     useState<SettingsSection>('general');
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('z-theme') as Theme) || 'dark';
+      return (localStorage.getItem('z-theme') as Theme) || 'light';
     }
-    return 'dark';
+    return 'light';
   });
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [showTemplateTip, setShowTemplateTip] = useState(false);
+  const [savedTemplates, setSavedTemplates] = useState<SavedTemplate[]>(() => {
+    try { return JSON.parse(localStorage.getItem('z-saved-templates') || '[]'); } catch { return []; }
+  });
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
@@ -94,7 +99,19 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   }, [isCollapsed, toggleCollapse]);
 
   const addChatHistory = useCallback((title: string) => {
-    setChatHistory(prev => [{ id: Math.random().toString(36).substring(2), title, timestamp: Date.now() }, ...prev]);
+    setChatHistory(prev => {
+      const next = [{ id: Math.random().toString(36).substring(2), title, timestamp: Date.now() }, ...prev];
+      localStorage.setItem('z-chat-history', JSON.stringify(next.slice(0, 50)));
+      return next;
+    });
+  }, []);
+
+  const addSavedTemplate = useCallback((t: SavedTemplate) => {
+    setSavedTemplates(prev => {
+      const next = [t, ...prev];
+      localStorage.setItem('z-saved-templates', JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   // Escape key handler
@@ -144,6 +161,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       isMobile,
       showTemplateTip,
       setShowTemplateTip,
+      savedTemplates,
+      addSavedTemplate,
     }),
     [
       isCollapsed,
@@ -168,6 +187,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       toggleTheme,
       isMobile,
       showTemplateTip,
+      savedTemplates,
+      addSavedTemplate,
     ]
   );
 

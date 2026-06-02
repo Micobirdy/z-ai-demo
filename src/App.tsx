@@ -3,9 +3,14 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AuthPage } from '@/components/auth/AuthPage';
 import { useAuth } from '@/hooks/useAuth';
+import { ChatInputPreview } from '@/components/chat/ChatInputPreview';
 
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  if (window.location.hash === '#chat-input-preview') {
+    return <ChatInputPreview />;
+  }
 
   if (isLoading) {
     return (

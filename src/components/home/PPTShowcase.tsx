@@ -134,7 +134,7 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
   const [activeCategory, setActiveCategory] = useState('all');
   const [detailTemplate, setDetailTemplate] = useState<Template | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { showTemplateTip, setShowTemplateTip } = useSidebar();
+  const { showTemplateTip, setShowTemplateTip, savedTemplates } = useSidebar();
 
   // Auto-dismiss template tip
   useEffect(() => {
@@ -153,7 +153,17 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
   }, []);
 
   const filteredTemplates = activeCategory === 'my'
-    ? MY_TEMPLATES
+    ? savedTemplates.map(st => ({
+        id: st.id,
+        title: st.title,
+        subtitle: '',
+        prompt: st.prompt,
+        coverBg: st.coverBg,
+        coverAccent: st.coverAccent,
+        coverTextColor: st.coverTextColor,
+        tag: '',
+        category: ['my'],
+      }))
     : TEMPLATES.filter(t => t.category.includes(activeCategory));
 
   return (
@@ -172,15 +182,16 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
             <button
               key={i}
               onClick={() => onSelectPrompt(p)}
-              className="text-left p-3 rounded-[12px] border border-border-default bg-bg-bg h-[110px] flex flex-col overflow-hidden transition-colors hover:bg-bg-surface active:opacity-80 cursor-pointer"
-              style={{ fontFamily: "'Geist', sans-serif" }}
+              className="text-left p-3 rounded-[10px] border border-border-default bg-bg-bg flex flex-col gap-[6px] overflow-hidden transition-colors hover:bg-bg-surface active:opacity-80 cursor-pointer"
+              style={{ fontFamily: "'Geist', sans-serif", boxShadow: '0px 1px 2px rgba(10, 13, 20, 0.03)' }}
             >
-              <div className="w-[20px] h-[20px] mb-2.5 text-icon-tertiary shrink-0">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 14V6M10 6L6 10M10 6L14 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <div className="p-[4px] rounded-[6px] bg-transparent border border-border-default shrink-0 w-fit" style={{ boxShadow: '0px 1px 2px rgba(10, 13, 20, 0.03)' }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M5.5 12V5.5M5.5 5.5L3.5 7.5M5.5 5.5L7.5 7.5" stroke="var(--icon-tertiary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M10.5 12V3.5M10.5 3.5L8.5 5.5M10.5 3.5L12.5 5.5" stroke="var(--icon-tertiary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <p className="text-[13px] leading-[18px] text-text-secondary flex-1 min-h-0 overflow-hidden text-ellipsis" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>{p}</p>
+              <p className="text-[14px] leading-[20px] text-text-primary flex-1 min-h-0 overflow-hidden text-ellipsis" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>{p}</p>
             </button>
           ))}
         </div>
@@ -212,7 +223,7 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
                 className={cn(
                   "px-3 py-1.5 rounded-[8px] text-[13px] border transition-all cursor-pointer active:scale-[0.97]",
                   activeCategory === cat.key
-                    ? "bg-interactive-primary text-text-inverted border-transparent"
+                    ? "bg-bg-surface text-text-primary border-border-strong font-medium"
                     : "border-border-default text-text-secondary hover:border-border-strong hover:bg-bg-surface",
                   cat.key === 'my' && activeCategory !== 'my' && "border-dashed"
                 )}
@@ -225,12 +236,24 @@ export function PPTShowcase({ onSelectPrompt, onSelectTemplate }: PPTShowcasePro
           ))}
         </div>
 
-        {/* Template grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
-          {filteredTemplates.map(template => (
-            <TemplateCard key={template.id} template={template} onClick={() => setDetailTemplate(template)} />
-          ))}
-        </div>
+        {/* Template grid or empty state */}
+        {activeCategory === 'my' && filteredTemplates.length === 0 ? (
+          <div className="w-full py-[48px] flex flex-col items-center gap-[12px]">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="opacity-30">
+              <path d="M8 6h15l7 7v19a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M23 6v8h7" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 22h10M15 28h6" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="text-[14px] text-text-tertiary" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>暂无保存的模板</span>
+            <span className="text-[12px] text-text-placeholder" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>保存模板后可在此查看和复用</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
+            {filteredTemplates.map(template => (
+              <TemplateCard key={template.id} template={template} onClick={() => setDetailTemplate(template)} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Template detail modal */}
@@ -304,12 +327,18 @@ function TemplateCard({ template, onClick }: { template: Template; onClick: () =
 
 function SectionTitle({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-4 w-full max-w-[360px]">
-      <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-default))' }} />
-      <span className="text-[13px] font-medium text-text-tertiary tracking-wide" style={{ fontFamily: "'Geist', sans-serif" }}>
+    <div className="flex items-center gap-3 w-full max-w-[360px] justify-center">
+      <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="opacity-30">
+        <path d="M3 13L6 3" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M6.5 13L9.5 3" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+      <span className="text-[16px] font-medium text-text-primary tracking-wide" style={{ fontFamily: "'Geist', sans-serif" }}>
         {text}
       </span>
-      <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, var(--border-default))' }} />
+      <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="opacity-30">
+        <path d="M9 13L6 3" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M5.5 13L2.5 3" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
     </div>
   );
 }

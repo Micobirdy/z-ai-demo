@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronRight } from 'lucide-react';
 import { PixelLoading } from '@/components/ui/pixel-loading';
 import { cn } from '@/lib/utils';
@@ -50,7 +51,7 @@ export function TemplateDetailModal({ template, onClose, onUse }: TemplateDetail
     scrollRef.current?.scrollBy({ left: dir * 140, behavior: 'smooth' });
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
         className="w-[848px] max-w-[95vw] max-h-[90vh] bg-bg-bg rounded-[12px] overflow-hidden flex flex-col animate-in zoom-in-95 fade-in duration-200"
@@ -179,7 +180,8 @@ export function TemplateDetailModal({ template, onClose, onUse }: TemplateDetail
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

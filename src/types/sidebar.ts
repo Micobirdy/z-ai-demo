@@ -10,6 +10,16 @@ export type SettingsSection =
 
 export type Theme = 'light' | 'dark';
 
+export interface SavedTemplate {
+  id: string;
+  title: string;
+  prompt: string;
+  coverBg: string;
+  coverAccent: string;
+  coverTextColor: string;
+  timestamp: number;
+}
+
 export interface SidebarContextValue {
   // Sidebar collapse state
   isCollapsed: boolean;
@@ -53,4 +63,8 @@ export interface SidebarContextValue {
   // Template save tip
   showTemplateTip: boolean;
   setShowTemplateTip: (v: boolean) => void;
+
+  // Saved templates
+  savedTemplates: SavedTemplate[];
+  addSavedTemplate: (t: SavedTemplate) => void;
 }

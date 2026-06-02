@@ -58,8 +58,28 @@ export function HomePage() {
   )
   const [isListening, setIsListening] = useState(false)
   const [attachedTemplate, setAttachedTemplate] = useState<{ title: string; coverBg: string; prompt: string } | null>(null)
+  const [pastedFiles, setPastedFiles] = useState<{ id: string; displayName: string; content: string; size: number }[]>([])
+  const [toastMsg, setToastMsg] = useState<string | null>(null)
+  const [toastKey, setToastKey] = useState(0)
+  const [previewFile, setPreviewFile] = useState<{ displayName: string; content: string } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const pasteScrollRef = useRef<HTMLDivElement>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const lastToastRef = useRef(0)
   const recognitionRef = useRef<any>(null)
+
+  useEffect(() => {
+    const el = pasteScrollRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => {
+      if (el.scrollWidth <= el.clientWidth) return
+      e.preventDefault()
+      e.stopPropagation()
+      el.scrollLeft += e.deltaY !== 0 ? e.deltaY : e.deltaX
+    }
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  })
   const { files, isDragging, removeFile, clearFiles, openFilePicker, dragHandlers, FileInput } = useFileUpload()
   const maxChars = 3000
 
@@ -78,6 +98,34 @@ export function HomePage() {
       setInputValue(value)
     }
   }
+
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const text = e.clipboardData.getData('text/plain')
+    if (text && text.length >= 300) {
+      e.preventDefault()
+      setPastedFiles(prev => {
+        if (prev.length >= 7) {
+          const now = Date.now()
+          if (now - lastToastRef.current > 5000) {
+            lastToastRef.current = now
+            clearTimeout(toastTimerRef.current)
+            setToastMsg('粘贴内容已达上限，无法继续粘贴。')
+            setToastKey(k => k + 1)
+            toastTimerRef.current = setTimeout(() => setToastMsg(null), 5000)
+          }
+          return prev
+        }
+        const bytes = new Blob([text]).size
+        const base = text.slice(0, 16).replace(/[\n\r]/g, ' ').trim()
+        return [...prev, {
+          id: Math.random().toString(36).substring(2),
+          displayName: base.length > 16 ? base.slice(0, 16) + '...' : base,
+          content: text,
+          size: bytes,
+        }]
+      })
+    }
+  }, [])
 
   useEffect(() => {
     const textarea = textareaRef.current
@@ -159,7 +207,7 @@ export function HomePage() {
   const triShadow = '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px 0px rgba(0,0,0,0.08), inset 0px 0px 0px 1px rgba(255,255,255,1)'
   const triShadowDk = '0px 0px 0px 1px rgba(255,255,255,0.1), 0px 1px 2px 0px rgba(0,0,0,0.3), inset 0px 0px 0px 1px rgba(255,255,255,0.06)'
 
-  const hasInput = inputValue.length > 0
+  const hasInput = inputValue.length > 0 || pastedFiles.length > 0 || files.length > 0
 
   return (
     <div className="relative w-full h-full bg-bg-page">
@@ -167,8 +215,8 @@ export function HomePage() {
       <div
         className="absolute inset-0"
         style={{
-          maskImage: 'radial-gradient(ellipse 80% 50% at 50% 45%, transparent 20%, black 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 50% at 50% 45%, transparent 20%, black 70%)',
+          maskImage: 'radial-gradient(ellipse 80% 40% at 50% 35%, transparent 20%, black 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 40% at 50% 35%, transparent 20%, black 70%)',
         }}
       >
         <RippleDotPattern
@@ -203,7 +251,14 @@ export function HomePage() {
       <ZHoverEffect />
 
       {/* Top bar */}
-      <div className={`flex items-center justify-between px-[12px] h-[52px] sticky top-0 z-10 ${dk ? 'bg-[var(--gray-900)]' : 'bg-[var(--gray-50)]'}`}>
+      <div
+        className="flex items-center justify-between px-[12px] h-[52px] sticky top-0 z-10"
+        style={{
+          background: dk
+            ? 'linear-gradient(to bottom, var(--gray-900) 40%, transparent)'
+            : 'linear-gradient(to bottom, var(--gray-50) 40%, transparent)',
+        }}
+      >
         {/* Left — Model selector */}
         <button className={`pl-[16px] pr-[12px] py-[4px] rounded-[6px] flex items-center gap-[4px] overflow-hidden cursor-pointer transition-colors ${
           "hover:bg-bg-surface"
@@ -254,7 +309,7 @@ export function HomePage() {
 
       {/* Main content */}
       <div
-        className="flex flex-col items-center justify-start pt-[200px] pb-[200px] px-[24px] relative w-full"
+        className="flex flex-col items-center justify-start pt-[200px] pb-[52px] px-[24px] relative w-full"
         style={{ zIndex: 1 }}
       >
         <div className="flex flex-col gap-[52px] items-center relative shrink-0">
@@ -281,11 +336,7 @@ export function HomePage() {
                 </Text3DFlip>
               </motion.div>
               {/* Decorative chevrons flanking the title */}
-              <div className="flex items-center justify-center gap-[12px] mt-[-4px]">
-                <svg width="7" height="9" viewBox="0 0 7 9" fill="none" className="opacity-60">
-                  <path d="M3.46826 0.175568L0.468262 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
-                  <path d="M6.46826 0.175568L3.46826 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
-                </svg>
+              <div className="flex items-center justify-center mt-[-4px]">
                 <motion.p
                   className={`font-normal leading-[1.25] relative shrink-0 text-[16px] text-pretty text-text-tertiary`}
                 style={{ fontFamily: 'Geist, sans-serif' }}
@@ -298,10 +349,6 @@ export function HomePage() {
                   : 'Interact with z.ai and explore the boundless creative world'
                 }
               </motion.p>
-                <svg width="7" height="9" viewBox="0 0 7 9" fill="none" className="opacity-60">
-                  <path d="M3.46826 0.175568L6.46826 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
-                  <path d="M0.468262 0.175568L3.46826 8.17557" stroke="currentColor" strokeOpacity="0.15"/>
-                </svg>
               </div>
             </div>
 
@@ -326,7 +373,7 @@ export function HomePage() {
                 active={hasInput}
               >
               <div className={cn(
-                "rounded-[12px] inline-flex flex-col justify-start items-start w-full overflow-hidden",
+                "rounded-[12px] inline-flex flex-col justify-start items-start w-full",
                 "bg-bg-bg",
               )}
               style={{
@@ -380,11 +427,48 @@ export function HomePage() {
                     </div>
                   )}
 
+                  {/* Pasted file cards */}
+                  {pastedFiles.length > 0 && (
+                    <div className="mb-2 w-full min-w-0 shrink-0">
+                      <div ref={pasteScrollRef} className="flex w-full min-w-0 max-w-full gap-[8px] flex-nowrap overflow-x-auto" style={{ scrollbarWidth: 'none', overscrollBehaviorX: 'contain' } as React.CSSProperties}>
+                        {pastedFiles.map(pf => (
+                          <div key={pf.id} className="relative shrink-0 group/card">
+                            <button
+                              onClick={() => setPastedFiles(prev => prev.filter(f => f.id !== pf.id))}
+                              className={cn(
+                                "absolute -top-[5px] -right-[5px] size-[18px] rounded-full border flex items-center justify-center cursor-pointer z-20 opacity-0 group-hover/card:opacity-100 transition-opacity",
+                                dk ? "bg-neutral-800 border-neutral-600 text-neutral-400 hover:text-neutral-100" : "bg-white border-neutral-300 text-neutral-500 hover:text-neutral-900"
+                              )}
+                            >
+                              <X className="size-[10px]" strokeWidth={2.5} />
+                            </button>
+                            <div className="inline-flex items-center gap-[8px] p-[6px] rounded-[8px] border border-border-default cursor-pointer transition-colors hover:bg-bg-surface" onClick={() => setPreviewFile(pf)}>
+                              <div className="w-[40px] h-[40px] shrink-0 rounded-[6px] border border-border-default flex items-center justify-center">
+                                <svg width="12" height="15" viewBox="0 0 12 15" fill="none">
+                                  <path d="M7.33366 0.845703V3.5994C7.33366 3.97277 7.33366 4.15945 7.40632 4.30206C7.47024 4.4275 7.57222 4.52949 7.69767 4.5934C7.84027 4.66606 8.02696 4.66606 8.40033 4.66606H11.154M7.33366 10.666H3.33366M8.66699 7.99935H3.33366M11.3337 5.9915V10.7993C11.3337 11.9195 11.3337 12.4795 11.1157 12.9073C10.9239 13.2837 10.618 13.5896 10.2416 13.7814C9.81382 13.9993 9.25376 13.9993 8.13366 13.9993H3.86699C2.74689 13.9993 2.18683 13.9993 1.75901 13.7814C1.38269 13.5896 1.07673 13.2837 0.884979 12.9073C0.666992 12.4795 0.666992 11.9195 0.666992 10.7993V3.86602C0.666992 2.74591 0.666992 2.18586 0.884979 1.75803C1.07673 1.38171 1.38269 1.07575 1.75901 0.884003C2.18683 0.666016 2.74689 0.666016 3.86699 0.666016H6.00818C6.49736 0.666016 6.74195 0.666016 6.97212 0.721276C7.17619 0.770269 7.37128 0.851078 7.55023 0.960735C7.75206 1.08442 7.92501 1.25737 8.27092 1.60327L10.3964 3.72876C10.7423 4.07466 10.9153 4.24761 11.0389 4.44945C11.1486 4.62839 11.2294 4.82348 11.2784 5.02755C11.3337 5.25773 11.3337 5.50232 11.3337 5.9915Z" stroke="var(--icon-tertiary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                              <div className="flex flex-col min-w-0 max-w-[140px]">
+                                <span className="text-[14px] text-text-primary leading-[20px] truncate" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>
+                                  粘贴了内容 {pf.displayName}
+                                </span>
+                                <span className="text-[12px] text-text-tertiary leading-[16px]" style={{ fontFamily: "'Geist', sans-serif" }}>
+                                  TXT · {pf.size < 1024 ? `${pf.size} B` : pf.size < 1024 * 1024 ? `${(pf.size / 1024).toFixed(1)} KB` : `${(pf.size / (1024 * 1024)).toFixed(2)} MB`}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <textarea
                     ref={textareaRef}
                     value={inputValue}
                     onChange={handleInputChange}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); } } }}
+                    onPaste={handlePaste}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (inputValue.trim() || files.length > 0 || pastedFiles.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); setPastedFiles([]); } } }}
                     maxLength={maxChars}
                     rows={2}
                     className={cn(
@@ -455,10 +539,10 @@ export function HomePage() {
 
                       {/* Send button */}
                       <button
-                        onClick={() => { if (inputValue.trim() || files.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); } }}
+                        onClick={() => { if (inputValue.trim() || files.length > 0 || pastedFiles.length > 0) { startChat(inputValue.trim() || 'Attached files', selectedAgent); clearFiles(); setPastedFiles([]); } }}
                         className={cn(
                           "w-[28px] h-[28px] rounded-[8px] flex justify-center items-center overflow-hidden transition-all text-text-primary",
-                          (inputValue.trim() || files.length > 0)
+                          (inputValue.trim() || files.length > 0 || pastedFiles.length > 0)
                             ? "bg-interactive-primary text-text-inverted"
                             : "bg-bg-subtle/60 opacity-50"
                         )}
@@ -693,6 +777,47 @@ export function HomePage() {
         </div>
       </div>
     </div>
+    {toastMsg && (
+      <div
+        key={toastKey}
+        className="fixed z-[200] w-[520px] max-w-[calc(100vw-32px)] px-[16px] py-[12px] bg-bg-error rounded-[8px] flex items-center gap-[16px]"
+        style={{ top: 60, right: 16, boxShadow: '0px 2px 8px rgba(0,0,0,0.08), inset 0px 0px 1px rgba(0,0,0,0.30)', animation: 'toastSlideIn 0.3s ease-out' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+          <path d="M8 1.33L1.33 13.33h13.34L8 1.33z" stroke="var(--accent-red)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          <path d="M8 6v2.67M8 11.33h.007" stroke="var(--accent-red)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className="text-[14px] text-accent-red leading-[20px]" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>{toastMsg}</span>
+      </div>
+    )}
+    {previewFile && (
+      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={() => setPreviewFile(null)}>
+        <div
+          className="w-[56vw] max-w-[1080px] min-w-[400px] max-h-[80vh] bg-bg-bg rounded-[12px] flex flex-col overflow-hidden"
+          style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.15)', outline: '1px solid var(--border-default)', animation: 'scaleIn 0.2s ease-out' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-[20px] py-[14px] border-b border-border-default shrink-0">
+            <div className="flex items-center gap-[8px]">
+              <svg width="16" height="16" viewBox="0 0 12 15" fill="none" className="shrink-0">
+                <path d="M7.33366 0.845703V3.5994C7.33366 3.97277 7.33366 4.15945 7.40632 4.30206C7.47024 4.4275 7.57222 4.52949 7.69767 4.5934C7.84027 4.66606 8.02696 4.66606 8.40033 4.66606H11.154M7.33366 10.666H3.33366M8.66699 7.99935H3.33366M11.3337 5.9915V10.7993C11.3337 11.9195 11.3337 12.4795 11.1157 12.9073C10.9239 13.2837 10.618 13.5896 10.2416 13.7814C9.81382 13.9993 9.25376 13.9993 8.13366 13.9993H3.86699C2.74689 13.9993 2.18683 13.9993 1.75901 13.7814C1.38269 13.5896 1.07673 13.2837 0.884979 12.9073C0.666992 12.4795 0.666992 11.9195 0.666992 10.7993V3.86602C0.666992 2.74591 0.666992 2.18586 0.884979 1.75803C1.07673 1.38171 1.38269 1.07575 1.75901 0.884003C2.18683 0.666016 2.74689 0.666016 3.86699 0.666016H6.00818C6.49736 0.666016 6.74195 0.666016 6.97212 0.721276C7.17619 0.770269 7.37128 0.851078 7.55023 0.960735C7.75206 1.08442 7.92501 1.25737 8.27092 1.60327L10.3964 3.72876C10.7423 4.07466 10.9153 4.24761 11.0389 4.44945C11.1486 4.62839 11.2294 4.82348 11.2784 5.02755C11.3337 5.25773 11.3337 5.50232 11.3337 5.9915Z" stroke="var(--icon-secondary)" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="text-[15px] font-medium text-text-primary" style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}>
+              粘贴的内容.txt
+            </span>
+            </div>
+            <button onClick={() => setPreviewFile(null)} className="p-[4px] rounded-[6px] hover:bg-bg-surface transition-colors cursor-pointer">
+              <X className="size-[16px] text-icon-secondary" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-[20px]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(128,128,128,0.2) transparent' }}>
+            <pre className="text-[13px] leading-[20px] text-text-primary whitespace-pre-wrap break-all" style={{ fontFamily: "'Geist Mono', 'SF Mono', monospace" }}>
+              {previewFile.content}
+            </pre>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   )
 }

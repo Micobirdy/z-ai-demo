@@ -1,6 +1,7 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { Copy, ThumbsUp, ThumbsDown, RefreshCw } from 'lucide-react';
 import { ThinkingBlock } from './messages/ThinkingBlock';
 import { PPTWizardCard } from './messages/PPTWizardCard';
 import { StreamingText } from './messages/StreamingText';
@@ -17,13 +18,23 @@ interface ChatMessagesProps {
   onToolCallDone?: (messageId: string) => void;
   onEditPPT?: () => void;
   scrollTrigger?: number;
+  showAssistantActions?: boolean;
 }
 
-export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, onEditPPT, scrollTrigger }: ChatMessagesProps) {
+export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, onEditPPT, scrollTrigger, showAssistantActions = true }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const wizardRef = useRef<HTMLDivElement>(null);
   const [expandedToolCallId, setExpandedToolCallId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [likedId, setLikedId] = useState<string | null>(null);
+  const [dislikedId, setDislikedId] = useState<string | null>(null);
+
+  const handleCopy = useCallback((id: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,8 +68,9 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone,
                 ? { duration: 0.5, ease: [0.25, 1, 0.5, 1] }
                 : { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
             }
-            className={cn("flex gap-3", msg.role === 'user' && "justify-end")}
+            className={cn("flex flex-col", msg.role === 'user' && "items-end")}
           >
+            <div className={cn("flex gap-3", msg.role === 'user' && "justify-end")}>
             <div className={cn(
               msg.type === 'ppt-slides' || msg.type === 'ppt-summary' || msg.type === 'ppt-actions' || msg.type === 'ppt-versions' || msg.type === 'tool-call' || msg.type === 'ppt-wizard' || msg.type === 'thinking'
                 ? "w-full"
@@ -67,6 +79,47 @@ export function ChatMessages({ messages, onPPTSubmit, onPPTSkip, onThinkingDone,
             )}>
               {renderMessageContent(msg, onPPTSubmit, onPPTSkip, onThinkingDone, onStreamingDone, onToolCallDone, onEditPPT, expandedToolCallId, setExpandedToolCallId)}
             </div>
+            </div>
+            {showAssistantActions && msg.role === 'assistant' && !msg.streaming && msg.content && !msg.type && (() => {
+              const nextMsg = messages[index + 1];
+              const isLastBeforeUser = !nextMsg || nextMsg.role === 'user';
+              if (!isLastBeforeUser) return null;
+              return (
+              <div className="flex items-center gap-[2px] mt-[6px] pl-[2px]">
+                <button
+                  onClick={() => handleCopy(msg.id, msg.content)}
+                  className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-hover transition-colors cursor-pointer"
+                  title="复制"
+                >
+                  {copiedId === msg.id ? (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8L7 11L12 5" stroke="var(--icon-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  ) : (
+                    <Copy className="size-[16px] text-icon-tertiary" />
+                  )}
+                </button>
+                <button
+                  onClick={() => { setLikedId(msg.id); setDislikedId(null); }}
+                  className={cn("w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-hover transition-colors cursor-pointer", likedId === msg.id && "bg-bg-hover")}
+                  title="有帮助"
+                >
+                  <ThumbsUp className={cn("size-[16px]", likedId === msg.id ? "text-icon-primary" : "text-icon-tertiary")} />
+                </button>
+                <button
+                  onClick={() => { setDislikedId(msg.id); setLikedId(null); }}
+                  className={cn("w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-hover transition-colors cursor-pointer", dislikedId === msg.id && "bg-bg-hover")}
+                  title="没帮助"
+                >
+                  <ThumbsDown className={cn("size-[16px]", dislikedId === msg.id ? "text-icon-primary" : "text-icon-tertiary")} />
+                </button>
+                <button
+                  className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-hover transition-colors cursor-pointer"
+                  title="重新生成"
+                >
+                  <RefreshCw className="size-[16px] text-icon-tertiary" />
+                </button>
+              </div>
+              );
+            })()}
           </motion.div>
           );
         })}

@@ -27,15 +27,18 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
   const [pageCount, setPageCount] = useState('1-12');
   const [styles, setStyles] = useState<string[]>(['mint-modern', 'sand-gold']);
   const [notes, setNotes] = useState('');
-  const [countdown, setCountdown] = useState(30);
+  const [countdown, setCountdown] = useState(60);
   const [submitted, setSubmitted] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [pageDropdownOpen, setPageDropdownOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
   const pageDropdownRef = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
+      if (pausedRef.current) return;
       setCountdown(prev => {
         if (prev <= 1) { clearInterval(timerRef.current); return 0; }
         return prev - 1;
@@ -43,6 +46,18 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
     }, 1000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (submitted) return;
+    pausedRef.current = true;
+    setPaused(true);
+  }, [submitted]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (submitted) return;
+    pausedRef.current = false;
+    setPaused(false);
+  }, [submitted]);
 
   useEffect(() => {
     if (!pageDropdownOpen) return;
@@ -65,16 +80,19 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
     onSubmit({ audience: audiences.join(','), pageCount, style: styles.join(','), notes });
   }, [submitted, audiences, pageCount, styles, notes, onSubmit]);
 
+  const [skipped, setSkipped] = useState(false);
+
   const handleSkip = useCallback(() => {
     if (submitted) return;
     setSubmitted(true);
+    setSkipped(true);
     clearInterval(timerRef.current);
     setExpanded(false);
     onSkip();
   }, [submitted, onSkip]);
 
   const toggleExpanded = () => {
-    if (!submitted) return;
+    if (!submitted || skipped) return;
     setExpanded(prev => !prev);
   };
 
@@ -84,7 +102,10 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
       {submitted && !expanded && (
         <button
           onClick={toggleExpanded}
-          className="w-full px-3 py-2 rounded-lg outline outline-1 outline-offset-[-1px] outline-border-default inline-flex justify-start items-center gap-1 overflow-hidden cursor-pointer hover:bg-bg-surface transition-colors"
+          className={cn(
+            "w-full px-3 py-2 rounded-lg outline outline-1 outline-offset-[-1px] outline-border-default inline-flex justify-start items-center gap-1 overflow-hidden transition-colors",
+            skipped ? "cursor-default" : "cursor-pointer hover:bg-bg-surface"
+          )}
         >
           <div className="flex justify-start items-center gap-1.5">
             <div className="w-4 h-6 flex items-center justify-center shrink-0">
@@ -98,14 +119,16 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
           <div className="w-1.5 h-6 flex items-center justify-center">
             <div className="w-[2px] h-[2px] opacity-80 bg-icon-tertiary rounded-full" />
           </div>
-          <div className="flex-1 text-text-tertiary text-[12px] font-medium leading-4 tracking-tight text-left" style={{ fontFamily: "'Geist', sans-serif" }}>已完成</div>
-          <ChevronRight className="size-[14px] text-icon-tertiary shrink-0" />
+          <div className="flex-1 text-text-tertiary text-[12px] font-medium leading-4 tracking-tight text-left" style={{ fontFamily: "'Geist', sans-serif" }}>
+            {skipped ? '跳过' : '已完成'}
+          </div>
+          {!skipped && <ChevronRight className="size-[14px] text-icon-tertiary shrink-0" />}
         </button>
       )}
 
       {/* Expanded state */}
       {(!submitted || expanded) && (
-      <div className="rounded-[8px] border border-border-default overflow-hidden w-full">
+      <div className="rounded-[8px] border border-border-default overflow-hidden w-full" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Header — entire bar is clickable when submitted */}
       <div
         onClick={toggleExpanded}
@@ -129,11 +152,30 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
         <div className="flex items-center gap-4">
           {!submitted ? (
             <>
-              <button onClick={(e) => { e.stopPropagation(); handleSkip(); }} className="text-[14px] text-text-tertiary hover:text-text-primary transition-colors cursor-pointer" style={{ fontFamily: "'Geist', sans-serif" }}>
+              <button onClick={(e) => { e.stopPropagation(); handleSkip(); }} className="text-[14px] text-text-tertiary hover:text-text-primary transition-colors duration-150 ease-in-out cursor-pointer" style={{ fontFamily: "'Geist', sans-serif" }}>
                 跳过 »
               </button>
-              <button onClick={(e) => { e.stopPropagation(); handleSubmit(); }} className="px-4 py-1.5 rounded-[6px] text-[14px] text-text-primary border border-border-default hover:bg-bg-surface transition-colors cursor-pointer active:opacity-80" style={{ fontFamily: "'Geist', sans-serif" }}>
-                继续 <span className="text-text-tertiary ml-[2px] tabular-nums">{countdown}s</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleSubmit(); }}
+                className="group/btn relative px-4 py-1.5 rounded-[6px] text-[14px] text-text-primary border border-border-default hover:bg-bg-surface transition-all duration-150 ease-in-out cursor-pointer active:opacity-80 overflow-hidden"
+                style={{ fontFamily: "'Geist', sans-serif" }}
+              >
+                <div
+                  className="absolute inset-0 bg-bg-surface origin-left transition-transform duration-1000 ease-linear"
+                  style={{ transform: `scaleX(${1 - countdown / 60})` }}
+                />
+                <span className="relative z-[1]">
+                  {paused ? (
+                    <>
+                      <span className="transition-opacity duration-150 ease-in-out opacity-100 group-hover/btn:opacity-0 inline group-hover/btn:hidden">已暂停 <span className="text-text-tertiary tabular-nums">{countdown}s</span></span>
+                      <span className="transition-opacity duration-150 ease-in-out opacity-0 group-hover/btn:opacity-100 hidden group-hover/btn:inline">继续</span>
+                    </>
+                  ) : (
+                    <>
+                      继续 <span className="text-text-tertiary tabular-nums">{countdown}s</span>
+                    </>
+                  )}
+                </span>
               </button>
             </>
           ) : (
@@ -257,11 +299,11 @@ export function PPTWizardCard({ onSubmit, onSkip }: PPTWizardCardProps) {
                         "w-[14px] h-[14px] rounded-[3px] shrink-0 mt-[1px] flex items-center justify-center transition-colors",
                         selected
                           ? "bg-interactive-primary text-text-inverted"
-                          : "border border-bg-subtle"
+                          : "border border-border-strong"
                       )}>
                         {selected && (
-                          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                            <path d="M1.5 4L3.5 6L6.5 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M2 5L4.5 7.5L8 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         )}
                       </div>

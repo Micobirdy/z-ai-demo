@@ -26,7 +26,7 @@ interface SlideElement {
 
 interface PPTEditorOverlayProps {
   slides: PPTSlide[];
-  onClose: () => void;
+  onClose: (didEdit: boolean) => void;
 }
 
 const ease = [0.4, 0, 0, 1] as const;
@@ -78,7 +78,7 @@ export function PPTEditorOverlay({ slides, onClose }: PPTEditorOverlayProps) {
     if (hasChanges) {
       setShowSaveDialog(true);
     } else {
-      onClose();
+      onClose(false);
     }
   }, [hasChanges, onClose]);
 
@@ -249,33 +249,41 @@ export function PPTEditorOverlay({ slides, onClose }: PPTEditorOverlayProps) {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1.5" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(128,128,128,0.2) transparent' }}>
-            {slides.map((slide, i) => (
+            {slides.map((slide, i) => {
+              const isSelected = selectedIndex === i;
+              return (
               <button
                 key={i}
                 onClick={() => setSelectedIndex(i)}
                 className={cn(
-                  "w-full flex items-start gap-2 p-1 rounded-[6px] cursor-pointer transition-all text-left",
-                  selectedIndex === i ? "bg-bg-surface" : "hover:bg-bg-surface/50"
+                  "w-full flex items-start gap-2 p-1.5 rounded-[8px] cursor-pointer transition-all text-left",
+                  isSelected ? "bg-bg-subtle" : "hover:bg-bg-surface active:bg-bg-subtle"
                 )}
               >
-                <span className="text-[11px] text-text-tertiary pt-1 w-[14px] text-right shrink-0" style={{ fontFamily: "'Geist', sans-serif" }}>
+                <span className={cn(
+                  "text-[11px] pt-1 w-[14px] text-right shrink-0 transition-colors",
+                  isSelected ? "text-accent-blue font-medium" : "text-text-tertiary"
+                )} style={{ fontFamily: "'Geist', sans-serif" }}>
                   {i + 1}
                 </span>
                 <div
                   className={cn(
-                    "flex-1 aspect-[16/9] rounded-[4px] overflow-hidden relative",
-                    selectedIndex === i && "ring-2 ring-interactive-primary"
+                    "flex-1 aspect-[16/9] rounded-[4px] overflow-hidden relative transition-shadow",
+                    isSelected
+                      ? "ring-1 ring-border-strong"
+                      : "ring-1 ring-border-default hover:ring-border-strong"
                   )}
                   style={{ backgroundColor: slide.bgColor }}
                 >
                   <div className="absolute inset-0 p-2 flex flex-col justify-start">
-                    <div className="text-[6px] font-bold leading-[8px] whitespace-pre-line text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>
+                    <div className="text-[6px] font-bold leading-[8px] whitespace-pre-line" style={{ fontFamily: "'Geist', sans-serif", color: '#0D0D0D' }}>
                       {slide.contentPreview}
                     </div>
                   </div>
                 </div>
               </button>
-            ))}
+              );
+            })}
             {hasChanges && (
               <button
                 onClick={handleReset}
@@ -308,8 +316,9 @@ export function PPTEditorOverlay({ slides, onClose }: PPTEditorOverlayProps) {
           totalPages={slides.length}
           onPrevPage={() => { if (selectedIndex > 0) { setSelectedIndex(i => i - 1); setSelectedElement(null); } }}
           onNextPage={() => { if (selectedIndex < slides.length - 1) { setSelectedIndex(i => i + 1); setSelectedElement(null); } }}
-          onUndo={handleUndo}
-          canUndo={undoStack.length > 0}
+          onReset={handleReset}
+          canReset={hasChanges}
+          onTextEdit={markChanged}
         />
 
         {/* Right Panel — always visible, switches between global and single-page style */}
@@ -430,7 +439,7 @@ export function PPTEditorOverlay({ slides, onClose }: PPTEditorOverlayProps) {
                     取消
                   </button>
                   <button
-                    onClick={() => { setHasChanges(false); setShowSaveDialog(false); onClose(); }}
+                    onClick={() => { setHasChanges(false); setShowSaveDialog(false); onClose(true); }}
                     className="px-[16px] py-[8px] rounded-[6px] bg-interactive-primary text-[14px] text-text-inverted hover:opacity-90 transition-all cursor-pointer"
                     style={{ fontFamily: "'PingFang SC', 'Geist', sans-serif" }}
                   >
@@ -457,11 +466,12 @@ interface MainEditorAreaProps {
   totalPages: number;
   onPrevPage: () => void;
   onNextPage: () => void;
-  onUndo: () => void;
-  canUndo: boolean;
+  onReset: () => void;
+  canReset: boolean;
+  onTextEdit: () => void;
 }
 
-function MainEditorArea({ selected, notes, onNotesChange, selectedElement, onSelectElement, currentPage, totalPages, onPrevPage, onNextPage, onUndo, canUndo }: MainEditorAreaProps) {
+function MainEditorArea({ selected, notes, onNotesChange, selectedElement, onSelectElement, currentPage, totalPages, onPrevPage, onNextPage, onReset, canReset, onTextEdit }: MainEditorAreaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [notesHeight, setNotesHeight] = useState(120);
   const isDragging = useRef(false);
@@ -487,6 +497,16 @@ function MainEditorArea({ selected, notes, onNotesChange, selectedElement, onSel
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
   }, []);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'r' && !e.metaKey && !e.ctrlKey && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || (e.target as HTMLElement)?.isContentEditable)) {
+        onReset();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onReset]);
 
   return (
     <motion.div
@@ -530,7 +550,13 @@ function MainEditorArea({ selected, notes, onNotesChange, selectedElement, onSel
                   });
                 }}
               >
-                <div className="text-[32px] font-bold leading-[40px] whitespace-pre-line text-text-primary" style={{ fontFamily: "'Geist', sans-serif" }}>
+                <div
+                  className="text-[32px] font-bold leading-[40px] whitespace-pre-line text-text-primary outline-none"
+                  style={{ fontFamily: "'Geist', sans-serif" }}
+                  contentEditable={selectedElement?.id === 'title'}
+                  suppressContentEditableWarning
+                  onInput={onTextEdit}
+                >
                   {selected.contentPreview}
                 </div>
               </div>
@@ -555,7 +581,13 @@ function MainEditorArea({ selected, notes, onNotesChange, selectedElement, onSel
                     });
                   }}
                 >
-                  <div className="text-[16px] leading-[24px] text-text-tertiary" style={{ fontFamily: "'Geist', sans-serif" }}>
+                  <div
+                    className="text-[16px] leading-[24px] text-text-tertiary outline-none"
+                    style={{ fontFamily: "'Geist', sans-serif" }}
+                    contentEditable={selectedElement?.id === 'desc'}
+                    suppressContentEditableWarning
+                    onInput={onTextEdit}
+                  >
                     {selected.description}
                   </div>
                 </div>
@@ -589,37 +621,35 @@ function MainEditorArea({ selected, notes, onNotesChange, selectedElement, onSel
         </div>
       </div>
 
-      {/* Page nav + undo — minimal toolbar */}
-      <div className="flex justify-center py-2 shrink-0">
-        <div className="flex items-center gap-0.5">
+      {/* Page nav + undo — floating pill toolbar */}
+      <div className="flex justify-center py-[16px] shrink-0">
+        <div className="flex items-center gap-0.5 px-[6px] py-[4px] rounded-full bg-bg-surface border border-border-default">
           <button
             onClick={onPrevPage}
             disabled={currentPage <= 1}
-            className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-surface transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+            className="w-[28px] h-[28px] rounded-full flex items-center justify-center hover:bg-bg-surface transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="size-[16px] text-text-tertiary" />
+            <ChevronLeft className="size-[16px] text-text-secondary" />
           </button>
-          <span className="px-1.5 text-[13px] font-medium text-text-secondary tabular-nums select-none" style={{ fontFamily: "'Geist', sans-serif" }}>
+          <span className="px-1 text-[13px] font-medium text-text-secondary tabular-nums select-none" style={{ fontFamily: "'Geist', sans-serif" }}>
             {currentPage} / {totalPages}
           </span>
           <button
             onClick={onNextPage}
             disabled={currentPage >= totalPages}
-            className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-surface transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+            className="w-[28px] h-[28px] rounded-full flex items-center justify-center hover:bg-bg-surface transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="size-[16px] text-text-tertiary rotate-180" />
+            <ChevronLeft className="size-[16px] text-text-secondary rotate-180" />
           </button>
-          <div className="w-[1px] h-[14px] bg-border-default mx-1" />
+          <div className="w-[1px] h-[14px] bg-border-default mx-[2px]" />
           <button
-            onClick={onUndo}
-            disabled={!canUndo}
-            className="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center hover:bg-bg-surface transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
-            title="撤回"
+            onClick={onReset}
+            disabled={!canReset}
+            className="h-[28px] px-[10px] rounded-full flex items-center gap-[6px] hover:bg-bg-surface transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+            title="Reset"
           >
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-text-tertiary">
-              <path d="M3 5.5h7a3 3 0 0 1 0 6H8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M5.5 3L3 5.5 5.5 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <span className="text-[13px] text-text-secondary" style={{ fontFamily: "'Geist', sans-serif" }}>Reset</span>
+            <span className="text-[11px] text-text-tertiary px-[5px] py-[1px] rounded-[4px] bg-bg-subtle border border-border-default leading-[16px]" style={{ fontFamily: "'Geist', sans-serif" }}>R</span>
           </button>
         </div>
       </div>

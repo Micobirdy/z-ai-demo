@@ -55,7 +55,7 @@ interface ChatPageProps {
 }
 
 export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
-  const { theme, toggleTheme, setShowTemplateTip } = useSidebar();
+  const { theme, toggleTheme, setShowTemplateTip, clearChat, addChatHistory, addSavedTemplate } = useSidebar();
   const dk = theme === 'dark';
   const isPPT = agentKey === 'ai-ppt';
   const initRef = useRef(false);
@@ -76,6 +76,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
   useEffect(() => {
     if (initRef.current || !initialMessage) return;
     initRef.current = true;
+    addChatHistory(initialMessage);
 
     // After sidebar collapse + top bar animation settle, show content area and send query
     setTimeout(() => {
@@ -119,7 +120,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
     }]);
   }, [pptPhase]);
 
-  const handlePPTSubmit = useCallback((prefs: PPTPreferences) => {
+  const handlePPTSubmit = useCallback((prefs: PPTPreferences, skipUserMessage?: boolean) => {
     setPptPhase('generating');
     const labels: Record<string, Record<string, string>> = {
       audience: { business: '泛商务/同事分享', executive: '管理层/投资人', tech: '技术团队/工程师', education: '高校/学生科普' },
@@ -226,8 +227,8 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
 
     type Step = { delay: number; message: Message; waitForAnimation?: boolean };
     const steps: Step[] = [
-      // 0: User confirmation
-      { delay: 0, message: { id: generateId(), role: 'user', content: `受众: ${labels.audience[prefs.audience] || prefs.audience}\n页数: ${prefs.pageCount}\n风格: ${prefs.style.split(',').map(s => labels.style[s] || s).join('、')}${prefs.notes ? `\n备注: ${prefs.notes}` : ''}`, timestamp: Date.now() } },
+      // 0: User confirmation (skip if skipped)
+      ...(skipUserMessage ? [] : [{ delay: 0, message: { id: generateId(), role: 'user' as const, content: `受众: ${labels.audience[prefs.audience] || prefs.audience}\n页数: ${prefs.pageCount}\n风格: ${prefs.style.split(',').map(s => labels.style[s] || s).join('、')}${prefs.notes ? `\n备注: ${prefs.notes}` : ''}`, timestamp: Date.now() } }]),
       // 1: Tool call 1 — initialize
       { delay: 1200, message: { id: generateId(), role: 'assistant', content: '', timestamp: Date.now(), type: 'tool-call', meta: { commands: toolCallCommands1 } }, waitForAnimation: true },
       // 2: Context text
@@ -326,7 +327,10 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
   }, [advanceStep]);
 
   const handlePPTSkip = useCallback(() => {
-    handlePPTSubmit({ audience: 'business', pageCount: '1-12', style: 'mint-modern', notes: '' });
+    setMessages(prev => [...prev, {
+      id: generateId(), role: 'user' as const, content: '跳过', timestamp: Date.now(),
+    }]);
+    handlePPTSubmit({ audience: 'business', pageCount: '1-12', style: 'mint-modern', notes: '' }, true);
   }, [handlePPTSubmit]);
 
   function genericReply(userMsg: string) {
@@ -477,6 +481,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
             onToolCallDone={handleToolCallDone}
             onEditPPT={() => setIsEditing(true)}
             scrollTrigger={scrollTrigger}
+            showAssistantActions={!isPPT}
           />
           {isTyping && (
             <div className="px-4 pb-3">
@@ -489,18 +494,20 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
           )}
           <div className="relative z-30">
             {showActions ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, ease: [0.25, 1, 0.5, 1] }}
-                className="px-4 pb-2"
-              >
+              <div className="px-4 pb-2">
                 <div className="max-w-[768px] 2xl:max-w-[860px] min-[1920px]:max-w-[960px] mx-auto bg-bg-page rounded-[13px] outline outline-1 outline-offset-[-1px] outline-border-default overflow-hidden">
-                  {/* Action bar — 44px */}
-                  <div className="h-[44px] px-[12px] flex items-center">
-                    <PPTActionButtons onSaveTemplate={() => setShowTemplateTip(true)} onEdit={() => setIsEditing(true)} inline />
-                  </div>
-                  {/* Chat input — embedded inside the container */}
+                  {/* Action bar — slides up from behind the input */}
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 44, opacity: 1 }}
+                    transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="h-[44px] px-[12px] flex items-center">
+                      <PPTActionButtons onSaveTemplate={(name) => { setShowTemplateTip(true); addSavedTemplate({ id: Math.random().toString(36).substring(2), title: name, prompt: initialMessage || '', coverBg: '#ffffff', coverAccent: '#2563eb', coverTextColor: '#ffffff', timestamp: Date.now() }); }} onEdit={() => setIsEditing(true)} onGoHome={clearChat} inline />
+                    </div>
+                  </motion.div>
+                  {/* Chat input — stays in place */}
                   <div className="mx-[2px] mb-[2px]">
                     <ChatInput
                       onSend={handleSend}
@@ -511,7 +518,7 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
                     />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ) : (
               <ChatInput
                 onSend={handleSend}
@@ -535,17 +542,20 @@ export function ChatPage({ initialMessage, agentKey }: ChatPageProps) {
         {isEditing && (
           <PPTEditorOverlay
             slides={messages.find(m => m.type === 'ppt-slides')?.meta?.slides as PPTSlide[] || []}
-            onClose={() => {
+            onClose={(didEdit) => {
               setIsEditing(false);
-              setPptVersion(v => {
-                const newV = v + 1;
-                setMessages(prev => [...prev, {
-                  id: generateId(), role: 'assistant', content: '', timestamp: Date.now(),
-                  type: 'ppt-versions', meta: { version: newV, isNew: true },
-                }]);
-                return newV;
-              });
-              setScrollTrigger(v => v + 1);
+              if (didEdit) {
+                setPptVersion(v => {
+                  const newV = v + 1;
+                  setMessages(prev => prev.map(m =>
+                    m.type === 'ppt-versions'
+                      ? { ...m, meta: { ...m.meta, version: newV, isNew: true } }
+                      : m
+                  ));
+                  return newV;
+                });
+                setScrollTrigger(v => v + 1);
+              }
             }}
           />
         )}
